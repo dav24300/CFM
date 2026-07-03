@@ -1,0 +1,30 @@
+# CFM ASBL — Déploiement temporaire Netlify
+# https://docs.netlify.com/build/frameworks/framework-setup-guides/nextjs/overview/
+
+[build]
+  command = "npm run build:netlify"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_CONFIG_AUDIT = "false"
+  CFM_SERVERLESS = "true"
+
+[context.production.environment]
+  CFM_SERVERLESS = "true"
+
+# Next.js 15 — détection auto OpenNext (pas de publish directory manuel)
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/media/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"

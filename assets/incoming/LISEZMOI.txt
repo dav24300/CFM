@@ -1,0 +1,8 @@
+Placez ici vos 4 photos CFM (PNG ou JPG — renommez en .png si besoin) :
+
+1. fondateur.png              → portrait studio du fondateur
+2. rassemblement-terrain.png  → photo rassemblement (béret vert)
+3. affiche-rassemblement.png → affiche « Bientôt rassemblement »
+4. affiche-congo.png          → affiche « Notre Congo est indivisible »
+
+Puis exécutez : npm run import-media

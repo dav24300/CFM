@@ -1,0 +1,209 @@
+{
+  "_counters": { "global": 110 },
+  "news": [
+    {
+      "id": 1,
+      "title": "Rassemblement des familles militaires à la FIKIN 2025",
+      "slug": "rassemblement-fikin-2025",
+      "excerpt": "Un moment historique de rassemblement et de plaidoyer pour les droits des dépendants des militaires.",
+      "content": "En 2025, CFM a organisé un rassemblement majeur des familles de militaires à la Foire Internationale de Kinshasa (FIKIN).",
+      "category": "evenement",
+      "cover_image": "/media/actualites/fikin-2025.png",
+      "cover_image_alt": "Rassemblement FIKIN 2025 des familles militaires",
+      "published": 1,
+      "created_at": "2026-06-30T17:23:22.707Z"
+    },
+    {
+      "id": 2,
+      "title": "Lancement de la campagne d'autonomisation des veuves",
+      "slug": "campagne-autonomisation-veuves",
+      "excerpt": "Former et accompagner les veuves de militaires vers l'entrepreneuriat.",
+      "content": "CFM lance une campagne nationale pour l'autonomisation économique des veuves de militaires par l'entrepreneuriat.",
+      "category": "campagne",
+      "cover_image": "/media/axes/economie.svg",
+      "cover_image_alt": "Campagne autonomisation des veuves",
+      "published": 1,
+      "created_at": "2026-06-30T17:23:22.707Z"
+    }
+  ],
+  "studies": [
+    {
+      "id": 3,
+      "title": "Analyse des conditions sociales des dépendants militaires en RDC",
+      "slug": "analyse-conditions-sociales-2025",
+      "summary": "Étude sur les faiblesses du système de protection des familles de militaires.",
+      "content": "Cette étude identifie les lacunes dans la protection sociale, l'accès à l'éducation, au logement et aux soins de santé pour les dépendants des militaires.",
+      "file_url": null,
+      "published": 1,
+      "created_at": "2026-06-30T17:23:22.707Z"
+    }
+  ],
+  "campaigns": [
+    {
+      "id": 4,
+      "title": "Autonomisation des femmes et veuves",
+      "slug": "autonomisation-femmes-veuves",
+      "description": "Entrepreneuriat et indépendance économique pour les femmes et veuves de militaires.",
+      "content": "Programme d'accompagnement vers l'entrepreneuriat : formation, microcrédit, mentorat et réseau de femmes entrepreneures.",
+      "image_url": "/media/axes/economie.svg",
+      "petition_slug": "autonomisation-femmes-veuves",
+      "active": 1,
+      "created_at": "2026-06-30T17:23:22.707Z"
+    },
+    {
+      "id": 5,
+      "title": "Santé sexuelle des femmes dans les camps militaires",
+      "slug": "sante-sexuelle-camps",
+      "description": "Sensibilisation et accès aux soins de santé reproductive.",
+      "content": "Campagne de sensibilisation et de plaidoyer pour l'amélioration de l'accès aux soins de santé sexuelle et reproductive.",
+      "image_url": "/media/axes/sante.svg",
+      "petition_slug": "reforme-protection-familles",
+      "active": 1,
+      "created_at": "2026-06-30T17:23:22.707Z"
+    }
+  ],
+  "partners": [
+    {
+      "id": 6,
+      "name": "Institutions nationales",
+      "logo_url": null,
+      "website": null,
+      "description": "Partenariats avec les institutions de la RDC",
+      "sort_order": 1
+    },
+    {
+      "id": 7,
+      "name": "Organisations internationales",
+      "logo_url": null,
+      "website": null,
+      "description": "Plaidoyer auprès des instances internationales",
+      "sort_order": 2
+    }
+  ],
+  "testimonials": [
+    {
+      "id": 8,
+      "author": "Marie K.",
+      "role": "Veuve de militaire, Kinshasa",
+      "content": "CFM m'a donné une voix quand je me sentais invisible.",
+      "photo": "/media/temoignages/portrait-01.svg",
+      "photo_alt": "Marie K., veuve de militaire",
+      "anonymous": 0,
+      "published": 1,
+      "created_at": "2026-06-30T17:23:22.707Z"
+    },
+    {
+      "id": 9,
+      "author": "Anonyme",
+      "role": "Orphelin de militaire",
+      "content": "Derrière chaque militaire, il y a une famille. CFM comprend notre quotidien.",
+      "photo": "/media/temoignages/portrait-02.svg",
+      "photo_alt": "Témoignage anonyme",
+      "anonymous": 1,
+      "published": 1,
+      "created_at": "2026-06-30T17:23:22.707Z"
+    }
+  ],
+  "actions": [
+    {
+      "id": 10,
+      "province": "Kinshasa",
+      "title": "Rassemblement FIKIN 2025",
+      "description": "Grand rassemblement des familles militaires",
+      "date": "2025-01-15",
+      "type": "evenement",
+      "photo": "/media/fikin-2025/rassemblement-01.svg"
+    },
+    {
+      "id": 11,
+      "province": "Nord-Kivu",
+      "title": "Atelier autonomisation femmes",
+      "description": "Formation entrepreneuriat pour veuves",
+      "date": "2025-03-10",
+      "type": "atelier"
+    },
+    {
+      "id": 12,
+      "province": "Kasaï-Oriental",
+      "title": "Plaidoyer provincial",
+      "description": "Rencontre avec les autorités locales",
+      "date": "2025-02-20",
+      "type": "plaidoyer"
+    }
+  ],
+  "memberships": [],
+  "help_requests": [],
+  "newsletter": [],
+  "contact_messages": [],
+  "press_releases": [
+    {
+      "id": 13,
+      "title": "CFM appelle à une réforme de la protection des familles militaires",
+      "slug": "communique-reforme-protection",
+      "content": "L'ASBL Cri de Familles Militaires publie un communiqué appelant le gouvernement et les partenaires internationaux à renforcer la protection sociale des dépendants des militaires en RDC.",
+      "file_url": null,
+      "published": 1,
+      "created_at": "2026-06-30T17:23:22.707Z"
+    }
+  ],
+  "site_settings": {
+    "social_links": "{\"facebook\":\"https://facebook.com/cfmasbl\",\"twitter\":\"https://x.com/cfmasbl\",\"youtube\":\"https://youtube.com/@cfmasbl\",\"linkedin\":\"https://linkedin.com/company/cfmasbl\"}",
+    "hero_image": "/media/hero/hero-home.png",
+    "hero_poster": "/media/hero/hero-home.png",
+    "hero_video": "",
+    "mission_image": "/media/fikin-2025/rassemblement-02.png"
+  },
+  "users": [],
+  "family_links": [],
+  "donations": [],
+  "petitions": [
+    {
+      "id": 105,
+      "title": "Réforme de la protection des familles militaires",
+      "slug": "reforme-protection-familles",
+      "description": "Appelons le gouvernement à renforcer la protection sociale des dépendants des militaires.",
+      "content": "Cette pétition vise à obtenir une réforme structurelle de la protection des veuves, orphelins et familles de militaires en RDC.",
+      "goal": 1000,
+      "signatures_count": 0,
+      "active": 1,
+      "created_at": "2026-06-30T19:41:40.392Z"
+    },
+    {
+      "id": 106,
+      "title": "Autonomisation économique des femmes et veuves de militaires",
+      "slug": "autonomisation-femmes-veuves",
+      "description": "Soutenons l'accès au microcrédit et à la formation entrepreneuriale pour les veuves et conjoints de militaires.",
+      "content": "Cette pétition demande des mesures concrètes d'accompagnement économique : formation, financement et réseaux d'entraide pour les femmes des familles militaires.",
+      "goal": 500,
+      "signatures_count": 0,
+      "active": 1,
+      "created_at": "2026-06-30T19:41:40.392Z"
+    }
+  ],
+  "petition_signatures": [],
+  "help_request_updates": [],
+  "password_reset_tokens": [],
+  "live_events": [
+    {
+      "id": 110,
+      "title": "FIKIN 2025 — Rassemblement des familles militaires",
+      "slug": "fikin-2025",
+      "description": "Replay du rassemblement historique des familles de militaires à la Foire Internationale de Kinshasa.",
+      "status": "replay",
+      "youtube_id": null,
+      "stream_url": null,
+      "replay_url": "https://www.youtube.com/@cfmasbl",
+      "chat_moderation": 1,
+      "viewer_count": 0,
+      "started_at": "2026-06-30T22:11:20.288Z",
+      "ended_at": "2026-06-30T22:11:20.288Z",
+      "thumbnail": "/media/live/fikin-live-thumb.png",
+      "thumbnail_alt": "FIKIN 2025 — replay du rassemblement",
+      "created_at": "2026-06-30T22:11:20.288Z"
+    }
+  ],
+  "live_chat_messages": [],
+  "live_polls": [],
+  "live_poll_votes": [],
+  "push_subscriptions": []
+}

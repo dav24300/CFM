@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="96" fill="#1a2f4a"/>
+  <circle cx="256" cy="256" r="140" stroke="#c9a227" stroke-width="24" fill="none"/>
+  <path d="M256 140 L256 280 M256 280 L320 340" stroke="#c9a227" stroke-width="20" stroke-linecap="round"/>
+  <text x="256" y="420" text-anchor="middle" fill="#c9a227" font-family="sans-serif" font-size="72" font-weight="bold">CFM</text>
+</svg>

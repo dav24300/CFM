@@ -1,0 +1,14 @@
+import { getAllUsers } from "@/lib/members";
+import { jsonData } from "@/lib/api-response";
+import { requireAdminRole } from "@/lib/admin-rest";
+
+export async function GET() {
+  const auth = await requireAdminRole();
+  if (!auth.ok) return auth.response;
+
+  const users = getAllUsers().map((u) => {
+    const { password_hash: _ignored, ...rest } = u;
+    return rest;
+  });
+  return jsonData({ users });
+}

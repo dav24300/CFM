@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-cfm-gold px-6 py-3 font-semibold text-cfm-navy shadow-cfm transition hover:scale-[1.02] hover:bg-amber-400 hover:shadow-cfm-lg focus:outline-none focus:ring-2 focus:ring-cfm-gold focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg border-2 border-cfm-navy px-6 py-3 font-semibold text-cfm-navy transition hover:scale-[1.02] hover:bg-cfm-navy hover:text-white focus:outline-none focus:ring-2 focus:ring-cfm-navy focus:ring-offset-2;
+  }
+
+  .btn-outline-light {
+    @apply inline-flex items-center justify-center rounded-lg border-2 border-white px-6 py-3 font-semibold text-white transition hover:bg-white hover:text-cfm-navy;
+  }
+
+  .section-title {
+    @apply font-display text-3xl font-bold text-cfm-navy md:text-4xl;
+  }
+
+  .section-subtitle {
+    @apply mt-3 text-lg text-cfm-earth;
+  }
+
+  .card {
+    @apply rounded-xl bg-white p-6 shadow-cfm transition hover:shadow-cfm-lg;
+  }
+
+  .card-media {
+    @apply overflow-hidden rounded-xl bg-white shadow-cfm transition hover:shadow-cfm-lg;
+  }
+
+  .card-glass {
+    @apply rounded-xl border border-white/20 bg-white/80 p-6 shadow-cfm backdrop-blur-md;
+  }
+
+  .hero-overlay {
+    @apply absolute inset-0 bg-gradient-to-b from-cfm-navy/80 via-cfm-navy/60 to-cfm-navy/90;
+  }
+
+  .media-frame {
+    @apply overflow-hidden rounded-2xl shadow-cfm-lg;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .image-zoom-hover img,
+  .image-zoom-hover .zoom-target {
+    @apply transition duration-500 ease-out;
+  }
+
+  .image-zoom-hover:hover img,
+  .image-zoom-hover:hover .zoom-target {
+    @apply scale-105;
+  }
+
+  .scroll-snap-x {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scroll-snap-item {
+    scroll-snap-align: start;
+  }
+
+  .input-field {
+    @apply w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-cfm-gold focus:outline-none focus:ring-2 focus:ring-cfm-gold/30;
+  }
+
+  .label-field {
+    @apply mb-1 block text-sm font-medium text-cfm-navy;
+  }
+
+  .page-enter {
+    animation: page-fade-in 0.2s ease-in-out;
+  }
+
+  @keyframes page-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: none;
+  }
+}

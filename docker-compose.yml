@@ -1,0 +1,40 @@
+# CFM ASBL — stack locale production-like
+# Usage : docker compose up -d && npm run bootstrap:pg
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cfm-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cfm
+      POSTGRES_PASSWORD: cfm_dev_password
+      POSTGRES_DB: cfm
+    ports:
+      - "5433:5432"
+    volumes:
+      - cfm_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cfm -d cfm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: cfm-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - cfm_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  cfm_pg_data:
+  cfm_redis_data:

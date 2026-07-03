@@ -1,0 +1,293 @@
+-- CFM ASBL — Schéma PostgreSQL normalisé (Phase R3)
+-- Exécuter : psql $DATABASE_URL -f scripts/schema.sql
+
+-- Meta : compteurs + marqueur de sync normalisée
+CREATE TABLE IF NOT EXISTS store_meta (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  counters JSONB NOT NULL DEFAULT '{"global": 100}',
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ── V1 Contenu ──────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS news (
+  id INTEGER PRIMARY KEY,
+  title VARCHAR(500) NOT NULL,
+  slug VARCHAR(255) NOT NULL,
+  excerpt TEXT,
+  content TEXT NOT NULL,
+  category VARCHAR(100) DEFAULT 'actualite',
+  cover_image TEXT,
+  cover_image_alt TEXT,
+  published SMALLINT DEFAULT 1,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS studies (
+  id INTEGER PRIMARY KEY,
+  title VARCHAR(500) NOT NULL,
+  slug VARCHAR(255) NOT NULL,
+  summary TEXT,
+  content TEXT NOT NULL,
+  file_url TEXT,
+  published SMALLINT DEFAULT 1,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS campaigns (
+  id INTEGER PRIMARY KEY,
+  title VARCHAR(500) NOT NULL,
+  slug VARCHAR(255) NOT NULL,
+  description TEXT,
+  content TEXT,
+  image_url TEXT,
+  petition_slug VARCHAR(255),
+  active SMALLINT DEFAULT 1,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS partners (
+  id INTEGER PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  logo_url TEXT,
+  website TEXT,
+  description TEXT,
+  sort_order INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS testimonials (
+  id INTEGER PRIMARY KEY,
+  author VARCHAR(255),
+  role VARCHAR(255),
+  content TEXT NOT NULL,
+  photo TEXT,
+  photo_alt TEXT,
+  anonymous SMALLINT DEFAULT 0,
+  published SMALLINT DEFAULT 1,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS actions (
+  id INTEGER PRIMARY KEY,
+  province VARCHAR(100) NOT NULL,
+  title VARCHAR(500) NOT NULL,
+  description TEXT,
+  date DATE,
+  type VARCHAR(100) DEFAULT 'action',
+  photo TEXT
+);
+
+CREATE TABLE IF NOT EXISTS press_releases (
+  id INTEGER PRIMARY KEY,
+  title VARCHAR(500) NOT NULL,
+  slug VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  file_url TEXT,
+  published SMALLINT DEFAULT 1,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS site_settings (
+  key VARCHAR(255) PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+-- ── V1 Formulaires ────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS memberships (
+  id INTEGER PRIMARY KEY,
+  data JSONB NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS help_requests (
+  id INTEGER PRIMARY KEY,
+  status VARCHAR(50) DEFAULT 'new',
+  data JSONB NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS newsletter (
+  id INTEGER PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id INTEGER PRIMARY KEY,
+  data JSONB NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+-- ── V2 Membres ────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  first_name VARCHAR(100) NOT NULL,
+  last_name VARCHAR(100) NOT NULL,
+  phone VARCHAR(50),
+  province VARCHAR(100),
+  role VARCHAR(50) DEFAULT 'member',
+  membership_type VARCHAR(50) NOT NULL,
+  military_link TEXT,
+  parent_military_name VARCHAR(255),
+  skills TEXT,
+  status VARCHAR(50) DEFAULT 'pending',
+  verified_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS family_links (
+  id INTEGER PRIMARY KEY,
+  parent_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  child_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  relationship VARCHAR(100),
+  status VARCHAR(50) DEFAULT 'pending_child',
+  initiated_by VARCHAR(20),
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS donations (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  amount DECIMAL(12,2) NOT NULL,
+  currency VARCHAR(10) DEFAULT 'USD',
+  provider VARCHAR(50) NOT NULL,
+  phone VARCHAR(50),
+  transaction_id VARCHAR(255),
+  status VARCHAR(50) DEFAULT 'pending',
+  donor_name VARCHAR(255),
+  donor_email VARCHAR(255),
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS petitions (
+  id INTEGER PRIMARY KEY,
+  title VARCHAR(500) NOT NULL,
+  slug VARCHAR(255) UNIQUE NOT NULL,
+  description TEXT,
+  content TEXT,
+  goal INTEGER DEFAULT 100,
+  signatures_count INTEGER DEFAULT 0,
+  active SMALLINT DEFAULT 1,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS petition_signatures (
+  id INTEGER PRIMARY KEY,
+  petition_id INTEGER REFERENCES petitions(id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  email VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  signed_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS help_request_updates (
+  id INTEGER PRIMARY KEY,
+  help_request_id INTEGER REFERENCES help_requests(id) ON DELETE CASCADE,
+  status VARCHAR(50),
+  note TEXT,
+  updated_by VARCHAR(100),
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  token VARCHAR(128) UNIQUE NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  used SMALLINT DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+-- ── V3 Live & Push ────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS live_events (
+  id INTEGER PRIMARY KEY,
+  title VARCHAR(500) NOT NULL,
+  slug VARCHAR(255) UNIQUE NOT NULL,
+  description TEXT,
+  status VARCHAR(50) DEFAULT 'scheduled',
+  youtube_id VARCHAR(100),
+  stream_url TEXT,
+  replay_url TEXT,
+  chat_moderation SMALLINT DEFAULT 1,
+  viewer_count INTEGER DEFAULT 0,
+  started_at TIMESTAMPTZ,
+  ended_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS live_chat_messages (
+  id INTEGER PRIMARY KEY,
+  live_event_id INTEGER REFERENCES live_events(id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  author_name VARCHAR(100),
+  content TEXT NOT NULL,
+  status VARCHAR(50) DEFAULT 'pending',
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS live_polls (
+  id INTEGER PRIMARY KEY,
+  live_event_id INTEGER REFERENCES live_events(id) ON DELETE CASCADE,
+  question TEXT NOT NULL,
+  options JSONB NOT NULL,
+  active SMALLINT DEFAULT 1,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS live_poll_votes (
+  id INTEGER PRIMARY KEY,
+  poll_id INTEGER REFERENCES live_polls(id) ON DELETE CASCADE,
+  option_id VARCHAR(50) NOT NULL,
+  voter_key VARCHAR(255) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL,
+  UNIQUE (poll_id, voter_key)
+);
+
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id INTEGER PRIMARY KEY,
+  endpoint TEXT UNIQUE NOT NULL,
+  p256dh TEXT NOT NULL,
+  auth TEXT NOT NULL,
+  topics TEXT[] DEFAULT '{lives}',
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+-- Snapshot JSON (fallback / compat dual-mode)
+CREATE TABLE IF NOT EXISTS app_state (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  data JSONB NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS admin_audit_log (
+  id BIGSERIAL PRIMARY KEY,
+  actor_type VARCHAR(50) NOT NULL,
+  actor_identifier VARCHAR(255),
+  endpoint VARCHAR(255) NOT NULL,
+  action VARCHAR(255) NOT NULL,
+  target VARCHAR(255),
+  status VARCHAR(50) NOT NULL,
+  ip VARCHAR(100),
+  metadata JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ── Index & contraintes concurrence (R3.7) ────────────────────────────────
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_news_slug ON news(slug);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_studies_slug ON studies(slug);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_newsletter_email ON newsletter(lower(email));
+CREATE UNIQUE INDEX IF NOT EXISTS idx_petition_sig_unique ON petition_signatures(petition_id, lower(email));
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(lower(email));
+CREATE INDEX IF NOT EXISTS idx_donations_status ON donations(status);
+CREATE INDEX IF NOT EXISTS idx_petitions_slug ON petitions(slug);
+CREATE INDEX IF NOT EXISTS idx_live_events_slug ON live_events(slug);
+CREATE INDEX IF NOT EXISTS idx_help_requests_status ON help_requests(status);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_created_at ON admin_audit_log(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_live_chat_event_created ON live_chat_messages(live_event_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);

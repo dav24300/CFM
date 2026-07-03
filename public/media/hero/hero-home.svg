@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-label="Cri de Familles Militaires">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a2f4a"/>
+      <stop offset="100%" style="stop-color:#0f1c2e"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <circle cx="1050" cy="120" r="180" fill="#ffffff" fill-opacity="0.06"/>
+  <text x="600" y="310" text-anchor="middle" fill="#faf7f2" font-family="Georgia, serif" font-size="42" font-weight="700">Cri de Familles Militaires</text>
+  <text x="600" y="370" text-anchor="middle" fill="#c9a227" font-family="system-ui, sans-serif" font-size="20" letter-spacing="3">FIKIN 2025 — Kinshasa</text>
+</svg>

@@ -1,0 +1,27 @@
+/** Codes d'erreur métier mappés vers HTTP dans api-response. */
+export const DOMAIN_ERROR_CODES = [
+  "ALREADY_EXISTS",
+  "ALREADY_SIGNED",
+  "ALREADY_VOTED",
+  "EMAIL_EXISTS",
+  "LINK_EXISTS",
+  "PASSWORD_TOO_SHORT",
+  "MILITARY_LINK_REQUIRED",
+  "INVALID_TOKEN",
+  "NOT_FOUND",
+  "NOT_LIVE",
+  "EMPTY_MESSAGE",
+  "CHILD_NOT_FOUND",
+  "PARENT_NOT_FOUND",
+  "FORBIDDEN",
+  "SELF_LINK",
+  "NOT_FAMILY_PARENT",
+  "POLL_CLOSED",
+  "INVALID_OPTION",
+  "EVENT_NOT_FOUND",
+  "UNAUTHORIZED",
+  "USER_NOT_FOUND",
+  "PAYDUNYA_KEYS_MISSING",
+] as const;
+
+export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

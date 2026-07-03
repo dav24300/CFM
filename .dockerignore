@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.github
+*.md
+.env*
+!.env.example
+data/store.json
+data/emails.log
+data/admin-audit.log
+coverage
+.vitest
+terminals
