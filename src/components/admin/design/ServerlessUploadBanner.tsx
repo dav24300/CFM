@@ -20,7 +20,10 @@ export function ServerlessUploadBanner() {
       className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"
     >
       <strong>Mode démo — upload désactivé.</strong> Cet hébergement ne conserve pas les fichiers
-      uploadés. Utilisez l&apos;admin sur le VPS production pour gérer les médias de façon durable.
+      sans Supabase Storage. Configurez{" "}
+      <code className="text-xs">SUPABASE_URL</code> +{" "}
+      <code className="text-xs">SUPABASE_SERVICE_ROLE_KEY</code> sur Vercel pour activer les
+      uploads, ou utilisez le VPS / localhost.
     </div>
   );
 }

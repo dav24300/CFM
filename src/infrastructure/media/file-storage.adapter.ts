@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { UploadError } from "@/domain/media/upload-errors";
+import { getLocalUploadDir } from "@/infrastructure/media/local-storage.adapter";
+import { getMediaStorage, isSupabaseStorageEnabled } from "@/infrastructure/media/storage.factory";
 import { isServerlessRuntime } from "@/lib/runtime";
 
 export const ALLOWED_MIME = new Set([
@@ -43,15 +45,17 @@ export function getUploadDir(): string {
 }
 
 export function ensureUploadDir(): void {
-  if (isServerlessRuntime()) {
+  if (isServerlessRuntime() && !isSupabaseStorageEnabled()) {
     throw new UploadError(
       "STORAGE_READONLY",
       "Upload impossible sur l'environnement démo (disque non persistant).",
-      "Utilisez le VPS production ou uploadez en local puis déployez les médias.",
+      "Configurez Supabase Storage (Vercel) ou utilisez le VPS / local.",
       503
     );
   }
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  if (!isSupabaseStorageEnabled()) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  }
 }
 
 export function resolveMimeType(file: File): string {
@@ -172,11 +176,11 @@ export async function saveUploadedFile(
   file: File,
   subdir?: string
 ): Promise<{ publicPath: string; absolutePath: string; warnings: string[] }> {
-  if (isServerlessRuntime()) {
+  if (isServerlessRuntime() && !isSupabaseStorageEnabled()) {
     throw new UploadError(
       "STORAGE_READONLY",
-      "Upload désactivé sur Netlify démo (stockage non persistant).",
-      "Connectez-vous à l'admin sur le VPS production pour uploader des médias.",
+      "Upload désactivé — stockage cloud non configuré.",
+      "Ajoutez SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sur Vercel, ou utilisez le VPS.",
       503
     );
   }
@@ -186,61 +190,36 @@ export async function saveUploadedFile(
     throw new UploadError(validation.code, validation.message, validation.hint, 400);
   }
 
-  const baseDir = subdir
-    ? path.join(process.cwd(), "public", subdir.replace(/^\//, ""))
-    : UPLOAD_DIR;
-
-  try {
-    fs.mkdirSync(baseDir, { recursive: true });
-  } catch {
-    throw new UploadError(
-      "STORAGE_FAILED",
-      "Impossible de créer le dossier d'upload.",
-      "Vérifiez les permissions du dossier public/media sur le serveur.",
-      500
-    );
-  }
-
   const raw = Buffer.from(await file.arrayBuffer());
   const { buffer, ext, warnings } = await processBuffer(raw, validation.mime);
   const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const absolutePath = path.join(baseDir, safeName);
 
-  try {
-    fs.writeFileSync(absolutePath, buffer);
-  } catch {
-    throw new UploadError(
-      "STORAGE_FAILED",
-      "Échec écriture du fichier sur le disque.",
-      "Vérifiez l'espace disque et le volume Docker cfm_media_uploads (VPS).",
-      500
-    );
-  }
+  const stored = await getMediaStorage().save(buffer, {
+    safeName,
+    mime: validation.mime,
+    subdir,
+  });
 
-  const publicPath = subdir
-    ? `/${subdir.replace(/^\//, "")}/${safeName}`
-    : `/media/uploads/${safeName}`;
-
-  return { publicPath, absolutePath, warnings };
+  return { publicPath: stored.publicPath, absolutePath: stored.absolutePath, warnings };
 }
 
-export function deletePublicMediaFile(publicPath: string): boolean {
-  const relative = publicPath.replace(/^\//, "");
-  const full = path.join(process.cwd(), "public", relative);
-  if (!full.includes("media")) return false;
-  if (!fs.existsSync(full)) return false;
-  fs.unlinkSync(full);
-  return true;
+export async function deletePublicMediaFile(publicPath: string): Promise<boolean> {
+  return getMediaStorage().delete(publicPath);
 }
 
 export function listOrphanUploadFiles(
   catalogPaths: Set<string>
 ): { path: string; uploaded_at: string }[] {
-  const fromDisk: { path: string; uploaded_at: string }[] = [];
-  if (!fs.existsSync(UPLOAD_DIR)) return fromDisk;
+  if (isSupabaseStorageEnabled()) {
+    return [];
+  }
 
-  for (const name of fs.readdirSync(UPLOAD_DIR)) {
-    const full = path.join(UPLOAD_DIR, name);
+  const fromDisk: { path: string; uploaded_at: string }[] = [];
+  const uploadDir = getLocalUploadDir();
+  if (!fs.existsSync(uploadDir)) return fromDisk;
+
+  for (const name of fs.readdirSync(uploadDir)) {
+    const full = path.join(uploadDir, name);
     if (!fs.statSync(full).isFile()) continue;
     const publicPath = `/media/uploads/${name}`;
     if (!catalogPaths.has(publicPath)) {
@@ -254,10 +233,14 @@ export function listOrphanUploadFiles(
 }
 
 export function publicFileExists(publicPath: string): boolean {
+  if (publicPath.startsWith("http://") || publicPath.startsWith("https://")) {
+    return getMediaStorage().exists(publicPath);
+  }
   const full = path.join(process.cwd(), "public", publicPath.replace(/^\//, ""));
   return fs.existsSync(full);
 }
 
 export function isUploadStorageAvailable(): boolean {
+  if (isSupabaseStorageEnabled()) return true;
   return !isServerlessRuntime();
 }

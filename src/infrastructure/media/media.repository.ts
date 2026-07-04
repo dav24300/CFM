@@ -317,7 +317,7 @@ export function assignMediaToEntity(params: {
   return false;
 }
 
-export function cleanupOrphanUploadFiles(): string[] {
+export async function cleanupOrphanUploadFiles(): Promise<string[]> {
   const removed: string[] = [];
   const uploadDir = getUploadDir();
   if (!fs.existsSync(uploadDir)) return removed;
@@ -327,7 +327,7 @@ export function cleanupOrphanUploadFiles(): string[] {
     if (!fs.statSync(full).isFile()) continue;
     const publicPath = `/media/uploads/${name}`;
     if (findMediaUsages(publicPath).length > 0) continue;
-    deletePublicMediaFile(publicPath);
+    await deletePublicMediaFile(publicPath);
     removeFromCatalog(publicPath);
     removed.push(publicPath);
   }

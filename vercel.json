@@ -1,0 +1,20 @@
+{
+  "buildCommand": "npm run build",
+  "framework": "nextjs",
+  "regions": ["cdg1"],
+  "functions": {
+    "src/app/api/admin/media/route.ts": {
+      "maxDuration": 120
+    }
+  },
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    }
+  ]
+}

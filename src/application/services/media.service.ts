@@ -125,12 +125,14 @@ export function updateLibraryMeta(
   updateCatalogMeta(assetPath, patch);
 }
 
-export function deleteLibraryAsset(assetPath: string): { blocked: boolean; usages: string[] } {
+export async function deleteLibraryAsset(
+  assetPath: string
+): Promise<{ blocked: boolean; usages: string[] }> {
   const usages = findMediaUsages(assetPath);
   if (usages.length > 0) {
     return { blocked: true, usages };
   }
-  deletePublicMediaFile(assetPath);
+  await deletePublicMediaFile(assetPath);
   removeFromCatalog(assetPath);
   afterMediaMutation();
   return { blocked: false, usages: [] };
@@ -170,8 +172,8 @@ export function assignMedia(params: {
   return ok;
 }
 
-export function cleanupOrphanUploads(): { removed: string[]; count: number } {
-  const removed = cleanupOrphanUploadFiles();
+export async function cleanupOrphanUploads(): Promise<{ removed: string[]; count: number }> {
+  const removed = await cleanupOrphanUploadFiles();
   if (removed.length > 0) afterMediaMutation();
   return { removed, count: removed.length };
 }

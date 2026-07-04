@@ -53,7 +53,7 @@ export async function DELETE(request: NextRequest) {
   const assetPath = searchParams.get("path");
   if (!assetPath) return jsonError("path requis", 400);
 
-  const result = deleteLibraryAsset(assetPath);
+  const result = await deleteLibraryAsset(assetPath);
   if (result.blocked) {
     return jsonError(`Fichier utilisé : ${result.usages.join(", ")}`, 409);
   }
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     return jsonError("Action inconnue", 400);
   }
 
-  const result = cleanupOrphanUploads();
+  const result = await cleanupOrphanUploads();
 
   await logAdminAction({
     actorType: access,

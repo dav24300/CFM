@@ -21,6 +21,7 @@
     "bootstrap:pg": "node scripts/bootstrap-pg.mjs",
     "hydrate:pg": "node scripts/hydrate-from-postgres.mjs",
     "deploy:vps": "node scripts/deploy-vps.mjs",
+    "deploy:vercel": "node scripts/predeploy-vercel.mjs",
     "media:placeholders": "node scripts/generate-media-placeholders.mjs",
     "backup:db": "bash scripts/backup-db.sh",
     "export:i18n": "node scripts/export-i18n-json.mjs"
