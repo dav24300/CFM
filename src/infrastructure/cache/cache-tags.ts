@@ -7,6 +7,7 @@ export const CACHE_TAGS = {
   testimonials: "cfm:testimonials",
   actions: "cfm:actions",
   press: "cfm:press",
+  mediaSettings: "cfm:media-settings",
 } as const;
 
 export type ContentTable =

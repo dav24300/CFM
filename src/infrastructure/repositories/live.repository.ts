@@ -84,6 +84,21 @@ export function setLiveEventStatus(
   return result;
 }
 
+export function updateLiveEventMedia(
+  eventId: number,
+  patch: { thumbnail?: string | null; thumbnail_alt?: string | null }
+): LiveEvent | undefined {
+  let result: LiveEvent | undefined;
+  updateStore((store) => {
+    const e = store.live_events.find((x) => x.id === eventId);
+    if (!e) return;
+    if (patch.thumbnail !== undefined) e.thumbnail = patch.thumbnail;
+    if (patch.thumbnail_alt !== undefined) e.thumbnail_alt = patch.thumbnail_alt;
+    result = e;
+  });
+  return result;
+}
+
 export function getChatMessages(
   eventId: number,
   publicOnly = true

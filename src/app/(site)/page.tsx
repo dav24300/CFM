@@ -8,8 +8,8 @@ import {
   getPublishedNews,
 } from "@/lib/db";
 import { getActiveLiveEvent } from "@/lib/live";
-import { getSiteMedia, getResolvedLiveThumb, getResolvedNewsCover } from "@/lib/media.server";
-import { getAxisImage, MEDIA } from "@/lib/media";
+import { getSiteMedia, getResolvedLiveThumb, getResolvedNewsCover, getResolvedAxisImage, getResolvedTestimonialPhoto } from "@/lib/media.server";
+import { MEDIA } from "@/lib/media";
 import { getTranslations } from "@/lib/i18n-server";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { HeroMedia, HeroItem } from "@/components/ui/HeroMedia";
@@ -23,11 +23,29 @@ import { HomeAxesStrip } from "@/components/home/HomeAxesStrip";
 export default async function HomePage() {
   const { locale, t } = await getTranslations();
   const p = t.pages.home;
-  const media = getSiteMedia();
+  const media = await getSiteMedia();
   const testimonials = await getPublishedTestimonials();
   const latestNews = (await getPublishedNews()).slice(0, 3);
   const activeLive = getActiveLiveEvent();
   const countryLabel = locale === "en" ? "DRC" : SITE.country;
+
+  const newsCovers = await Promise.all(
+    latestNews.map((n) => getResolvedNewsCover(n.cover_image))
+  );
+  const axisItems = await Promise.all(
+    AXES.map(async (axe) => ({
+      slug: axe.slug,
+      title: axe.title,
+      description: axe.description,
+      image: await getResolvedAxisImage(axe.slug),
+    }))
+  );
+  const liveThumb = await getResolvedLiveThumb(activeLive?.thumbnail);
+  const testimonialPhotos = await Promise.all(
+    testimonials.map((item, i) =>
+      getResolvedTestimonialPhoto(Boolean(item.anonymous), i, item.photo)
+    )
+  );
 
   return (
     <>
@@ -109,10 +127,10 @@ export default async function HomePage() {
                 </Link>
               </div>
               <div className="mt-6 grid gap-6 md:grid-cols-3">
-                {latestNews.map((n) => (
+                {latestNews.map((n, idx) => (
                   <MediaCard
                     key={n.slug}
-                    image={getResolvedNewsCover(n.cover_image)}
+                    image={newsCovers[idx]}
                     imageAlt={n.cover_image_alt || n.title}
                     title={n.title}
                     excerpt={n.excerpt}
@@ -136,14 +154,7 @@ export default async function HomePage() {
               Des solutions pragmatiques pour améliorer durablement le quotidien des dépendants.
             </p>
           </ScrollReveal>
-          <HomeAxesStrip
-            axes={AXES.map((axe) => ({
-              slug: axe.slug,
-              title: axe.title,
-              description: axe.description,
-              image: getAxisImage(axe.slug),
-            }))}
-          />
+          <HomeAxesStrip axes={axisItems} />
         </div>
       </section>
 
@@ -154,7 +165,7 @@ export default async function HomePage() {
             <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
               <div className="media-frame relative aspect-video bg-cfm-navy">
                 <Image
-                  src={activeLive ? getResolvedLiveThumb(activeLive.thumbnail) : getResolvedLiveThumb()}
+                  src={liveThumb}
                   alt={activeLive?.title || "Événements live CFM"}
                   fill
                   className="object-cover"
@@ -201,7 +212,7 @@ export default async function HomePage() {
                 content: item.content,
                 author: item.anonymous ? "Anonyme" : item.author || "Membre CFM",
                 role: item.role,
-                photo: item.photo || (item.anonymous ? MEDIA.testimonials.anonymous : MEDIA.testimonials.default),
+                photo: testimonialPhotos[i],
                 photoAlt: item.photo_alt || undefined,
               }))}
             />

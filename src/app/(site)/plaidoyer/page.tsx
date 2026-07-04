@@ -41,7 +41,10 @@ export default async function PlaidoyerPage() {
 
   const news = await getPublishedNews();
 
-  const gallery = getResolvedGallery();
+  const gallery = await getResolvedGallery();
+  const newsCovers = await Promise.all(
+    news.map((item) => getResolvedNewsCover(item.cover_image))
+  );
 
 
 
@@ -182,13 +185,13 @@ export default async function PlaidoyerPage() {
 
             <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 
-              {news.map((item) => (
+              {news.map((item, idx) => (
 
                 <MediaCard
 
                   key={item.slug}
 
-                  image={getResolvedNewsCover(item.cover_image)}
+                  image={newsCovers[idx]}
 
                   imageAlt={item.cover_image_alt || item.title}
 

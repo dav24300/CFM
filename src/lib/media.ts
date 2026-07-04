@@ -51,14 +51,15 @@ export function resolveMediaPath(publicPath: string): string {
 
 export function getAxisImage(slug: string): string {
   const axes = MEDIA.axes as Record<string, string>;
-  return axes[slug] || MEDIA.mission;
+  return resolveMediaPath(axes[slug] || MEDIA.mission);
 }
 
-export function getTestimonialPhoto(anonymous: boolean, index: number): string {
-  if (anonymous) return MEDIA.testimonials.anonymous;
-  return index % 2 === 0
-    ? MEDIA.testimonials.default
-    : "/media/temoignages/portrait-02.svg";
+export function getTestimonialPhoto(anonymous: boolean, index: number, photo?: string | null): string {
+  if (photo) return resolveMediaPath(photo);
+  if (anonymous) return resolveMediaPath(MEDIA.testimonials.anonymous);
+  return resolveMediaPath(
+    index % 2 === 0 ? MEDIA.testimonials.default : "/media/temoignages/portrait-02.svg"
+  );
 }
 
 export function getNewsCoverImage(coverImage?: string | null): string {

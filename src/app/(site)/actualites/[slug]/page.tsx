@@ -44,7 +44,7 @@ export default async function NewsDetailPage({ params }: Props) {
 
   if (!article) notFound();
 
-
+  const coverImage = await getResolvedNewsCover(article.cover_image);
 
   return (
 
@@ -60,7 +60,7 @@ export default async function NewsDetailPage({ params }: Props) {
 
         <Image
 
-          src={getResolvedNewsCover(article.cover_image)}
+          src={coverImage}
 
           alt={article.cover_image_alt || article.title}
 

@@ -27,3 +27,57 @@ export const adminPetitionCreateSchema = z.object({
 export const adminUserActivateSchema = z.object({
   action: z.enum(["activate", "suspend"]),
 });
+
+export const adminMediaPatchSchema = z.object({
+  action: z.literal("reset_hero").optional(),
+  hero: z.record(z.string(), z.string()).optional(),
+  defaults: z.record(z.string(), z.string()).optional(),
+}).passthrough();
+
+export const adminMediaLibraryPatchSchema = z.object({
+  path: z.string().min(1),
+  alt: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  category: z.string().optional(),
+});
+
+export const adminMediaCollectionsPutSchema = z.object({
+  fikin_gallery: z
+    .array(
+      z.object({
+        src: z.string().min(1),
+        alt: z.string(),
+        sort: z.number().int(),
+      })
+    )
+    .optional(),
+  axis_images: z.record(z.string(), z.string()).optional(),
+});
+
+export const adminMediaCollectionsPatchSchema = z.object({
+  type: z.enum(["fikin", "axis"]).optional(),
+  item: z
+    .object({
+      src: z.string().min(1),
+      alt: z.string(),
+      sort: z.number().int(),
+    })
+    .optional(),
+  slug: z.string().optional(),
+  src: z.string().optional(),
+});
+
+export const adminMediaAssignSchema = z.object({
+  type: z.enum([
+    "news",
+    "studies",
+    "campaigns",
+    "press_releases",
+    "testimonials",
+    "live_events",
+    "partners",
+  ]),
+  id: z.number().int().positive(),
+  field: z.string().min(1),
+  path: z.string().min(1),
+});

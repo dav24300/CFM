@@ -1,119 +1,102 @@
 import { NextRequest } from "next/server";
-import fs from "fs";
-import path from "path";
 import { getAdminAccess } from "@/lib/admin-access";
-import { getStore, updateStore } from "@/lib/store";
-import {
-  jsonData,
-  jsonError,
-  jsonForbidden,
-  jsonUnauthorized,
-} from "@/lib/api-response";
+import { jsonData, jsonError, jsonSuccess, jsonUnauthorized } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
+import {
+  getMediaState,
+  patchMediaSettings,
+  uploadMediaFile,
+} from "@/application/services/media.service";
+import { jsonUploadError } from "@/infrastructure/http/upload-response";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "media", "uploads");
-const MAX_SIZE = 5 * 1024 * 1024;
-const ALLOWED = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/svg+xml",
-  "video/mp4",
-  "video/webm",
-]);
+export const maxDuration = 120;
 
 export async function GET() {
-  if (!(await getAdminAccess())) {
-    return jsonUnauthorized();
-  }
-  const settings = getStore().site_settings;
-  return jsonData({
-    hero_image: settings.hero_image || "",
-    hero_poster: settings.hero_poster || "",
-    hero_video: settings.hero_video || "",
-    mission_image: settings.mission_image || "",
-  });
+  if (!(await getAdminAccess())) return jsonUnauthorized();
+  return jsonData(getMediaState());
 }
 
 export async function POST(request: NextRequest) {
   const access = await getAdminAccess();
-  if (!access) {
-    await logAdminAction({
-      actorType: "unknown",
-      endpoint: "/api/admin/media",
-      action: "upload",
-      status: "denied",
-      ip: request.headers.get("x-forwarded-for") || null,
-    });
-    return jsonUnauthorized();
-  }
+  if (!access) return jsonUnauthorized();
+
+  const started = Date.now();
 
   try {
     const form = await request.formData();
     const file = form.get("file") as File | null;
     const settingKey = form.get("settingKey") as string | null;
+    const category = (form.get("category") as string) || "upload";
+    const subdir = form.get("subdir") as string | null;
 
-    if (!file) {
-      return jsonError("Fichier requis", 400);
-    }
+    if (!file) return jsonError("Fichier requis", 400);
 
-    if (!ALLOWED.has(file.type)) {
-      return jsonError("Type de fichier non autorisé", 400);
-    }
+    const result = await uploadMediaFile({
+      file,
+      settingKey,
+      category,
+      subdir,
+      alt: (form.get("alt") as string) || null,
+    });
 
-    if (file.size > MAX_SIZE) {
-      return jsonError("Fichier trop volumineux (max 5 Mo)", 400);
-    }
-
-    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-
-    const ext = file.name.split(".").pop()?.toLowerCase() || "webp";
-    const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    fs.writeFileSync(path.join(UPLOAD_DIR, safeName), buffer);
-
-    const publicPath = `/media/uploads/${safeName}`;
-
-    if (settingKey) {
-      const allowedKeys = ["hero_image", "hero_poster", "hero_video", "mission_image"];
-      if (!allowedKeys.includes(settingKey)) {
-        return jsonError("Clé setting invalide", 400);
-      }
-      updateStore((store) => {
-        store.site_settings[settingKey] = publicPath;
+    try {
+      await logAdminAction({
+        actorType: access,
+        endpoint: "/api/admin/media",
+        action: "upload",
+        target: settingKey || result.path,
+        status: "success",
+        ip: request.headers.get("x-forwarded-for") || null,
+        metadata: {
+          mime: file.type,
+          size: file.size,
+          durationMs: Date.now() - started,
+          published: result.published,
+          warnings: result.warnings,
+        },
       });
+    } catch (auditErr) {
+      console.warn("[CFM] admin audit after upload:", auditErr);
     }
 
+    return jsonData(result);
+  } catch (err) {
     await logAdminAction({
       actorType: access,
       endpoint: "/api/admin/media",
       action: "upload",
-      target: settingKey || publicPath,
-      status: "success",
+      status: "error",
       ip: request.headers.get("x-forwarded-for") || null,
+      metadata: {
+        durationMs: Date.now() - started,
+        message: err instanceof Error ? err.message : "unknown",
+      },
     });
-    return jsonData({ path: publicPath, settingKey });
-  } catch {
-    return jsonError("Erreur upload", 500);
+    return jsonUploadError(err);
   }
 }
 
 export async function PATCH(request: NextRequest) {
   const access = await getAdminAccess();
-  if (!access) {
-    return jsonUnauthorized();
-  }
+  if (!access) return jsonUnauthorized();
 
   try {
     const body = await request.json();
-    const allowedKeys = ["hero_image", "hero_poster", "hero_video", "mission_image"];
-    updateStore((store) => {
-      for (const key of allowedKeys) {
-        if (typeof body[key] === "string") {
-          store.site_settings[key] = body[key];
-        }
-      }
-    });
+
+    if (body.action === "reset_hero") {
+      patchMediaSettings({ action: "reset_hero" });
+      await logAdminAction({
+        actorType: access,
+        endpoint: "/api/admin/media",
+        action: "reset_hero",
+        status: "success",
+        ip: request.headers.get("x-forwarded-for") || null,
+      });
+      return jsonSuccess();
+    }
+
+    patchMediaSettings(body);
+
     await logAdminAction({
       actorType: access,
       endpoint: "/api/admin/media",

@@ -11,6 +11,8 @@ import { useAdminToast } from "@/components/admin/context/AdminToastContext";
 import { useAdminApi } from "@/components/admin/hooks/useAdminApi";
 import type { AdminData } from "@/components/admin/types";
 
+import { MediaPicker } from "@/components/admin/ui/media-picker";
+
 type ContentType = "news" | "studies" | "campaigns" | "press_releases" | "testimonials";
 type Row = Record<string, unknown>;
 
@@ -29,6 +31,8 @@ export function ContentPanel({ data, onReload }: Props) {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [mediaPath, setMediaPath] = useState("");
+  const [showPicker, setShowPicker] = useState(false);
   const { post } = useAdminApi(onReload);
   const { success, error } = useAdminToast();
 
@@ -47,6 +51,17 @@ export function ContentPanel({ data, onReload }: Props) {
     fd.forEach((v, k) => {
       payload[k] = String(v);
     });
+    if (mediaPath) {
+      if (table === "news") {
+        payload.cover_image = mediaPath;
+      } else if (table === "campaigns") {
+        payload.image_url = mediaPath;
+      } else if (table === "testimonials") {
+        payload.photo = mediaPath;
+      } else if (table === "studies" || table === "press_releases") {
+        payload.file_url = mediaPath;
+      }
+    }
 
     if (editId && table === "news") {
       const res = await fetch(`/api/admin/news/${editId}`, {
@@ -66,6 +81,7 @@ export function ContentPanel({ data, onReload }: Props) {
     }
     setShowForm(false);
     setEditId(null);
+    setMediaPath("");
     onReload();
   }
 
@@ -82,11 +98,20 @@ export function ContentPanel({ data, onReload }: Props) {
 
   const editing = editId ? rows.find((r) => Number(r.id) === editId) : null;
 
+  const mediaFieldLabel =
+    table === "news"
+      ? "Couverture"
+      : table === "campaigns"
+        ? "Image campagne"
+        : table === "testimonials"
+          ? "Photo"
+          : "Fichier PDF";
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="font-display text-xl font-bold text-cfm-navy">Contenu</h2>
-        <Button type="button" size="sm" onClick={() => { setShowForm(true); setEditId(null); }}>
+        <Button type="button" size="sm" onClick={() => { setShowForm(true); setEditId(null); setMediaPath(""); }}>
           + Nouveau
         </Button>
       </div>
@@ -123,6 +148,13 @@ export function ContentPanel({ data, onReload }: Props) {
               <Textarea name="content" placeholder="Témoignage" required rows={3} defaultValue={String(editing?.content || "")} />
             </>
           )}
+          <div className="flex flex-wrap items-center gap-2 border-t pt-3">
+            <span className="text-sm text-cfm-earth">{mediaFieldLabel} :</span>
+            <code className="max-w-xs truncate text-xs">{mediaPath || String(editing?.cover_image || editing?.image_url || editing?.photo || editing?.file_url || "—")}</code>
+            <Button type="button" size="sm" variant="secondary" onClick={() => setShowPicker(true)}>
+              Choisir média
+            </Button>
+          </div>
           <div className="flex gap-2">
             <Button type="submit" size="sm">Enregistrer</Button>
             <Button type="button" size="sm" variant="ghost" onClick={() => { setShowForm(false); setEditId(null); }}>
@@ -139,7 +171,12 @@ export function ContentPanel({ data, onReload }: Props) {
         rowKey={(r) => Number(r.id)}
         actions={(row) => (
           <div className="flex gap-1">
-            <Button size="sm" variant="secondary" type="button" onClick={() => { setEditId(Number(row.id)); setShowForm(false); }}>
+            <Button size="sm" variant="secondary" type="button" onClick={() => {
+              setEditId(Number(row.id));
+              setShowForm(false);
+              const r = row as Row;
+              setMediaPath(String(r.cover_image || r.image_url || r.photo || r.file_url || ""));
+            }}>
               Éditer
             </Button>
             <Button size="sm" variant="destructive" type="button" onClick={() => setDeleteId(Number(row.id))}>
@@ -158,6 +195,19 @@ export function ContentPanel({ data, onReload }: Props) {
         onConfirm={confirmDelete}
         onCancel={() => setDeleteId(null)}
       />
+
+      {showPicker && (
+        <MediaPicker
+          open
+          onClose={() => setShowPicker(false)}
+          onSelect={(path) => {
+            setMediaPath(path);
+            setShowPicker(false);
+          }}
+          title={`Média — ${mediaFieldLabel}`}
+          accept={table === "studies" || table === "press_releases" ? "application/pdf,image/*" : "image/*"}
+        />
+      )}
     </div>
   );
 }

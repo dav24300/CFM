@@ -6,6 +6,7 @@ import {
   getLiveEvents,
   getChatMessages,
   getPendingChatCount,
+  updateLiveEventMedia,
 } from "@/lib/live";
 import { sendPushToTopic } from "@/lib/push";
 import { getStore } from "@/lib/store";
@@ -53,15 +54,21 @@ export async function POST(request: NextRequest) {
     return jsonData({ messages: msgs });
   }
 
-  if (access !== "admin") {
+  if (action === "set_thumbnail" && body.id) {
+    const event = updateLiveEventMedia(body.id, {
+      thumbnail: body.thumbnail,
+      thumbnail_alt: body.thumbnail_alt,
+    });
+    if (!event) return jsonError("Événement introuvable", 404);
     await logAdminAction({
       actorType: access,
       endpoint: "/api/admin/live",
-      action: String(action),
-      status: "denied",
+      action: "set_thumbnail",
+      target: String(body.id),
+      status: "success",
       ip: request.headers.get("x-forwarded-for") || null,
     });
-    return jsonForbidden();
+    return jsonData({ event });
   }
 
   if (action === "create") {

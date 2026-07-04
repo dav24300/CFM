@@ -17,8 +17,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AboutPage() {
   const { t } = await getTranslations();
   const a = t.pages.about;
-  const gallery = getResolvedGallery();
-  const aboutMedia = getResolvedAboutMedia();
+  const gallery = await getResolvedGallery();
+  const aboutMedia = await getResolvedAboutMedia();
 
   const timeline = [
     {

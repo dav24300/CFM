@@ -180,6 +180,8 @@ export function adminCreate(table: string, data: Record<string, string>): void {
         excerpt: data.excerpt || null,
         content: data.content,
         category: data.category || "actualite",
+        cover_image: data.cover_image || null,
+        cover_image_alt: data.cover_image_alt || null,
         published: 1,
         created_at: now,
       });
@@ -190,7 +192,7 @@ export function adminCreate(table: string, data: Record<string, string>): void {
         slug: data.slug || slugify(data.title),
         summary: data.summary || null,
         content: data.content,
-        file_url: null,
+        file_url: data.file_url || null,
         published: 1,
         created_at: now,
       });
@@ -201,7 +203,7 @@ export function adminCreate(table: string, data: Record<string, string>): void {
         slug: data.slug || slugify(data.title),
         description: data.description || null,
         content: data.content || null,
-        image_url: null,
+        image_url: data.image_url || null,
         active: 1,
         created_at: now,
       });
@@ -220,6 +222,8 @@ export function adminCreate(table: string, data: Record<string, string>): void {
         author: data.author || null,
         role: data.role || null,
         content: data.content,
+        photo: data.photo || null,
+        photo_alt: data.photo_alt || null,
         anonymous: data.anonymous === "1" ? 1 : 0,
         published: 1,
         created_at: now,
@@ -230,7 +234,7 @@ export function adminCreate(table: string, data: Record<string, string>): void {
         title: data.title,
         slug: data.slug || slugify(data.title),
         content: data.content,
-        file_url: null,
+        file_url: data.file_url || null,
         published: 1,
         created_at: now,
       });

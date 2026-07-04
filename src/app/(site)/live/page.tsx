@@ -18,13 +18,17 @@ export default async function LiveListPage() {
   const { t } = await getTranslations();
   const events = getLiveEvents();
   const active = getActiveLiveEvent();
+  const heroThumb = await getResolvedLiveThumb(active?.thumbnail);
+  const eventThumbs = await Promise.all(
+    events.map((ev) => getResolvedLiveThumb(ev.thumbnail))
+  );
 
   return (
     <>
       <PageHero
         title={t.pages.live?.title ?? t.nav.live}
         subtitle={t.pages.live?.subtitle ?? "Suivez nos événements en direct et les replays."}
-        image={active?.thumbnail ? getResolvedLiveThumb(active.thumbnail) : getResolvedLiveThumb()}
+        image={heroThumb}
         imageAlt="Live CFM"
       />
 
@@ -55,10 +59,10 @@ export default async function LiveListPage() {
         <ScrollReveal className="mt-12">
           <h2 className="font-display text-2xl font-bold">{t.pages.live?.allEvents ?? "Tous les événements"}</h2>
           <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {events.map((ev) => (
+            {events.map((ev, i) => (
               <MediaCard
                 key={ev.id}
-                image={getResolvedLiveThumb(ev.thumbnail)}
+                image={eventThumbs[i]}
                 imageAlt={ev.thumbnail_alt || ev.title}
                 title={ev.title}
                 excerpt={ev.description}

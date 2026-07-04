@@ -44,6 +44,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - cfm_media_uploads:/app/public/media/uploads
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
       interval: 30s
@@ -54,3 +56,4 @@ services:
 volumes:
   cfm_pg_data:
   cfm_redis_data:
+  cfm_media_uploads:

@@ -8,7 +8,7 @@ import {
   Activity,
 } from "lucide-react";
 import { AXES } from "@/lib/constants";
-import { getAxisImage } from "@/lib/media";
+import { getResolvedAxisImage } from "@/lib/media.server";
 import { PageHero } from "@/components/ui/PageHero";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { getTranslations } from "@/lib/i18n-server";
@@ -29,6 +29,11 @@ const iconMap = {
 export default async function AxesPage() {
   const { t } = await getTranslations();
   const p = t.pages.axes;
+  const axisImages = Object.fromEntries(
+    await Promise.all(
+      AXES.map(async (axe) => [axe.slug, await getResolvedAxisImage(axe.slug)] as const)
+    )
+  );
 
   return (
     <>
@@ -62,7 +67,7 @@ export default async function AxesPage() {
                   <div className={imageFirst ? "" : "lg:order-2"}>
                     <div className="media-frame relative aspect-[4/3]">
                       <Image
-                        src={getAxisImage(axe.slug)}
+                        src={axisImages[axe.slug]}
                         alt={content.title}
                         fill
                         className="object-cover"

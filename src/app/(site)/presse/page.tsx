@@ -14,16 +14,11 @@ import { dateLocale } from "@/lib/i18n-supplement";
 
 
 
-const PRESS_KIT_PATH = "/media/presse/dossier-presse.pdf";
+import { getPressKitPath } from "@/lib/media.server";
 
-
-
-function pressKitAvailable(): boolean {
-
-  const full = path.join(process.cwd(), "public", PRESS_KIT_PATH.replace(/^\//, ""));
-
+function pressKitAvailable(kitPath: string): boolean {
+  const full = path.join(process.cwd(), "public", kitPath.replace(/^\//, ""));
   return fs.existsSync(full);
-
 }
 
 
@@ -45,8 +40,8 @@ export default async function PressePage() {
   const p = t.pages.press;
 
   const releases = await getPublishedPressReleases();
-
-  const hasPressKit = pressKitAvailable();
+  const pressKitPath = await getPressKitPath();
+  const hasPressKit = pressKitAvailable(pressKitPath);
 
 
 
@@ -73,7 +68,7 @@ export default async function PressePage() {
           {hasPressKit ? (
 
             <AnchorButton
-              href={PRESS_KIT_PATH}
+              href={pressKitPath}
               download
               variant="secondary"
               size="sm"

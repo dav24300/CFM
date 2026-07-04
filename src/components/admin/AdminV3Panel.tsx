@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/primitives/button";
 import { Input } from "@/components/ui/primitives/input";
 import { Textarea } from "@/components/ui/primitives/textarea";
 import { NativeSelect } from "@/components/ui/primitives/native-select";
+import { MediaPicker } from "@/components/admin/ui/media-picker";
 
 type LiveEvent = {
   id: number;
@@ -13,6 +14,7 @@ type LiveEvent = {
   status: string;
   viewer_count: number;
   chat_moderation: number;
+  thumbnail?: string | null;
 };
 
 type PendingMsg = {
@@ -32,6 +34,7 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
   const [pending, setPending] = useState<PendingMsg[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<number | null>(null);
   const [pushForm, setPushForm] = useState({ topic: "lives", title: "", body: "" });
+  const [thumbEventId, setThumbEventId] = useState<number | null>(null);
 
   async function reload() {
     const res = await fetch("/api/admin/live");
@@ -112,6 +115,16 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
     e.currentTarget.reset();
   }
 
+  async function setThumbnail(id: number, thumbnail: string) {
+    await fetch("/api/admin/live", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "set_thumbnail", id, thumbnail }),
+    });
+    setThumbEventId(null);
+    reload();
+  }
+
   async function sendPush(e: React.FormEvent) {
     e.preventDefault();
     await fetch("/api/admin/live", {
@@ -181,8 +194,14 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
                   <button type="button" onClick={() => loadPending(ev.id)} className="rounded border px-2 py-1 text-xs">
                     Modérer chat
                   </button>
+                  <button type="button" onClick={() => setThumbEventId(ev.id)} className="rounded border px-2 py-1 text-xs">
+                    Miniature
+                  </button>
                 </div>
               </div>
+              {ev.thumbnail && (
+                <p className="mt-1 truncate text-xs text-gray-500">Miniature : {ev.thumbnail}</p>
+              )}
               <form onSubmit={(e) => createPoll(e, ev.id)} className="mt-3 flex flex-wrap gap-2 border-t pt-3">
                 <Input name="question" placeholder="Sondage…" className="flex-1 min-w-[120px] text-xs" />
                 <Input name="opt1" placeholder="Option 1" className="w-24 text-xs" required />
@@ -226,6 +245,16 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
           <Button type="submit" size="sm">Envoyer</Button>
         </form>
       </section>
+
+      {thumbEventId !== null && (
+        <MediaPicker
+          open
+          onClose={() => setThumbEventId(null)}
+          onSelect={(path) => setThumbnail(thumbEventId, path)}
+          title="Miniature du live"
+          accept="image/*"
+        />
+      )}
     </div>
   );
 }
