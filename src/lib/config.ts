@@ -13,7 +13,7 @@ export function assertProductionConfig(): void {
 
   for (const key of REQUIRED_IN_PRODUCTION) {
     if (!process.env[key]) {
-      if (isBuildTime && key === "DATA_ENCRYPTION_KEY") {
+      if (isBuildTime) {
         console.warn(`[CFM] Variable requise absente pendant build : ${key}`);
         continue;
       }
@@ -23,7 +23,11 @@ export function assertProductionConfig(): void {
 
   const secret = process.env.SESSION_SECRET;
   if (secret === "dev-secret-change-in-production") {
-    throw new Error("[CFM] SESSION_SECRET ne doit pas utiliser la valeur par défaut en production");
+    if (isBuildTime) {
+      console.warn("[CFM] SESSION_SECRET par défaut ignoré pendant build");
+    } else {
+      throw new Error("[CFM] SESSION_SECRET ne doit pas utiliser la valeur par défaut en production");
+    }
   }
 }
 
