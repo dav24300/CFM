@@ -9,11 +9,10 @@ import {
   updateLiveEventMedia,
 } from "@/lib/live";
 import { sendPushToTopic } from "@/lib/push";
-import { getStore } from "@/lib/store";
+import { getStoreAsync } from "@/lib/store";
 import {
   jsonData,
   jsonError,
-  jsonForbidden,
   jsonUnauthorized,
 } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
@@ -23,11 +22,13 @@ export async function GET() {
   if (!access) {
     return jsonUnauthorized();
   }
-  const events = getLiveEvents();
-  const pending = events.map((e) => ({
-    eventId: e.id,
-    count: getPendingChatCount(e.id),
-  }));
+  const events = await getLiveEvents();
+  const pending = await Promise.all(
+    events.map(async (e) => ({
+      eventId: e.id,
+      count: await getPendingChatCount(e.id),
+    }))
+  );
   return jsonData({ events, pending });
 }
 
@@ -48,14 +49,14 @@ export async function POST(request: NextRequest) {
   const { action } = body;
 
   if (action === "pending_chat" && body.eventId) {
-    const msgs = getChatMessages(body.eventId, false).filter(
+    const msgs = (await getChatMessages(body.eventId, false)).filter(
       (m) => m.status === "pending"
     );
     return jsonData({ messages: msgs });
   }
 
   if (action === "set_thumbnail" && body.id) {
-    const event = updateLiveEventMedia(body.id, {
+    const event = await updateLiveEventMedia(body.id, {
       thumbnail: body.thumbnail,
       thumbnail_alt: body.thumbnail_alt,
     });
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (action === "create") {
-    const event = createLiveEvent({
+    const event = await createLiveEvent({
       title: body.title,
       description: body.description,
       youtube_id: body.youtube_id,
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (action === "set_status" && body.id) {
-    const event = setLiveEventStatus(body.id, body.status, body.replay_url);
+    const event = await setLiveEventStatus(body.id, body.status, body.replay_url);
     if (body.status === "live" && event) {
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
       await sendPushToTopic("lives", {
@@ -130,7 +131,8 @@ export async function POST(request: NextRequest) {
   }
 
   if (action === "stats") {
-    const subs = getStore().push_subscriptions?.length ?? 0;
+    const store = await getStoreAsync();
+    const subs = store.push_subscriptions?.length ?? 0;
     return jsonData({ push_subscribers: subs });
   }
 

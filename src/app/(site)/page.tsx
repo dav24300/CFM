@@ -26,7 +26,7 @@ export default async function HomePage() {
   const media = await getSiteMedia();
   const testimonials = await getPublishedTestimonials();
   const latestNews = (await getPublishedNews()).slice(0, 3);
-  const activeLive = getActiveLiveEvent();
+  const activeLive = await getActiveLiveEvent();
   const countryLabel = locale === "en" ? "DRC" : SITE.country;
 
   const newsCovers = await Promise.all(

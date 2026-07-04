@@ -1,17 +1,17 @@
 import type { StorePort } from "@/domain/ports/store.port";
-import {
-  getStore,
-  updateStore,
-  nextId,
-} from "@/infrastructure/persistence/store.impl";
 import type { Store } from "@/domain/entities/store";
+import {
+  getJsonStore,
+  updateJsonStore,
+} from "@/infrastructure/persistence/json-store.impl";
+import { nextId } from "@/infrastructure/persistence/store-seed";
 
 export const jsonStoreAdapter: StorePort = {
-  read(): Store {
-    return getStore();
+  async read(): Promise<Store> {
+    return getJsonStore();
   },
-  write(mutator: (store: Store) => void): Store {
-    return updateStore(mutator);
+  async write(mutator: (store: Store) => void): Promise<Store> {
+    return updateJsonStore(mutator);
   },
   nextId(store: Store): number {
     return nextId(store);

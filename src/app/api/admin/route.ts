@@ -33,7 +33,7 @@ export async function GET() {
   if (!(await getAdminAccess())) {
     return jsonUnauthorized();
   }
-  return jsonData(getAdminStats());
+  return jsonData(await getAdminStats());
 }
 
 export async function POST(request: NextRequest) {
@@ -64,9 +64,9 @@ export async function POST(request: NextRequest) {
         "press_releases",
       ];
       if (contentTables.includes(table)) {
-        adminCreate(table, data);
+        await adminCreate(table, data);
       } else if (table === "petitions") {
-        createPetition({
+        await createPetition({
           title: data.title,
           description: data.description,
           content: data.content,
@@ -74,31 +74,31 @@ export async function POST(request: NextRequest) {
         });
       }
     } else if (action === "update_content" && table && id) {
-      const ok = adminUpdateContent(table, id, data);
+      const ok = await adminUpdateContent(table, id, data);
       if (!ok) return jsonError("Élément introuvable", 404);
     } else if (action === "update_status") {
       if (table === "memberships" || table === "help_requests") {
-        adminUpdateStatus(table, id, data.status);
+        await adminUpdateStatus(table, id, data.status);
       }
     } else if (action === "activate_user" && id) {
-      const user = activateUser(id);
+      const user = await activateUser(id);
       if (user) {
         await sendAccountActivatedEmail(user.email, user.first_name);
       }
     } else if (action === "suspend_user" && id) {
-      suspendUser(id);
+      await suspendUser(id);
     } else if (action === "approve_family_link" && id) {
-      adminApproveFamilyLink(id);
+      await adminApproveFamilyLink(id);
     } else if (action === "reject_family_link" && id) {
-      adminRejectFamilyLink(id);
+      await adminRejectFamilyLink(id);
     } else if (action === "help_update" && id) {
-      addHelpRequestUpdate({
+      await addHelpRequestUpdate({
         help_request_id: id,
         status: data.status,
         note: data.note,
         updated_by: access === "volunteer" ? "bénévole" : "admin",
       });
-      const req = getHelpRequestById(id);
+      const req = await getHelpRequestById(id);
       if (req?.email) {
         await sendHelpRequestUpdateEmail(
           req.email as string,
@@ -113,9 +113,9 @@ export async function POST(request: NextRequest) {
         url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/membre/tableau-de-bord`,
       });
     } else if (action === "delete" && id && table) {
-      adminDelete(table, id);
+      await adminDelete(table, id);
     } else if (action === "reject_membership" && id) {
-      adminUpdateStatus("memberships", id, "rejected");
+      await adminUpdateStatus("memberships", id, "rejected");
     }
 
     await logAdminAction({

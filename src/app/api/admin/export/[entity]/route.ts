@@ -3,13 +3,13 @@ import { getAllDonations } from "@/lib/members";
 import { requireAdminAccess } from "@/lib/admin-rest";
 import { jsonError, jsonNotFound } from "@/lib/api-response";
 
-const EXPORTERS: Record<string, () => Record<string, unknown>[]> = {
-  newsletter: () => getAdminData().newsletter,
-  memberships: () => getAdminData().memberships,
-  contacts: () => getAdminData().contacts,
-  help_requests: () => getAdminData().help_requests,
-  news: () => getAdminData().news,
-  donations: () => getAllDonations() as unknown as Record<string, unknown>[],
+const EXPORTERS: Record<string, () => Promise<Record<string, unknown>[]>> = {
+  newsletter: async () => (await getAdminData()).newsletter,
+  memberships: async () => (await getAdminData()).memberships,
+  contacts: async () => (await getAdminData()).contacts,
+  help_requests: async () => (await getAdminData()).help_requests,
+  news: async () => (await getAdminData()).news,
+  donations: async () => (await getAllDonations()) as unknown as Record<string, unknown>[],
 };
 
 function toCsv(rows: Record<string, unknown>[]): string {
@@ -39,7 +39,7 @@ export async function GET(
   const exporter = EXPORTERS[entity];
   if (!exporter) return jsonError("Entité inconnue", 404);
 
-  const rows = exporter();
+  const rows = await exporter();
   const csv = toCsv(rows);
   return new Response(csv, {
     status: 200,

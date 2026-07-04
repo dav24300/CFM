@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const parsed = parseOrBadRequest(newsletterSchema, body, "Champs obligatoires manquants");
     if (!parsed.ok) return parsed.response;
 
-    subscribeNewsletter(parsed.data.email);
+    await subscribeNewsletter(parsed.data.email);
     return jsonSuccess();
   } catch (err) {
     return handleDomainError(err);

@@ -12,7 +12,7 @@ import { logAdminAction } from "@/lib/admin-audit";
 export async function GET() {
   const auth = await requireAdminAccess();
   if (!auth.ok) return auth.response;
-  return jsonData({ partners: getAllPartners() });
+  return jsonData({ partners: await getAllPartners() });
 }
 
 export async function POST(request: NextRequest) {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   if (!auth.ok) return auth.response;
 
   const body = await request.json();
-  const partner = adminCreatePartner({
+  const partner = await adminCreatePartner({
     name: String(body.name || ""),
     logo_url: body.logo_url,
     website: body.website,
@@ -48,7 +48,7 @@ export async function PATCH(request: NextRequest) {
   const id = Number(body.id);
   if (!id) return jsonNotFound("ID requis");
 
-  const ok = adminUpdatePartner(id, {
+  const ok = await adminUpdatePartner(id, {
     name: body.name,
     logo_url: body.logo_url,
     website: body.website,
@@ -77,7 +77,7 @@ export async function DELETE(request: NextRequest) {
   const id = Number(searchParams.get("id"));
   if (!id) return jsonNotFound("ID requis");
 
-  adminDeletePartner(id);
+  await adminDeletePartner(id);
 
   await logAdminAction({
     actorType: auth.access,

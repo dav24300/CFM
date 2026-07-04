@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 let mockStore: Record<string, unknown>;
 
 vi.mock("@/infrastructure/persistence/store-access", () => ({
-  getStore: vi.fn(() => mockStore),
-  updateStore: vi.fn((mutator: (store: typeof mockStore) => void) => {
+  getStoreAsync: vi.fn(() => Promise.resolve(mockStore)),
+  updateStoreAsync: vi.fn((mutator: (store: typeof mockStore) => void) => {
     mutator(mockStore);
-    return mockStore;
+    return Promise.resolve(mockStore);
   }),
 }));
 
@@ -22,10 +22,6 @@ vi.mock("@/infrastructure/repositories/content.repository", () => ({
 
 vi.mock("@/infrastructure/repositories/live.repository", () => ({
   updateLiveEventMedia: vi.fn(() => ({ id: 1 })),
-}));
-
-vi.mock("@/infrastructure/repositories/partners.repository", () => ({
-  adminUpdatePartner: vi.fn(() => true),
 }));
 
 import { adminUpdateContent } from "@/infrastructure/repositories/content.repository";
@@ -54,23 +50,23 @@ describe("media.repository", () => {
     vi.clearAllMocks();
   });
 
-  it("findMediaUsages detects site_settings and entity references", () => {
+  it("findMediaUsages detects site_settings and entity references", async () => {
     mockStore.news = [{ id: 1, title: "Actu", cover_image: "/media/uploads/hero.webp" }];
-    const usages = findMediaUsages("/media/uploads/hero.webp");
+    const usages = await findMediaUsages("/media/uploads/hero.webp");
     expect(usages.some((u) => u.startsWith("site_settings"))).toBe(true);
     expect(usages.some((u) => u.startsWith("news:"))).toBe(true);
   });
 
-  it("scanMissingMedia lists entities without visuals", () => {
-    const missing = scanMissingMedia();
+  it("scanMissingMedia lists entities without visuals", async () => {
+    const missing = await scanMissingMedia();
     expect(missing.length).toBeGreaterThanOrEqual(3);
     expect(missing.some((m) => m.type === "news" && m.field === "cover_image")).toBe(true);
     expect(missing.some((m) => m.type === "live_events")).toBe(true);
     expect(missing.some((m) => m.type === "partners")).toBe(true);
   });
 
-  it("assignMediaToEntity delegates to content repository", () => {
-    const ok = assignMediaToEntity({
+  it("assignMediaToEntity delegates to content repository", async () => {
+    const ok = await assignMediaToEntity({
       type: "news",
       id: 1,
       field: "cover_image",
@@ -82,8 +78,8 @@ describe("media.repository", () => {
     });
   });
 
-  it("assignMediaToEntity delegates live thumbnail update", () => {
-    assignMediaToEntity({
+  it("assignMediaToEntity delegates live thumbnail update", async () => {
+    await assignMediaToEntity({
       type: "live_events",
       id: 2,
       field: "thumbnail",

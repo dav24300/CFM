@@ -9,11 +9,11 @@ type Props = { params: Promise<{ slug: string }> };
 
 export default async function LiveEventPage({ params }: Props) {
   const { slug } = await params;
-  const event = getLiveEventBySlug(slug);
+  const event = await getLiveEventBySlug(slug);
   if (!event) notFound();
 
   const { t } = await getTranslations();
-  const polls = getPollsForEvent(event.id).filter((p) => p.active === 1);
+  const polls = (await getPollsForEvent(event.id)).filter((p) => p.active === 1);
   const live = t.pages.live;
 
   return (

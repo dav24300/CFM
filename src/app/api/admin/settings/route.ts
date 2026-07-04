@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { getStore, updateStore } from "@/lib/store";
+import { getStoreAsync } from "@/lib/store";
+import { withStoreMutation } from "@/infrastructure/persistence/admin-mutation";
 import { requireAdminAccess } from "@/lib/admin-rest";
 import { jsonData, jsonError, jsonSuccess } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
@@ -7,7 +8,8 @@ import { logAdminAction } from "@/lib/admin-audit";
 export async function GET() {
   const auth = await requireAdminAccess();
   if (!auth.ok) return auth.response;
-  return jsonData({ settings: getStore().site_settings });
+  const store = await getStoreAsync();
+  return jsonData({ settings: store.site_settings });
 }
 
 export async function PATCH(request: NextRequest) {
@@ -20,9 +22,12 @@ export async function PATCH(request: NextRequest) {
     return jsonError("settings requis", 400);
   }
 
-  updateStore((store) => {
-    store.site_settings = { ...store.site_settings, ...patch };
-  });
+  await withStoreMutation(
+    (store) => {
+      store.site_settings = { ...store.site_settings, ...patch };
+    },
+    { invalidate: "media" }
+  );
 
   await logAdminAction({
     actorType: auth.access,

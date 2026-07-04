@@ -31,23 +31,23 @@ function afterMediaMutation() {
   invalidateMediaCache();
 }
 
-export function getMediaState() {
+export async function getMediaState() {
   return getFullMediaState();
 }
 
-export function getMediaLibrary(usagePath?: string | null) {
+export async function getMediaLibrary(usagePath?: string | null) {
   if (usagePath) {
-    return { usages: findMediaUsages(usagePath) };
+    return { usages: await findMediaUsages(usagePath) };
   }
-  return { items: listLibraryFiles() };
+  return { items: await listLibraryFiles() };
 }
 
-export function getMediaCollections() {
+export async function getMediaCollections() {
   return getCollectionsState();
 }
 
-export function getMissingMedia() {
-  const missing = scanMissingMedia();
+export async function getMissingMedia() {
+  const missing = await scanMissingMedia();
   return { missing, count: missing.length };
 }
 
@@ -81,10 +81,10 @@ export async function uploadMediaFile(params: {
   const published = Boolean(params.settingKey);
 
   if (params.settingKey) {
-    setSiteSetting(params.settingKey, publicPath);
+    await setSiteSetting(params.settingKey, publicPath);
   }
 
-  addToCatalog({
+  await addToCatalog({
     path: publicPath,
     category: params.category || "upload",
     alt: params.alt || undefined,
@@ -101,73 +101,73 @@ export async function uploadMediaFile(params: {
   };
 }
 
-export function patchMediaSettings(body: Record<string, unknown>): void {
+export async function patchMediaSettings(body: Record<string, unknown>): Promise<void> {
   if (body.action === "reset_hero") {
-    resetHeroSettings();
+    await resetHeroSettings();
     afterMediaMutation();
     return;
   }
 
   if (body.hero && typeof body.hero === "object") {
-    patchHeroSettings(body.hero as Record<string, string>);
+    await patchHeroSettings(body.hero as Record<string, string>);
   }
   if (body.defaults && typeof body.defaults === "object") {
-    patchDefaultSettings(body.defaults as Record<string, string>);
+    await patchDefaultSettings(body.defaults as Record<string, string>);
   }
-  patchAssignableSettings(body);
+  await patchAssignableSettings(body);
   afterMediaMutation();
 }
 
-export function updateLibraryMeta(
+export async function updateLibraryMeta(
   assetPath: string,
   patch: Partial<MediaCatalogEntry>
-): void {
-  updateCatalogMeta(assetPath, patch);
+): Promise<void> {
+  await updateCatalogMeta(assetPath, patch);
 }
 
 export async function deleteLibraryAsset(
   assetPath: string
 ): Promise<{ blocked: boolean; usages: string[] }> {
-  const usages = findMediaUsages(assetPath);
+  const usages = await findMediaUsages(assetPath);
   if (usages.length > 0) {
     return { blocked: true, usages };
   }
   await deletePublicMediaFile(assetPath);
-  removeFromCatalog(assetPath);
+  await removeFromCatalog(assetPath);
   afterMediaMutation();
   return { blocked: false, usages: [] };
 }
 
-export function saveMediaCollections(body: {
+export async function saveMediaCollections(body: {
   fikin_gallery?: GalleryItem[];
   axis_images?: Record<string, string>;
-}): void {
-  replaceCollections(body);
+}): Promise<void> {
+  await replaceCollections(body);
   afterMediaMutation();
 }
 
-export function patchMediaCollection(body: {
+export async function patchMediaCollection(body: {
   type?: "fikin" | "axis";
   item?: GalleryItem;
   slug?: string;
   src?: string;
-}): void {
-  patchCollectionItem(body);
+}): Promise<void> {
+  await patchCollectionItem(body);
   afterMediaMutation();
 }
 
-export function removeFikinItem(sort: number): void {
-  deleteFikinGalleryItem(sort);
+export async function removeFikinItem(sort: number): Promise<void> {
+  await deleteFikinGalleryItem(sort);
   afterMediaMutation();
 }
 
-export function assignMedia(params: {
+export async function assignMedia(params: {
   type: MediaAssignTarget;
   id: number;
   field: string;
   path: string;
-}): boolean {
-  const ok = assignMediaToEntity(params);
+}): Promise<boolean> {
+  const ok = await assignMediaToEntity(params);
   if (ok) afterMediaMutation();
   return ok;
 }
@@ -178,7 +178,6 @@ export async function cleanupOrphanUploads(): Promise<{ removed: string[]; count
   return { removed, count: removed.length };
 }
 
-// Re-export read resolvers for pages that import via application layer
 export {
   getSiteMedia,
   getResolvedGallery,

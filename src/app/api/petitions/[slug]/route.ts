@@ -19,7 +19,7 @@ export async function GET(
 
   const { slug } = await params;
 
-  const petition = getPetition(slug);
+  const petition = await getPetition(slug);
 
   if (!petition) {
 
@@ -45,7 +45,7 @@ export async function POST(
 
     const { slug } = await params;
 
-    const petition = getPetition(slug);
+    const petition = await getPetition(slug);
 
     if (!petition) {
 

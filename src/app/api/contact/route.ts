@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       return jsonMissingFields();
     }
 
-    submitContact({
+    await submitContact({
       name,
       email,
       subject,

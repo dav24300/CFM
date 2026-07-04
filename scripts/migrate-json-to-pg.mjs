@@ -3,9 +3,20 @@
  * Migration store.json → PostgreSQL (tables normalisées + app_state)
  * Usage: DATABASE_URL=... node scripts/migrate-json-to-pg.mjs
  */
+import { createRequire } from "module";
 import fs from "fs";
 import path from "path";
 import pg from "pg";
+
+const require = createRequire(import.meta.url);
+const Module = require("module");
+const resolveFilename = Module._resolveFilename;
+Module._resolveFilename = function (request, parent, isMain, options) {
+  if (request === "server-only") {
+    return require.resolve("./empty.cjs");
+  }
+  return resolveFilename.call(this, request, parent, isMain, options);
+};
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -34,7 +45,7 @@ async function main() {
     await client.query("BEGIN");
 
     const { saveStoreToTables } = await import(
-      "../src/lib/persistence/pg-sync.ts"
+      "../src/infrastructure/persistence/pg-sync.ts"
     );
 
     await client.query(

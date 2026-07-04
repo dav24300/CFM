@@ -8,6 +8,10 @@ export const CACHE_TAGS = {
   actions: "cfm:actions",
   press: "cfm:press",
   mediaSettings: "cfm:media-settings",
+  partners: "cfm:partners",
+  live: "cfm:live",
+  petitions: "cfm:petitions",
+  i18n: "cfm:i18n",
 } as const;
 
 export type ContentTable =

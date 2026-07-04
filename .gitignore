@@ -50,3 +50,5 @@ data/admin-audit.log
 # User uploads (keep placeholder only)
 public/media/uploads/*
 !public/media/uploads/.gitkeep
+.vercel
+.env*

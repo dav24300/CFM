@@ -15,26 +15,31 @@ export async function GET() {
     return jsonUnauthorized();
   }
 
-  const base = getAdminData();
-  const users = getAllUsers().map((u) => {
+  const base = await getAdminData();
+  const users = (await getAllUsers()).map((u) => {
     const { password_hash: _, ...pub } = u;
     return pub;
   });
-  const familyLinks = getAllFamilyLinks().map((l) => ({
-    ...l,
-    parent: getUserById(l.parent_user_id),
-    child: getUserById(l.child_user_id),
-  }));
-  const petitions = getActivePetitions().map((p) => ({
-    ...p,
-    signatures: getPetitionSignatures(p.id).length,
-  }));
+  const familyLinksRaw = await getAllFamilyLinks();
+  const familyLinks = await Promise.all(
+    familyLinksRaw.map(async (l) => ({
+      ...l,
+      parent: await getUserById(l.parent_user_id),
+      child: await getUserById(l.child_user_id),
+    }))
+  );
+  const petitions = await Promise.all(
+    (await getActivePetitions()).map(async (p) => ({
+      ...p,
+      signatures: (await getPetitionSignatures(p.id)).length,
+    }))
+  );
 
   return jsonData({
     ...base,
     users,
     family_links: familyLinks,
-    donations: getAllDonations(),
+    donations: await getAllDonations(),
     petitions,
   });
 }

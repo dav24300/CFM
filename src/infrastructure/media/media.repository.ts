@@ -1,4 +1,5 @@
-import { getStore, updateStore } from "@/infrastructure/persistence/store-access";
+import { getStoreAsync, updateStoreAsync } from "@/infrastructure/persistence/store-access";
+import { withStoreMutation } from "@/infrastructure/persistence/admin-mutation";
 import {
   ASSIGNABLE_MEDIA_KEYS,
   HERO_SETTING_KEYS,
@@ -27,54 +28,64 @@ import { adminUpdateContent } from "@/infrastructure/repositories/content.reposi
 import { updateLiveEventMedia } from "@/infrastructure/repositories/live.repository";
 import { adminUpdatePartner } from "@/infrastructure/repositories/partners.repository";
 
-function readSettings(): Record<string, string> {
-  return getStore().site_settings;
+async function readSettings(): Promise<Record<string, string>> {
+  const store = await getStoreAsync();
+  return store.site_settings;
 }
 
-export function setSiteSetting(key: string, value: string): void {
-  updateStore((store) => {
-    store.site_settings[key] = value;
-  });
+export async function setSiteSetting(key: string, value: string): Promise<void> {
+  await withStoreMutation(
+    (store) => {
+      store.site_settings[key] = value;
+    },
+    { invalidate: "media" }
+  );
 }
 
-export function patchSiteSettings(patch: Record<string, string>): void {
-  updateStore((store) => {
-    for (const [key, val] of Object.entries(patch)) {
-      if (typeof val === "string") store.site_settings[key] = val;
-    }
-  });
+export async function patchSiteSettings(patch: Record<string, string>): Promise<void> {
+  await withStoreMutation(
+    (store) => {
+      for (const [key, val] of Object.entries(patch)) {
+        if (typeof val === "string") store.site_settings[key] = val;
+      }
+    },
+    { invalidate: "media" }
+  );
 }
 
-export function patchHeroSettings(hero: Record<string, string>): void {
+export async function patchHeroSettings(hero: Record<string, string>): Promise<void> {
   const patch: Record<string, string> = {};
   for (const key of HERO_SETTING_KEYS) {
     if (typeof hero[key] === "string") patch[key] = hero[key];
   }
-  patchSiteSettings(patch);
+  await patchSiteSettings(patch);
 }
 
-export function patchDefaultSettings(defaults: Record<string, string>): void {
-  patchSiteSettings(defaults);
+export async function patchDefaultSettings(defaults: Record<string, string>): Promise<void> {
+  await patchSiteSettings(defaults);
 }
 
-export function patchAssignableSettings(body: Record<string, unknown>): void {
+export async function patchAssignableSettings(body: Record<string, unknown>): Promise<void> {
   const patch: Record<string, string> = {};
   for (const key of ASSIGNABLE_MEDIA_KEYS) {
     if (typeof body[key] === "string") patch[key] = body[key];
   }
-  patchSiteSettings(patch);
+  await patchSiteSettings(patch);
 }
 
-export function resetHeroSettings(): void {
-  updateStore((store) => {
-    for (const [key, val] of Object.entries(HERO_DEFAULTS)) {
-      store.site_settings[key] = val;
-    }
-  });
+export async function resetHeroSettings(): Promise<void> {
+  await withStoreMutation(
+    (store) => {
+      for (const [key, val] of Object.entries(HERO_DEFAULTS)) {
+        store.site_settings[key] = val;
+      }
+    },
+    { invalidate: "media" }
+  );
 }
 
-export function addToCatalog(entry: MediaCatalogEntry): void {
-  updateStore((store) => {
+export async function addToCatalog(entry: MediaCatalogEntry): Promise<void> {
+  await updateStoreAsync((store) => {
     const catalog = parseCatalog(store.site_settings);
     const filtered = catalog.filter((c) => c.path !== entry.path);
     filtered.unshift({
@@ -85,8 +96,11 @@ export function addToCatalog(entry: MediaCatalogEntry): void {
   });
 }
 
-export function updateCatalogMeta(assetPath: string, patch: Partial<MediaCatalogEntry>): void {
-  updateStore((store) => {
+export async function updateCatalogMeta(
+  assetPath: string,
+  patch: Partial<MediaCatalogEntry>
+): Promise<void> {
+  await updateStoreAsync((store) => {
     const catalog = parseCatalog(store.site_settings);
     const idx = catalog.findIndex((c) => c.path === assetPath);
     if (idx >= 0) {
@@ -98,15 +112,15 @@ export function updateCatalogMeta(assetPath: string, patch: Partial<MediaCatalog
   });
 }
 
-export function removeFromCatalog(assetPath: string): void {
-  updateStore((store) => {
+export async function removeFromCatalog(assetPath: string): Promise<void> {
+  await updateStoreAsync((store) => {
     const catalog = parseCatalog(store.site_settings).filter((c) => c.path !== assetPath);
     store.site_settings.media_catalog = JSON.stringify(catalog);
   });
 }
 
-export function listLibraryFiles(): MediaCatalogEntry[] {
-  const settings = readSettings();
+export async function listLibraryFiles(): Promise<MediaCatalogEntry[]> {
+  const settings = await readSettings();
   const catalog = parseCatalog(settings);
   const catalogPaths = new Set(catalog.map((c) => c.path));
   const fromDisk = listOrphanUploadFiles(catalogPaths).map((item) => ({
@@ -120,8 +134,8 @@ export function listLibraryFiles(): MediaCatalogEntry[] {
   );
 }
 
-export function findMediaUsages(targetPath: string): string[] {
-  const store = getStore();
+export async function findMediaUsages(targetPath: string): Promise<string[]> {
+  const store = await getStoreAsync();
   const usages: string[] = [];
 
   for (const [key, val] of Object.entries(store.site_settings)) {
@@ -147,8 +161,8 @@ export function findMediaUsages(targetPath: string): string[] {
   return usages;
 }
 
-export function getFullMediaState(): FullMediaState {
-  const settings = readSettings();
+export async function getFullMediaState(): Promise<FullMediaState> {
+  const settings = await readSettings();
   return {
     hero: {
       hero_image: settings.hero_image || "",
@@ -178,68 +192,77 @@ export function getFullMediaState(): FullMediaState {
   };
 }
 
-export function getCollectionsState(): {
+export async function getCollectionsState(): Promise<{
   fikin_gallery: GalleryItem[];
   axis_images: Record<string, string>;
-} {
-  const settings = readSettings();
+}> {
+  const settings = await readSettings();
   const fikin = settings.fikin_gallery ? parseGallery(settings) : defaultFikinGallery();
   const axes = settings.axis_images ? parseAxisImages(settings) : defaultAxisImages();
   return { fikin_gallery: fikin, axis_images: axes };
 }
 
-export function replaceCollections(body: {
+export async function replaceCollections(body: {
   fikin_gallery?: GalleryItem[];
   axis_images?: Record<string, string>;
-}): void {
-  updateStore((store) => {
-    if (Array.isArray(body.fikin_gallery)) {
-      const items = body.fikin_gallery.map((item, i) => ({
-        src: item.src,
-        alt: item.alt || "",
-        sort: item.sort ?? i + 1,
-      }));
-      store.site_settings.fikin_gallery = JSON.stringify(items);
-    }
-    if (body.axis_images && typeof body.axis_images === "object") {
-      store.site_settings.axis_images = JSON.stringify(body.axis_images);
-    }
-  });
+}): Promise<void> {
+  await withStoreMutation(
+    (store) => {
+      if (Array.isArray(body.fikin_gallery)) {
+        const items = body.fikin_gallery.map((item, i) => ({
+          src: item.src,
+          alt: item.alt || "",
+          sort: item.sort ?? i + 1,
+        }));
+        store.site_settings.fikin_gallery = JSON.stringify(items);
+      }
+      if (body.axis_images && typeof body.axis_images === "object") {
+        store.site_settings.axis_images = JSON.stringify(body.axis_images);
+      }
+    },
+    { invalidate: "media" }
+  );
 }
 
-export function patchCollectionItem(body: {
+export async function patchCollectionItem(body: {
   type?: "fikin" | "axis";
   item?: GalleryItem;
   slug?: string;
   src?: string;
-}): void {
-  updateStore((store) => {
-    if (body.type === "fikin" && body.item) {
-      const gallery = parseGallery(store.site_settings);
-      const idx = gallery.findIndex((g) => g.sort === body.item!.sort);
-      if (idx >= 0) gallery[idx] = body.item;
-      else gallery.push(body.item);
-      store.site_settings.fikin_gallery = JSON.stringify(
-        gallery.sort((a, b) => a.sort - b.sort)
-      );
-    }
-    if (body.type === "axis" && body.slug && body.src) {
-      const axes = parseAxisImages(store.site_settings);
-      axes[body.slug] = body.src;
-      store.site_settings.axis_images = JSON.stringify(axes);
-    }
-  });
+}): Promise<void> {
+  await withStoreMutation(
+    (store) => {
+      if (body.type === "fikin" && body.item) {
+        const gallery = parseGallery(store.site_settings);
+        const idx = gallery.findIndex((g) => g.sort === body.item!.sort);
+        if (idx >= 0) gallery[idx] = body.item;
+        else gallery.push(body.item);
+        store.site_settings.fikin_gallery = JSON.stringify(
+          gallery.sort((a, b) => a.sort - b.sort)
+        );
+      }
+      if (body.type === "axis" && body.slug && body.src) {
+        const axes = parseAxisImages(store.site_settings);
+        axes[body.slug] = body.src;
+        store.site_settings.axis_images = JSON.stringify(axes);
+      }
+    },
+    { invalidate: "media" }
+  );
 }
 
-export function deleteFikinGalleryItem(sort: number): void {
-  updateStore((store) => {
-    const gallery = parseGallery(store.site_settings).filter((g) => g.sort !== sort);
-    store.site_settings.fikin_gallery = JSON.stringify(gallery);
-  });
+export async function deleteFikinGalleryItem(sort: number): Promise<void> {
+  await withStoreMutation(
+    (store) => {
+      const gallery = parseGallery(store.site_settings).filter((g) => g.sort !== sort);
+      store.site_settings.fikin_gallery = JSON.stringify(gallery);
+    },
+    { invalidate: "media" }
+  );
 }
 
-export function scanMissingMedia(): MissingMediaItem[] {
-  const store = getStore();
+export async function scanMissingMedia(): Promise<MissingMediaItem[]> {
+  const store = await getStoreAsync();
   const missing: MissingMediaItem[] = [];
 
   for (const n of store.news) {
@@ -294,16 +317,16 @@ const CONTENT_TABLES = new Set<MediaAssignTarget>([
   "testimonials",
 ]);
 
-export function assignMediaToEntity(params: {
+export async function assignMediaToEntity(params: {
   type: MediaAssignTarget;
   id: number;
   field: string;
   path: string;
-}): boolean {
+}): Promise<boolean> {
   const { type, id, field, path } = params;
 
   if (type === "live_events") {
-    return Boolean(updateLiveEventMedia(id, { thumbnail: path }));
+    return Boolean(await updateLiveEventMedia(id, { thumbnail: path }));
   }
 
   if (type === "partners") {
@@ -326,9 +349,9 @@ export async function cleanupOrphanUploadFiles(): Promise<string[]> {
     const full = path.join(uploadDir, name);
     if (!fs.statSync(full).isFile()) continue;
     const publicPath = `/media/uploads/${name}`;
-    if (findMediaUsages(publicPath).length > 0) continue;
+    if ((await findMediaUsages(publicPath)).length > 0) continue;
     await deletePublicMediaFile(publicPath);
-    removeFromCatalog(publicPath);
+    await removeFromCatalog(publicPath);
     removed.push(publicPath);
   }
   return removed;

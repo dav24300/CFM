@@ -9,11 +9,11 @@ import {
 import { getCurrentMember } from "@/infrastructure/auth/member-auth";
 import type { Petition } from "@/domain/entities/v2";
 
-export function listActivePetitions(): Petition[] {
+export async function listActivePetitions(): Promise<Petition[]> {
   return getActivePetitions();
 }
 
-export function getPetition(slug: string): Petition | undefined {
+export async function getPetition(slug: string): Promise<Petition | undefined> {
   return getPetitionBySlug(slug);
 }
 
@@ -21,7 +21,7 @@ export async function signPetitionBySlug(
   slug: string,
   body: { email?: string; name?: string }
 ): Promise<void> {
-  const petition = getPetitionBySlug(slug);
+  const petition = await getPetitionBySlug(slug);
   if (!petition) throw new Error("NOT_FOUND");
 
   const member = await getCurrentMember();
@@ -31,7 +31,7 @@ export async function signPetitionBySlug(
 
   if (!email || !name) throw new Error("MISSING_SIGNER");
 
-  signPetition({
+  await signPetition({
     petition_id: petition.id,
     user_id: member?.id,
     email,

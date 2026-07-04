@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isPostgresEnabled } from "@/infrastructure/persistence/db-adapter";
 import { isRedisRateLimitEnabled } from "@/infrastructure/rate-limit/redis";
-import { bootstrapPostgresStore } from "@/infrastructure/persistence/store.impl";
+import { bootstrapPostgresStore } from "@/infrastructure/persistence/postgres-store.adapter";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

@@ -7,11 +7,11 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const event = getLiveEventBySlug(slug);
+  const event = await getLiveEventBySlug(slug);
   if (!event) {
     return jsonNotFound("Introuvable");
   }
-  const messages = getChatMessages(event.id, true);
+  const messages = await getChatMessages(event.id, true);
   return jsonData({ messages });
 }
 

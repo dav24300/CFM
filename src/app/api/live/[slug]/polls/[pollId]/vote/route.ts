@@ -20,7 +20,7 @@ export async function POST(
       voterKey = `v-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     }
 
-    const poll = voteLivePoll(parseInt(pollId, 10), optionId, voterKey);
+    const poll = await voteLivePoll(parseInt(pollId, 10), optionId, voterKey);
     const res = jsonData({ poll });
     res.cookies.set("cfm_voter", voterKey, {
       path: "/",

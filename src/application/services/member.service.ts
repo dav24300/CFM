@@ -61,14 +61,14 @@ export async function getMemberDashboard() {
   const user = await getCurrentMember();
   if (!user) return null;
 
-  const helpRequests = getHelpRequestsForUser(user.id).map((h) => ({
+  const helpRequests = (await getHelpRequestsForUser(user.id)).map((h) => ({
     id: h.id as number,
     need_type: String(h.need_type ?? "aide"),
     status: String(h.status ?? "new"),
     description: String(h.description ?? ""),
   }));
 
-  const donations = getDonationsForUser(user.id).map((d) => ({
+  const donations = (await getDonationsForUser(user.id)).map((d) => ({
     id: d.id,
     amount: d.amount,
     currency: d.currency,
@@ -83,14 +83,14 @@ export async function updateProfile(
   userId: number,
   data: { first_name?: string; last_name?: string; phone?: string; province?: string }
 ): Promise<PublicUser | undefined> {
-  const updated = updateMemberProfile(userId, data);
+  const updated = await updateMemberProfile(userId, data);
   return updated ? toPublicUser(updated) : undefined;
 }
 
 export async function requestPasswordReset(email: string): Promise<void> {
-  const user = getUserByEmail(email);
+  const user = await getUserByEmail(email);
   if (!user) return;
-  const token = createPasswordResetToken(user.id);
+  const token = await createPasswordResetToken(user.id);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const resetUrl = `${baseUrl}/membre/reinitialiser-mot-de-passe?token=${token}`;
   await sendPasswordResetEmail(user.email, user.first_name, resetUrl);
@@ -108,11 +108,14 @@ export type FamilyLinkWithUsers = FamilyLink & {
 export async function getFamilyLinks(): Promise<FamilyLinkWithUsers[]> {
   const user = await getCurrentMember();
   if (!user) return [];
-  return getFamilyLinksForUser(user.id).map((link) => ({
-    ...link,
-    parent: getUserById(link.parent_user_id),
-    child: getUserById(link.child_user_id),
-  }));
+  const links = await getFamilyLinksForUser(user.id);
+  return Promise.all(
+    links.map(async (link) => ({
+      ...link,
+      parent: await getUserById(link.parent_user_id),
+      child: await getUserById(link.child_user_id),
+    }))
+  );
 }
 
 export async function manageFamilyLink(
@@ -138,7 +141,7 @@ export async function manageFamilyLink(
   }
 
   if (action === "respond") {
-    respondFamilyLink(body.link_id as number, userId, body.approve === true);
+    await respondFamilyLink(body.link_id as number, userId, body.approve === true);
     return;
   }
 

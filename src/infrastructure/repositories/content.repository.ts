@@ -1,9 +1,11 @@
 import {
-  getStore,
-  updateStore,
+  getStoreAsync,
+  updateStoreAsync,
   nextId,
 } from "@/infrastructure/persistence/store-access";
-import { slugify } from "@/infrastructure/persistence/store.impl";
+import { slugify } from "@/infrastructure/persistence/store-seed";
+import { withStoreMutation } from "@/infrastructure/persistence/admin-mutation";
+import { invalidateContentCache } from "@/infrastructure/cache/invalidate";
 import { domainError } from "@/domain/errors/domain-error";
 import type {
   News,
@@ -14,51 +16,64 @@ import type {
   PressRelease,
 } from "@/domain/entities/content";
 import { decryptHelpRequest } from "@/infrastructure/encryption/aes.adapter";
-import { invalidateContentCache } from "@/infrastructure/cache/invalidate";
 import { compareIsoDesc, toDateString } from "@/infrastructure/persistence/normalize-pg-row";
 
 export type { News, Study, Campaign, Testimonial, Action, PressRelease };
 
-export function getPublishedNews(): News[] {
-  return getStore()
-    .news.filter((n) => n.published === 1)
+export async function getPublishedNewsAsync(): Promise<News[]> {
+  const store = await getStoreAsync();
+  return store.news
+    .filter((n) => n.published === 1)
     .sort((a, b) => compareIsoDesc(a.created_at, b.created_at));
 }
 
-export function getPublishedStudies(): Study[] {
-  return getStore()
-    .studies.filter((s) => s.published === 1)
+export async function getPublishedStudiesAsync(): Promise<Study[]> {
+  const store = await getStoreAsync();
+  return store.studies
+    .filter((s) => s.published === 1)
     .sort((a, b) => compareIsoDesc(a.created_at, b.created_at));
 }
 
-export function getActiveCampaigns(): Campaign[] {
-  return getStore()
-    .campaigns.filter((c) => c.active === 1)
+export async function getActiveCampaignsAsync(): Promise<Campaign[]> {
+  const store = await getStoreAsync();
+  return store.campaigns
+    .filter((c) => c.active === 1)
     .sort((a, b) => compareIsoDesc(a.created_at, b.created_at));
 }
 
-export function getPublishedTestimonials(): Testimonial[] {
-  return getStore()
-    .testimonials.filter((t) => t.published === 1)
+export async function getPublishedTestimonialsAsync(): Promise<Testimonial[]> {
+  const store = await getStoreAsync();
+  return store.testimonials
+    .filter((t) => t.published === 1)
     .sort((a, b) => compareIsoDesc(a.created_at, b.created_at));
 }
 
-export function getActions(): Action[] {
-  return getStore().actions.sort((a, b) => {
+export async function getActionsAsync(): Promise<Action[]> {
+  const store = await getStoreAsync();
+  return store.actions.sort((a, b) => {
     if (!a.date) return 1;
     if (!b.date) return -1;
     return toDateString(b.date).localeCompare(toDateString(a.date));
   });
 }
 
-export function getPublishedPressReleases(): PressRelease[] {
-  return getStore()
-    .press_releases.filter((p) => p.published === 1)
+export async function getPublishedPressReleasesAsync(): Promise<PressRelease[]> {
+  const store = await getStoreAsync();
+  return store.press_releases
+    .filter((p) => p.published === 1)
     .sort((a, b) => compareIsoDesc(a.created_at, b.created_at));
 }
 
-export function addNewsletter(email: string): void {
-  updateStore((store) => {
+/** @deprecated Utiliser getPublishedNewsAsync */
+export const getPublishedNews = getPublishedNewsAsync;
+export const getPublishedStudies = getPublishedStudiesAsync;
+export const getActiveCampaigns = getActiveCampaignsAsync;
+export const getPublishedTestimonials = getPublishedTestimonialsAsync;
+export const getActions = getActionsAsync;
+export const getPublishedPressReleases = getPublishedPressReleasesAsync;
+
+export async function addNewsletter(email: string): Promise<void> {
+  await updateStoreAsync((store) => {
     const exists = store.newsletter.some(
       (n) => n.email.toLowerCase() === email.toLowerCase()
     );
@@ -71,7 +86,7 @@ export function addNewsletter(email: string): void {
   });
 }
 
-export function addMembership(data: {
+export async function addMembership(data: {
   type: string;
   first_name: string;
   last_name: string;
@@ -82,8 +97,8 @@ export function addMembership(data: {
   parent_military_name?: string;
   skills?: string;
   message?: string;
-}): void {
-  updateStore((store) => {
+}): Promise<void> {
+  await updateStoreAsync((store) => {
     store.memberships.push({
       id: nextId(store),
       ...data,
@@ -93,8 +108,8 @@ export function addMembership(data: {
   });
 }
 
-export function addHelpRequest(data: Record<string, unknown>): void {
-  updateStore((store) => {
+export async function addHelpRequest(data: Record<string, unknown>): Promise<void> {
+  await updateStoreAsync((store) => {
     store.help_requests.push({
       id: nextId(store),
       ...data,
@@ -104,18 +119,21 @@ export function addHelpRequest(data: Record<string, unknown>): void {
   });
 }
 
-export function getHelpRequestById(id: number): Record<string, unknown> | undefined {
-  return getStore().help_requests.find((h) => h.id === id);
+export async function getHelpRequestById(
+  id: number
+): Promise<Record<string, unknown> | undefined> {
+  const store = await getStoreAsync();
+  return store.help_requests.find((h) => h.id === id);
 }
 
-export function addContactMessage(data: {
+export async function addContactMessage(data: {
   name: string;
   email: string;
   subject?: string;
   message: string;
   type?: string;
-}): void {
-  updateStore((store) => {
+}): Promise<void> {
+  await updateStoreAsync((store) => {
     store.contact_messages.push({
       id: nextId(store),
       ...data,
@@ -124,13 +142,15 @@ export function addContactMessage(data: {
   });
 }
 
-export function getAdminStats() {
-  const store = getStore();
+export async function getAdminStats() {
+  const store = await getStoreAsync();
   const pendingUsers = (store.users || []).filter((u) => u.status === "pending").length;
   const pendingFamily = (store.family_links || []).filter(
     (l) => l.status !== "approved" && l.status !== "rejected"
   ).length;
-  const pendingChat = (store.live_chat_messages || []).filter((m) => m.status === "pending").length;
+  const pendingChat = (store.live_chat_messages || []).filter(
+    (m) => m.status === "pending"
+  ).length;
   return {
     news: store.news.length,
     studies: store.studies.length,
@@ -152,8 +172,8 @@ export function getAdminStats() {
   };
 }
 
-export function getAdminData() {
-  const store = getStore();
+export async function getAdminData() {
+  const store = await getStoreAsync();
   return {
     memberships: [...store.memberships].reverse(),
     help_requests: [...store.help_requests].reverse().map((h) => decryptHelpRequest(h)),
@@ -162,89 +182,98 @@ export function getAdminData() {
     news: [...store.news].reverse(),
     studies: [...store.studies].reverse(),
     campaigns: [...store.campaigns].reverse(),
-    actions: getActions(),
+    actions: await getActionsAsync(),
     testimonials: [...store.testimonials].reverse(),
     press_releases: [...store.press_releases].reverse(),
   };
 }
 
-export function adminCreate(table: string, data: Record<string, string>): void {
-  updateStore((store) => {
-    const now = new Date().toISOString();
-    if (table === "news") {
-      const slug = data.slug || slugify(data.title);
-      store.news.push({
-        id: nextId(store),
-        title: data.title,
-        slug,
-        excerpt: data.excerpt || null,
-        content: data.content,
-        category: data.category || "actualite",
-        cover_image: data.cover_image || null,
-        cover_image_alt: data.cover_image_alt || null,
-        published: 1,
-        created_at: now,
-      });
-    } else if (table === "studies") {
-      store.studies.push({
-        id: nextId(store),
-        title: data.title,
-        slug: data.slug || slugify(data.title),
-        summary: data.summary || null,
-        content: data.content,
-        file_url: data.file_url || null,
-        published: 1,
-        created_at: now,
-      });
-    } else if (table === "campaigns") {
-      store.campaigns.push({
-        id: nextId(store),
-        title: data.title,
-        slug: data.slug || slugify(data.title),
-        description: data.description || null,
-        content: data.content || null,
-        image_url: data.image_url || null,
-        active: 1,
-        created_at: now,
-      });
-    } else if (table === "actions") {
-      store.actions.push({
-        id: nextId(store),
-        province: data.province,
-        title: data.title,
-        description: data.description || null,
-        date: data.date || null,
-        type: data.type || "action",
-      });
-    } else if (table === "testimonials") {
-      store.testimonials.push({
-        id: nextId(store),
-        author: data.author || null,
-        role: data.role || null,
-        content: data.content,
-        photo: data.photo || null,
-        photo_alt: data.photo_alt || null,
-        anonymous: data.anonymous === "1" ? 1 : 0,
-        published: 1,
-        created_at: now,
-      });
-    } else if (table === "press_releases") {
-      store.press_releases.push({
-        id: nextId(store),
-        title: data.title,
-        slug: data.slug || slugify(data.title),
-        content: data.content,
-        file_url: data.file_url || null,
-        published: 1,
-        created_at: now,
-      });
-    }
-  });
-  invalidateContentCache(table);
+export async function adminCreate(
+  table: string,
+  data: Record<string, string>
+): Promise<void> {
+  await withStoreMutation(
+    (store) => {
+      const now = new Date().toISOString();
+      if (table === "news") {
+        const slug = data.slug || slugify(data.title);
+        store.news.push({
+          id: nextId(store),
+          title: data.title,
+          slug,
+          excerpt: data.excerpt || null,
+          content: data.content,
+          category: data.category || "actualite",
+          cover_image: data.cover_image || null,
+          cover_image_alt: data.cover_image_alt || null,
+          published: 1,
+          created_at: now,
+        });
+      } else if (table === "studies") {
+        store.studies.push({
+          id: nextId(store),
+          title: data.title,
+          slug: data.slug || slugify(data.title),
+          summary: data.summary || null,
+          content: data.content,
+          file_url: data.file_url || null,
+          published: 1,
+          created_at: now,
+        });
+      } else if (table === "campaigns") {
+        store.campaigns.push({
+          id: nextId(store),
+          title: data.title,
+          slug: data.slug || slugify(data.title),
+          description: data.description || null,
+          content: data.content || null,
+          image_url: data.image_url || null,
+          active: 1,
+          created_at: now,
+        });
+      } else if (table === "actions") {
+        store.actions.push({
+          id: nextId(store),
+          province: data.province,
+          title: data.title,
+          description: data.description || null,
+          date: data.date || null,
+          type: data.type || "action",
+        });
+      } else if (table === "testimonials") {
+        store.testimonials.push({
+          id: nextId(store),
+          author: data.author || null,
+          role: data.role || null,
+          content: data.content,
+          photo: data.photo || null,
+          photo_alt: data.photo_alt || null,
+          anonymous: data.anonymous === "1" ? 1 : 0,
+          published: 1,
+          created_at: now,
+        });
+      } else if (table === "press_releases") {
+        store.press_releases.push({
+          id: nextId(store),
+          title: data.title,
+          slug: data.slug || slugify(data.title),
+          content: data.content,
+          file_url: data.file_url || null,
+          published: 1,
+          created_at: now,
+        });
+      }
+    },
+    { invalidate: "content", contentTable: table }
+  );
 }
 
-export function adminUpdateStatus(table: string, id: number, status: string): void {
-  updateStore((store) => {
+export async function adminUpdateStatus(
+  table: string,
+  id: number,
+  status: string
+): Promise<void> {
+  await updateStoreAsync((store) => {
     if (table === "memberships") {
       const item = store.memberships.find((m) => m.id === id);
       if (item) item.status = status;
@@ -255,16 +284,16 @@ export function adminUpdateStatus(table: string, id: number, status: string): vo
   });
 }
 
-export function adminUpdateContent(
+export async function adminUpdateContent(
   table: string,
   id: number,
   data: Record<string, string | number | null>
-): boolean {
+): Promise<boolean> {
   const allowed = ["news", "studies", "campaigns", "actions", "testimonials", "press_releases"] as const;
   if (!allowed.includes(table as (typeof allowed)[number])) return false;
 
   let found = false;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     const key = table as keyof typeof store;
     if (!Array.isArray(store[key])) return;
     const items = store[key] as { id: number; [k: string]: unknown }[];
@@ -279,17 +308,19 @@ export function adminUpdateContent(
   return found;
 }
 
-export function adminDelete(table: string, id: number): void {
+export async function adminDelete(table: string, id: number): Promise<void> {
   const allowed = ["news", "studies", "campaigns", "actions", "testimonials", "press_releases"] as const;
   if (!allowed.includes(table as (typeof allowed)[number])) return;
 
-  updateStore((store) => {
-    const key = table as keyof typeof store;
-    if (Array.isArray(store[key])) {
-      (store[key] as { id: number }[]) = (store[key] as { id: number }[]).filter(
-        (item) => item.id !== id
-      );
-    }
-  });
-  invalidateContentCache(table);
+  await withStoreMutation(
+    (store) => {
+      const key = table as keyof typeof store;
+      if (Array.isArray(store[key])) {
+        (store[key] as { id: number }[]) = (store[key] as { id: number }[]).filter(
+          (item) => item.id !== id
+        );
+      }
+    },
+    { invalidate: "content", contentTable: table }
+  );
 }

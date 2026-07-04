@@ -14,12 +14,12 @@ export async function GET(
 
   const { id } = await params;
   const petitionId = parseInt(id, 10);
-  const petition = getPetitionById(petitionId);
+  const petition = await getPetitionById(petitionId);
   if (!petition) {
     return jsonError("Pétition introuvable", 404);
   }
 
-  const signatures = getPetitionSignatures(petitionId).map((s) => ({
+  const signatures = (await getPetitionSignatures(petitionId)).map((s) => ({
     name: s.name,
     email: s.email,
     signed_at: s.signed_at,

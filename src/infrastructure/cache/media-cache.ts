@@ -3,22 +3,22 @@ import { unstable_cache } from "next/cache";
 import {
   getSiteMedia,
   getResolvedGallery,
-  getResolvedAxisImage,
   getResolvedAboutMedia,
-  getResolvedLiveThumb,
-  getResolvedNewsCover,
-  getResolvedTestimonialPhoto,
   getPressKitPath,
   getOgImagePath,
   getFaviconPath,
   getActionsHeroImage,
+  getResolvedAxisImage,
+  getResolvedLiveThumb,
+  getResolvedNewsCover,
+  getResolvedTestimonialPhoto,
 } from "@/infrastructure/media/media-resolution.server";
 import { CACHE_TAGS } from "@/infrastructure/cache/cache-tags";
 
 const REVALIDATE_SECONDS = Number(process.env.CFM_MEDIA_CACHE_TTL ?? 300);
 
-function cached<T>(key: string, fn: () => T): () => Promise<T> {
-  return unstable_cache(() => Promise.resolve(fn()), [key], {
+function cached<T>(key: string, fn: () => Promise<T>): () => Promise<T> {
+  return unstable_cache(fn, [key], {
     tags: [CACHE_TAGS.mediaSettings],
     revalidate: REVALIDATE_SECONDS,
   });
@@ -34,26 +34,24 @@ export const getActionsHeroImageCached = cached("cfm-actions-hero", getActionsHe
 
 export function getResolvedAxisImageCached(slug: string): Promise<string> {
   return unstable_cache(
-    () => Promise.resolve(getResolvedAxisImage(slug)),
-    [`cfm-axis-${slug}`],
+    () => getResolvedAxisImage(slug),
+    ["cfm-axis", slug],
     { tags: [CACHE_TAGS.mediaSettings], revalidate: REVALIDATE_SECONDS }
   )();
 }
 
 export function getResolvedLiveThumbCached(thumbnail?: string | null): Promise<string> {
-  const key = thumbnail || "default";
   return unstable_cache(
-    () => Promise.resolve(getResolvedLiveThumb(thumbnail)),
-    [`cfm-live-thumb-${key}`],
+    () => getResolvedLiveThumb(thumbnail),
+    ["cfm-live-thumb", thumbnail ?? ""],
     { tags: [CACHE_TAGS.mediaSettings], revalidate: REVALIDATE_SECONDS }
   )();
 }
 
 export function getResolvedNewsCoverCached(coverImage?: string | null): Promise<string> {
-  const key = coverImage || "default";
   return unstable_cache(
-    () => Promise.resolve(getResolvedNewsCover(coverImage)),
-    [`cfm-news-cover-${key}`],
+    () => getResolvedNewsCover(coverImage),
+    ["cfm-news-cover", coverImage ?? ""],
     { tags: [CACHE_TAGS.mediaSettings], revalidate: REVALIDATE_SECONDS }
   )();
 }
@@ -63,10 +61,9 @@ export function getResolvedTestimonialPhotoCached(
   index: number,
   photo?: string | null
 ): Promise<string> {
-  const key = `${anonymous}-${index}-${photo || "default"}`;
   return unstable_cache(
-    () => Promise.resolve(getResolvedTestimonialPhoto(anonymous, index, photo)),
-    [`cfm-testimonial-${key}`],
+    () => getResolvedTestimonialPhoto(anonymous, index, photo),
+    ["cfm-testimonial", String(anonymous), String(index), photo ?? ""],
     { tags: [CACHE_TAGS.mediaSettings], revalidate: REVALIDATE_SECONDS }
   )();
 }

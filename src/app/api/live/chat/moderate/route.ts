@@ -13,6 +13,6 @@ export async function POST(request: NextRequest) {
     return jsonError("Données invalides", 400);
   }
 
-  moderateChatMessage(messageId, status);
+  await moderateChatMessage(messageId, status);
   return jsonSuccess();
 }

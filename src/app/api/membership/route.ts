@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const parsed = parseOrBadRequest(membershipSchema, body, "Champs obligatoires manquants");
     if (!parsed.ok) return parsed.response;
 
-    submitMembership(parsed.data);
+    await submitMembership(parsed.data);
     return jsonSuccess();
   } catch (err) {
     return handleDomainError(err);

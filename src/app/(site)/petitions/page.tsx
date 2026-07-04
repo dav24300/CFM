@@ -6,7 +6,7 @@ import { getTranslations } from "@/lib/i18n-server";
 export const metadata: Metadata = { title: "Pétitions" };
 
 export default async function PetitionsPage() {
-  const petitions = getActivePetitions();
+  const petitions = await getActivePetitions();
   const { t } = await getTranslations();
 
   return (

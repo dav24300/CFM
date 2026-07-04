@@ -20,11 +20,11 @@ export async function PATCH(
   const userId = parseInt(id, 10);
 
   if (parsed.data.action === "activate") {
-    const user = activateUser(userId);
+    const user = await activateUser(userId);
     if (!user) return jsonNotFound("Utilisateur introuvable");
     return jsonSuccess();
   }
 
-  suspendUser(userId);
+  await suspendUser(userId);
   return jsonSuccess();
 }

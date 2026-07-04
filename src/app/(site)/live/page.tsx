@@ -16,8 +16,8 @@ export async function generateMetadata() {
 
 export default async function LiveListPage() {
   const { t } = await getTranslations();
-  const events = getLiveEvents();
-  const active = getActiveLiveEvent();
+  const events = await getLiveEvents();
+  const active = await getActiveLiveEvent();
   const heroThumb = await getResolvedLiveThumb(active?.thumbnail);
   const eventThumbs = await Promise.all(
     events.map((ev) => getResolvedLiveThumb(ev.thumbnail))

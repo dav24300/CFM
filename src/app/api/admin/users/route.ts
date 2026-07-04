@@ -6,7 +6,7 @@ export async function GET() {
   const auth = await requireAdminRole();
   if (!auth.ok) return auth.response;
 
-  const users = getAllUsers().map((u) => {
+  const users = (await getAllUsers()).map((u) => {
     const { password_hash: _ignored, ...rest } = u;
     return rest;
   });

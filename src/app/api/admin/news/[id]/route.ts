@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { adminDelete, getAdminData } from "@/lib/db";
-import { updateStore } from "@/lib/store";
+import { updateStoreAsync } from "@/lib/store";
+import { invalidateContentCache } from "@/infrastructure/cache/invalidate";
 import { jsonData, jsonError, jsonNotFound, jsonSuccess } from "@/lib/api-response";
 import { requireAdminAccess } from "@/lib/admin-rest";
 import { parseOrBadRequest } from "@/lib/validators";
@@ -15,7 +16,8 @@ export async function GET(
 
   const { id } = await params;
   const newsId = parseInt(id, 10);
-  const item = getAdminData().news.find((n) => n.id === newsId);
+  const { news } = await getAdminData();
+  const item = news.find((n) => n.id === newsId);
   if (!item) return jsonNotFound("Actualité introuvable");
   return jsonData({ item });
 }
@@ -35,7 +37,7 @@ export async function PATCH(
   const newsId = parseInt(id, 10);
   let found = false;
 
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     const item = store.news.find((n) => n.id === newsId);
     if (!item) return;
     found = true;
@@ -49,6 +51,7 @@ export async function PATCH(
   });
 
   if (!found) return jsonNotFound("Actualité introuvable");
+  invalidateContentCache("news");
   return jsonSuccess();
 }
 
@@ -62,7 +65,7 @@ export async function DELETE(
   const { id } = await params;
   const newsId = parseInt(id, 10);
   try {
-    adminDelete("news", newsId);
+    await adminDelete("news", newsId);
     return jsonSuccess();
   } catch {
     return jsonError("Erreur serveur", 500);

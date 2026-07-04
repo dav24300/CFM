@@ -1,8 +1,8 @@
 import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import {
-  getStore,
-  updateStore,
+  getStoreAsync,
+  updateStoreAsync,
   nextId,
 } from "@/infrastructure/persistence/store-access";
 import { domainError } from "@/domain/errors/domain-error";
@@ -11,11 +11,11 @@ import type { PasswordResetToken } from "@/domain/entities/v2";
 const TOKEN_BYTES = 32;
 const EXPIRY_HOURS = 1;
 
-export function createPasswordResetToken(userId: number): string {
+export async function createPasswordResetToken(userId: number): Promise<string> {
   const token = randomBytes(TOKEN_BYTES).toString("hex");
   const expiresAt = new Date(Date.now() + EXPIRY_HOURS * 60 * 60 * 1000).toISOString();
 
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     store.password_reset_tokens = store.password_reset_tokens.filter(
       (t) => t.user_id !== userId || t.used === 1
     );
@@ -32,8 +32,10 @@ export function createPasswordResetToken(userId: number): string {
   return token;
 }
 
-export function getValidResetToken(token: string): PasswordResetToken | null {
-  const store = getStore();
+export async function getValidResetToken(
+  token: string
+): Promise<PasswordResetToken | null> {
+  const store = await getStoreAsync();
   const entry = store.password_reset_tokens.find(
     (t) => t.token === token && t.used === 0
   );
@@ -48,11 +50,11 @@ export async function resetPasswordWithToken(
 ): Promise<void> {
   if (newPassword.length < 8) throw domainError("PASSWORD_TOO_SHORT");
 
-  const entry = getValidResetToken(token);
+  const entry = await getValidResetToken(token);
   if (!entry) throw domainError("INVALID_TOKEN");
 
   const hash = await bcrypt.hash(newPassword, 10);
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     const user = store.users.find((u) => u.id === entry.user_id);
     if (!user) throw domainError("USER_NOT_FOUND");
     user.password_hash = hash;

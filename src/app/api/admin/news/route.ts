@@ -8,7 +8,7 @@ import { adminNewsCreateSchema } from "@/lib/validators/admin-api";
 export async function GET() {
   const auth = await requireAdminRole();
   if (!auth.ok) return auth.response;
-  const { news } = getAdminData();
+  const { news } = await getAdminData();
   return jsonData({ news });
 }
 
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   if (!parsed.ok) return parsed.response;
 
   try {
-    adminCreate("news", parsed.data as Record<string, string>);
+    await adminCreate("news", parsed.data as Record<string, string>);
     return jsonSuccess();
   } catch {
     return jsonError("Erreur serveur", 500);

@@ -218,6 +218,33 @@ Checklist complète : [`docs/vps-media-deploy-checklist.md`](vps-media-deploy-ch
 | `database: degraded` | Vérifier `DATABASE_URL` pooler (port 6543) |
 | Images Supabase non affichées | `remotePatterns` dans [`next.config.ts`](../next.config.ts) |
 | Build timeout upload | `maxDuration: 120` sur route media ([`vercel.json`](../vercel.json)) |
+| Admin OK mais site inchangé | Vérifier `DATABASE_URL` pooler ; redéployer après changement env |
+| Modifications admin perdues au refresh | PostgreSQL non connecté — `/api/health` doit retourner `database: ok` |
+
+---
+
+## Persistance runtime (admin ↔ site public)
+
+Quand `DATABASE_URL` est défini sur Vercel :
+
+- **Lecture/écriture** passent par `PostgresStoreAdapter` → Supabase PostgreSQL (tables normalisées + `app_state`)
+- **Sans** `DATABASE_URL` (dev local) : `JsonStoreAdapter` → `data/store.json`
+- **Cache public** : `unstable_cache` (TTL `CFM_CONTENT_CACHE_TTL` / `CFM_MEDIA_CACHE_TTL`, défaut 300 s) ; invalidé par tag après chaque mutation admin
+- **Uploads** : Supabase Storage (`media-uploads`) ; métadonnées dans `site_settings` en PostgreSQL
+
+Scripts utiles :
+
+```bash
+DATABASE_URL="..." npm run bootstrap:pg   # schéma + migration seed (une fois)
+npm run typecheck && npm test && npm run build
+```
+
+Vérification post-déploiement :
+
+1. `/api/health` → `database: ok`
+2. Créer une actu admin → visible sur `/` sous ~30 s
+3. Table `news` dans Supabase Dashboard mise à jour
+4. Recharger l’admin (nouvelle lambda) → données toujours présentes
 
 ---
 

@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import {
-  getStore,
-  updateStore,
+  getStoreAsync,
+  updateStoreAsync,
   nextId,
 } from "@/infrastructure/persistence/store-access";
 import { domainError } from "@/domain/errors/domain-error";
@@ -15,12 +15,14 @@ import type {
 
 const SALT_ROUNDS = 10;
 
-export function getUserById(id: number): User | undefined {
-  return getStore().users.find((u) => u.id === id);
+export async function getUserById(id: number): Promise<User | undefined> {
+  const store = await getStoreAsync();
+  return store.users.find((u) => u.id === id);
 }
 
-export function getUserByEmail(email: string): User | undefined {
-  return getStore().users.find(
+export async function getUserByEmail(email: string): Promise<User | undefined> {
+  const store = await getStoreAsync();
+  return store.users.find(
     (u) => u.email.toLowerCase() === email.trim().toLowerCase()
   );
 }
@@ -38,7 +40,7 @@ export async function registerUser(data: {
   skills?: string;
 }): Promise<User> {
   if (data.password.length < 8) throw domainError("PASSWORD_TOO_SHORT");
-  if (getUserByEmail(data.email)) throw domainError("EMAIL_EXISTS");
+  if (await getUserByEmail(data.email)) throw domainError("EMAIL_EXISTS");
   if (data.membership_type === "famille" && !data.military_link) {
     throw domainError("MILITARY_LINK_REQUIRED");
   }
@@ -47,7 +49,7 @@ export async function registerUser(data: {
   const hash = await bcrypt.hash(data.password, SALT_ROUNDS);
   let created!: User;
 
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     if (!store.users) store.users = [];
     created = {
       id: nextId(store),
@@ -76,15 +78,15 @@ export async function verifyUserPassword(
   email: string,
   password: string
 ): Promise<User | null> {
-  const user = getUserByEmail(email);
+  const user = await getUserByEmail(email);
   if (!user) return null;
   const ok = await bcrypt.compare(password, user.password_hash);
   return ok ? user : null;
 }
 
-export function activateUser(userId: number): User | undefined {
+export async function activateUser(userId: number): Promise<User | undefined> {
   let user: User | undefined;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     const u = store.users?.find((x) => x.id === userId);
     if (u) {
       u.status = "active";
@@ -95,12 +97,12 @@ export function activateUser(userId: number): User | undefined {
   return user;
 }
 
-export function updateMemberProfile(
+export async function updateMemberProfile(
   userId: number,
   data: { first_name?: string; last_name?: string; phone?: string; province?: string }
-): User | undefined {
+): Promise<User | undefined> {
   let updated: User | undefined;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     const u = store.users?.find((x) => x.id === userId);
     if (!u) return;
     if (data.first_name) u.first_name = data.first_name.trim();
@@ -112,21 +114,22 @@ export function updateMemberProfile(
   return updated;
 }
 
-export function suspendUser(userId: number): void {
-  updateStore((store) => {
+export async function suspendUser(userId: number): Promise<void> {
+  await updateStoreAsync((store) => {
     const user = store.users?.find((u) => u.id === userId);
     if (user) user.status = "suspended";
   });
 }
 
-export function getAllUsers(): User[] {
-  return [...getStore().users].reverse();
+export async function getAllUsers(): Promise<User[]> {
+  const store = await getStoreAsync();
+  return [...store.users].reverse();
 }
 
-export function getHelpRequestsForUser(userId: number) {
-  const user = getUserById(userId);
+export async function getHelpRequestsForUser(userId: number) {
+  const user = await getUserById(userId);
   if (!user) return [];
-  const store = getStore();
+  const store = await getStoreAsync();
   return store.help_requests
     .filter((h) => {
       const linkedUserId = h.user_id as number | undefined;
@@ -141,14 +144,14 @@ export function getHelpRequestsForUser(userId: number) {
     .map((h) => decryptHelpRequest(h));
 }
 
-export function addHelpRequestUpdate(data: {
+export async function addHelpRequestUpdate(data: {
   help_request_id: number;
   status: string;
   note: string;
   updated_by: string;
-}): HelpRequestUpdate {
+}): Promise<HelpRequestUpdate> {
   let created!: HelpRequestUpdate;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     created = {
       id: nextId(store),
       help_request_id: data.help_request_id,
@@ -165,8 +168,9 @@ export function addHelpRequestUpdate(data: {
   return created!;
 }
 
-export function getHelpRequestUpdates(helpRequestId: number): HelpRequestUpdate[] {
-  return getStore().help_request_updates.filter(
-    (u) => u.help_request_id === helpRequestId
-  );
+export async function getHelpRequestUpdates(
+  helpRequestId: number
+): Promise<HelpRequestUpdate[]> {
+  const store = await getStoreAsync();
+  return store.help_request_updates.filter((u) => u.help_request_id === helpRequestId);
 }

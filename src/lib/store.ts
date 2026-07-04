@@ -24,9 +24,21 @@ export type {
 } from "@/domain/entities";
 
 export {
+  getStoreAsync,
+  updateStoreAsync,
   getStore,
   updateStore,
   nextId,
+} from "@/infrastructure/persistence/store-access";
+
+export {
   slugify,
-  hydrateStoreFromPostgres,
-} from "@/infrastructure/persistence/store.impl";
+  loadSeedStore,
+} from "@/infrastructure/persistence/store-seed";
+
+export { bootstrapPostgresStore } from "@/infrastructure/persistence/postgres-store.adapter";
+
+/** @deprecated No-op — le cache PG est géré par postgresStoreAdapter */
+export function hydrateStoreFromPostgres(): void {
+  // conservé pour compatibilité imports existants
+}

@@ -1,23 +1,25 @@
 import {
-  getStore,
-  updateStore,
+  getStoreAsync,
+  updateStoreAsync,
   nextId,
 } from "@/infrastructure/persistence/store-access";
+import { invalidatePartnersCache } from "@/infrastructure/cache/invalidate";
 import type { Partner } from "@/domain/entities/content";
 
-export function getAllPartners(): Partner[] {
-  return [...getStore().partners].sort((a, b) => a.sort_order - b.sort_order);
+export async function getAllPartners(): Promise<Partner[]> {
+  const store = await getStoreAsync();
+  return [...store.partners].sort((a, b) => a.sort_order - b.sort_order);
 }
 
-export function adminCreatePartner(data: {
+export async function adminCreatePartner(data: {
   name: string;
   logo_url?: string;
   website?: string;
   description?: string;
   sort_order?: number;
-}): Partner {
+}): Promise<Partner> {
   let created!: Partner;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     created = {
       id: nextId(store),
       name: data.name,
@@ -28,15 +30,16 @@ export function adminCreatePartner(data: {
     };
     store.partners.push(created);
   });
+  invalidatePartnersCache();
   return created!;
 }
 
-export function adminUpdatePartner(
+export async function adminUpdatePartner(
   id: number,
   data: Partial<Omit<Partner, "id">>
-): boolean {
+): Promise<boolean> {
   let found = false;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     const p = store.partners.find((x) => x.id === id);
     if (!p) return;
     found = true;
@@ -46,11 +49,13 @@ export function adminUpdatePartner(
     if (data.description !== undefined) p.description = data.description;
     if (data.sort_order !== undefined) p.sort_order = data.sort_order;
   });
+  if (found) invalidatePartnersCache();
   return found;
 }
 
-export function adminDeletePartner(id: number): void {
-  updateStore((store) => {
+export async function adminDeletePartner(id: number): Promise<void> {
+  await updateStoreAsync((store) => {
     store.partners = store.partners.filter((p) => p.id !== id);
   });
+  invalidatePartnersCache();
 }

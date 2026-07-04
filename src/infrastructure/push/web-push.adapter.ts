@@ -1,7 +1,7 @@
 import webpush from "web-push";
 import {
-  getStore,
-  updateStore,
+  getStoreAsync,
+  updateStoreAsync,
   nextId,
 } from "@/infrastructure/persistence/store-access";
 import type { PushSubscription, PushTopic } from "@/domain/entities/v3";
@@ -21,13 +21,13 @@ function configureWebPush(): void {
   );
 }
 
-export function savePushSubscription(data: {
+export async function savePushSubscription(data: {
   endpoint: string;
   p256dh: string;
   auth: string;
   topics: PushTopic[];
-}): void {
-  updateStore((store) => {
+}): Promise<void> {
+  await updateStoreAsync((store) => {
     if (!store.push_subscriptions) store.push_subscriptions = [];
     const idx = store.push_subscriptions.findIndex(
       (s) => s.endpoint === data.endpoint
@@ -45,16 +45,17 @@ export function savePushSubscription(data: {
   });
 }
 
-export function removePushSubscription(endpoint: string): void {
-  updateStore((store) => {
+export async function removePushSubscription(endpoint: string): Promise<void> {
+  await updateStoreAsync((store) => {
     store.push_subscriptions = store.push_subscriptions.filter(
       (s) => s.endpoint !== endpoint
     );
   });
 }
 
-export function getPushSubscriberCount(topic?: PushTopic): number {
-  const subs = getStore().push_subscriptions || [];
+export async function getPushSubscriberCount(topic?: PushTopic): Promise<number> {
+  const store = await getStoreAsync();
+  const subs = store.push_subscriptions || [];
   if (!topic) return subs.length;
   return subs.filter((s) => s.topics.includes(topic)).length;
 }
@@ -63,7 +64,8 @@ export async function sendPushToTopic(
   topic: PushTopic,
   payload: { title: string; body: string; url?: string }
 ): Promise<{ sent: number; failed: number }> {
-  const subs = (getStore().push_subscriptions || []).filter((s) =>
+  const store = await getStoreAsync();
+  const subs = (store.push_subscriptions || []).filter((s) =>
     s.topics.includes(topic)
   );
 
@@ -89,7 +91,7 @@ export async function sendPushToTopic(
       sent++;
     } catch {
       failed++;
-      removePushSubscription(sub.endpoint);
+      await removePushSubscription(sub.endpoint);
     }
   }
   return { sent, failed };

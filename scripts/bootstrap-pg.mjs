@@ -39,16 +39,18 @@ async function main() {
 
   if (!normalized) {
     console.log("→ Migration store.json → PostgreSQL…");
-    execSync("node scripts/migrate-json-to-pg.mjs", {
+    execSync("npx tsx scripts/migrate-json-to-pg.mjs", {
       stdio: "inherit",
       env: process.env,
+      shell: true,
     });
   }
 
   console.log("→ Hydratation store.json depuis PostgreSQL…");
-  execSync("node scripts/hydrate-from-postgres.mjs", {
+  execSync("npx tsx scripts/hydrate-from-postgres.mjs", {
     stdio: "inherit",
     env: process.env,
+    shell: true,
   });
 
   console.log("✓ Bootstrap PostgreSQL terminé");

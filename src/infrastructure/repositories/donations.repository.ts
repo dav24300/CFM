@@ -1,11 +1,11 @@
 import {
-  getStore,
-  updateStore,
+  getStoreAsync,
+  updateStoreAsync,
   nextId,
 } from "@/infrastructure/persistence/store-access";
 import type { Donation } from "@/domain/entities/v2";
 
-export function createDonation(data: {
+export async function createDonation(data: {
   user_id?: number;
   amount: number;
   currency: string;
@@ -13,9 +13,9 @@ export function createDonation(data: {
   phone: string;
   donor_name?: string;
   donor_email?: string;
-}): Donation {
+}): Promise<Donation> {
   let created!: Donation;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     created = {
       id: nextId(store),
       user_id: data.user_id || null,
@@ -34,12 +34,12 @@ export function createDonation(data: {
   return created!;
 }
 
-export function completeDonation(
+export async function completeDonation(
   donationId: number,
   transactionId: string
-): Donation | undefined {
+): Promise<Donation | undefined> {
   let result: Donation | undefined;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     const d = store.donations.find((x) => x.id === donationId);
     if (d) {
       d.status = "completed";
@@ -50,20 +50,22 @@ export function completeDonation(
   return result;
 }
 
-export function getDonationsForUser(userId: number): Donation[] {
-  return getStore().donations.filter((d) => d.user_id === userId);
+export async function getDonationsForUser(userId: number): Promise<Donation[]> {
+  const store = await getStoreAsync();
+  return store.donations.filter((d) => d.user_id === userId);
 }
 
-export function getAllDonations(): Donation[] {
-  return [...getStore().donations].reverse();
+export async function getAllDonations(): Promise<Donation[]> {
+  const store = await getStoreAsync();
+  return [...store.donations].reverse();
 }
 
-export function adminUpdateDonation(
+export async function adminUpdateDonation(
   donationId: number,
   patch: { status?: Donation["status"]; transaction_id?: string | null }
-): Donation | undefined {
+): Promise<Donation | undefined> {
   let result: Donation | undefined;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     const d = store.donations.find((x) => x.id === donationId);
     if (!d) return;
     if (patch.status !== undefined) d.status = patch.status as Donation["status"];

@@ -1,5 +1,5 @@
 import "server-only";
-import { getStore } from "@/infrastructure/persistence/store-access";
+import { getStoreAsync } from "@/infrastructure/persistence/store-access";
 import { MEDIA, type SiteMediaSettings } from "@/lib/media";
 import { pngToSvgFallback } from "@/infrastructure/media/media-resolver";
 import {
@@ -15,16 +15,19 @@ function pick(publicPath: string, svgFallback: string): string {
   return publicFileExists(publicPath) ? publicPath : svgFallback;
 }
 
-function getSettings(): Record<string, string> {
-  return getStore().site_settings;
+async function getSettings(): Promise<Record<string, string>> {
+  const store = await getStoreAsync();
+  return store.site_settings;
 }
 
-export function getSiteMedia(): SiteMediaSettings & {
-  heroImageMobile: string;
-  heroImageAlt: string;
-  missionImageAlt: string;
-} {
-  const settings = getSettings();
+export async function getSiteMedia(): Promise<
+  SiteMediaSettings & {
+    heroImageMobile: string;
+    heroImageAlt: string;
+    missionImageAlt: string;
+  }
+> {
+  const settings = await getSettings();
   const heroPng = settingOrDefault(settings, "hero_image", MEDIA.hero.image);
   const heroMobile = settingOrDefault(settings, "hero_image_mobile", MEDIA.hero.imageMobile);
   const missionPng = settingOrDefault(settings, "mission_image", MEDIA.mission);
@@ -50,8 +53,8 @@ export function resolveMediaPath(publicPath: string): string {
   return pick(publicPath, pngToSvgFallback(publicPath));
 }
 
-export function getResolvedGallery() {
-  const settings = getSettings();
+export async function getResolvedGallery() {
+  const settings = await getSettings();
   const gallery = settings.fikin_gallery
     ? parseGallery(settings)
     : MEDIA.fikinGallery.map((item, i) => ({ ...item, sort: i + 1 }));
@@ -62,14 +65,14 @@ export function getResolvedGallery() {
   }));
 }
 
-export function getResolvedAxisImage(slug: string): string {
-  const axes = parseAxisImages(getSettings());
+export async function getResolvedAxisImage(slug: string): Promise<string> {
+  const axes = parseAxisImages(await getSettings());
   const path = axes[slug] || (MEDIA.axes as Record<string, string>)[slug] || MEDIA.mission;
   return resolveMediaPath(path);
 }
 
-export function getResolvedAboutMedia() {
-  const settings = getSettings();
+export async function getResolvedAboutMedia() {
+  const settings = await getSettings();
   return {
     founder: resolveMediaPath(
       settingOrDefault(settings, DEFAULT_SETTING_KEYS.aboutFounder, MEDIA.about.founder)
@@ -80,8 +83,8 @@ export function getResolvedAboutMedia() {
   };
 }
 
-export function getResolvedLiveThumb(thumbnail?: string | null): string {
-  const settings = getSettings();
+export async function getResolvedLiveThumb(thumbnail?: string | null): Promise<string> {
+  const settings = await getSettings();
   const fallback = settingOrDefault(
     settings,
     DEFAULT_SETTING_KEYS.live,
@@ -90,19 +93,19 @@ export function getResolvedLiveThumb(thumbnail?: string | null): string {
   return resolveMediaPath(thumbnail || fallback);
 }
 
-export function getResolvedNewsCover(coverImage?: string | null): string {
-  const settings = getSettings();
+export async function getResolvedNewsCover(coverImage?: string | null): Promise<string> {
+  const settings = await getSettings();
   const fallback = settingOrDefault(settings, DEFAULT_SETTING_KEYS.news, MEDIA.news.default);
   return resolveMediaPath(coverImage || fallback);
 }
 
-export function getResolvedTestimonialPhoto(
+export async function getResolvedTestimonialPhoto(
   anonymous: boolean,
   index: number,
   photo?: string | null
-): string {
+): Promise<string> {
   if (photo) return resolveMediaPath(photo);
-  const settings = getSettings();
+  const settings = await getSettings();
   if (anonymous) {
     return resolveMediaPath(
       settingOrDefault(
@@ -123,8 +126,8 @@ export function getResolvedTestimonialPhoto(
   return resolveMediaPath(settingOrDefault(settings, key, fallback));
 }
 
-export function getPressKitPath(): string {
-  const settings = getSettings();
+export async function getPressKitPath(): Promise<string> {
+  const settings = await getSettings();
   return settingOrDefault(
     settings,
     DEFAULT_SETTING_KEYS.pressKit,
@@ -132,21 +135,20 @@ export function getPressKitPath(): string {
   );
 }
 
-export function getOgImagePath(): string {
-  const settings = getSettings();
+export async function getOgImagePath(): Promise<string> {
+  const settings = await getSettings();
   return resolveMediaPath(
     settingOrDefault(settings, DEFAULT_SETTING_KEYS.ogImage, DEFAULT_FALLBACKS.og_image)
   );
 }
 
-export function getFaviconPath(): string {
-  const settings = getSettings();
+export async function getFaviconPath(): Promise<string> {
+  const settings = await getSettings();
   return settingOrDefault(settings, DEFAULT_SETTING_KEYS.favicon, "/icon.svg");
 }
 
-/** Hero image for /actions — uses FIKIN gallery item 4 or first */
-export function getActionsHeroImage(): string {
-  const gallery = getResolvedGallery();
+export async function getActionsHeroImage(): Promise<string> {
+  const gallery = await getResolvedGallery();
   const item = gallery[3] ?? gallery[0];
   return item?.src ?? resolveMediaPath(MEDIA.mission);
 }

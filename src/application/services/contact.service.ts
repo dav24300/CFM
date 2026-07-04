@@ -11,21 +11,21 @@ import { getCurrentMember } from "@/infrastructure/auth/member-auth";
 import { encryptSensitive } from "@/infrastructure/encryption/aes.adapter";
 import { domainError } from "@/domain/errors/domain-error";
 
-export function submitContact(data: {
+export async function submitContact(data: {
   name: string;
   email: string;
   subject?: string;
   message: string;
   type?: string;
-}): void {
-  addContactMessage(data);
+}): Promise<void> {
+  await addContactMessage(data);
 }
 
-export function subscribeNewsletter(email: string): void {
-  addNewsletter(email);
+export async function subscribeNewsletter(email: string): Promise<void> {
+  await addNewsletter(email);
 }
 
-export function submitMembership(data: {
+export async function submitMembership(data: {
   type: string;
   first_name: string;
   last_name: string;
@@ -36,8 +36,8 @@ export function submitMembership(data: {
   parent_military_name?: string;
   skills?: string;
   message?: string;
-}): void {
-  addMembership(data);
+}): Promise<void> {
+  await addMembership(data);
 }
 
 export async function submitHelpRequest(body: Record<string, unknown>): Promise<void> {
@@ -72,7 +72,7 @@ export async function submitHelpRequest(body: Record<string, unknown>): Promise<
 
   const member = await getCurrentMember();
 
-  addHelpRequest({
+  await addHelpRequest({
     first_name,
     last_name,
     email: (body.email as string) || null,

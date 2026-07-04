@@ -1,5 +1,9 @@
 import { cookies } from "next/headers";
 import { getDictionary, type Locale } from "@/lib/i18n";
+import {
+  applyI18nOverrides,
+  getI18nOverridesForLocale,
+} from "@/lib/i18n-overrides.server";
 
 export async function getLocale(): Promise<Locale> {
   const cookieStore = await cookies();
@@ -10,5 +14,7 @@ export async function getLocale(): Promise<Locale> {
 
 export async function getTranslations() {
   const locale = await getLocale();
-  return { locale, t: getDictionary(locale) };
+  const base = getDictionary(locale);
+  const overrides = await getI18nOverridesForLocale(locale);
+  return { locale, t: applyI18nOverrides(base, overrides) };
 }

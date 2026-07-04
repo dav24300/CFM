@@ -10,8 +10,11 @@ vi.mock("bcryptjs", () => ({
 }));
 
 vi.mock("@/infrastructure/persistence/store-access", () => ({
-  getStore: vi.fn(() => mockStore),
-  updateStore: vi.fn((mutator: (store: any) => void) => mutator(mockStore)),
+  getStoreAsync: vi.fn(() => Promise.resolve(mockStore)),
+  updateStoreAsync: vi.fn((mutator: (store: any) => void) => {
+    mutator(mockStore);
+    return Promise.resolve(mockStore);
+  }),
   nextId: vi.fn(() => 42),
 }));
 
@@ -52,15 +55,15 @@ describe("users.repository", () => {
     };
   });
 
-  it("activates user and sets verified date", () => {
-    const activated = activateUser(1);
+  it("activates user and sets verified date", async () => {
+    const activated = await activateUser(1);
     expect(activated?.status).toBe("active");
     expect(activated?.verified_at).toBeTruthy();
     expect(mockStore.users[0].status).toBe("active");
   });
 
-  it("creates help request update and mirrors status to request", () => {
-    const update = addHelpRequestUpdate({
+  it("creates help request update and mirrors status to request", async () => {
+    const update = await addHelpRequestUpdate({
       help_request_id: 100,
       status: "processing",
       note: "Contacted family",
@@ -75,7 +78,7 @@ describe("users.repository", () => {
       updated_by: "admin",
     });
     expect(mockStore.help_requests[0].status).toBe("processing");
-    expect(getHelpRequestUpdates(100)).toHaveLength(1);
+    expect(await getHelpRequestUpdates(100)).toHaveLength(1);
   });
 
   it("registers user and validates credential flow", async () => {
@@ -88,26 +91,26 @@ describe("users.repository", () => {
       membership_type: "soutien",
     });
     expect(created.email).toBe("new@cfm.org");
-    expect(getUserByEmail("NEW@CFM.ORG")?.id).toBe(created.id);
+    expect((await getUserByEmail("NEW@CFM.ORG"))?.id).toBe(created.id);
     const ok = await verifyUserPassword("new@cfm.org", "longsecret");
     expect(ok?.id).toBe(created.id);
   });
 
-  it("updates profile, suspends user and exposes user collections", () => {
-    const updated = updateMemberProfile(1, {
+  it("updates profile, suspends user and exposes user collections", async () => {
+    const updated = await updateMemberProfile(1, {
       first_name: "Jane",
       phone: "0900",
     });
     expect(updated?.first_name).toBe("Jane");
     expect(updated?.phone).toBe("0900");
 
-    suspendUser(1);
+    await suspendUser(1);
     expect(mockStore.users[0].status).toBe("suspended");
-    expect(getAllUsers()).toHaveLength(1);
+    expect(await getAllUsers()).toHaveLength(1);
   });
 
-  it("returns help requests resolved for user identities", () => {
-    const list = getHelpRequestsForUser(1);
+  it("returns help requests resolved for user identities", async () => {
+    const list = await getHelpRequestsForUser(1);
     expect(list).toHaveLength(1);
   });
 });

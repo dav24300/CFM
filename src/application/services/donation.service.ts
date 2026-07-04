@@ -29,7 +29,7 @@ export async function processDonation(body: {
   donor_email?: string;
 }): Promise<DonationResult> {
   const member = await getCurrentMember();
-  const donation = createDonation({
+  const donation = await createDonation({
     user_id: member?.id,
     amount: parseFloat(String(body.amount)),
     currency: body.currency || "USD",
@@ -42,7 +42,7 @@ export async function processDonation(body: {
   const isDemo = process.env.MOBILE_MONEY_MODE !== "production";
 
   if (isDemo) {
-    const completed = completeDonation(
+    const completed = await completeDonation(
       donation.id,
       `DEMO-${Date.now()}-${donation.id}`
     );
@@ -86,7 +86,7 @@ export async function handleDonationWebhook(
   donationId: number,
   transactionId: string
 ): Promise<Donation | undefined> {
-  const completed = completeDonation(donationId, transactionId);
+  const completed = await completeDonation(donationId, transactionId);
   if (completed?.donor_email) {
     await sendDonationReceiptEmail({
       to: completed.donor_email,

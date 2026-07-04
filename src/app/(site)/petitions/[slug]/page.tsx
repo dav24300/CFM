@@ -9,13 +9,13 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const p = getPetitionBySlug(slug);
+  const p = await getPetitionBySlug(slug);
   return { title: p?.title || "Pétition" };
 }
 
 export default async function PetitionDetailPage({ params }: Props) {
   const { slug } = await params;
-  const petition = getPetitionBySlug(slug);
+  const petition = await getPetitionBySlug(slug);
   if (!petition) notFound();
 
   const { t } = await getTranslations();

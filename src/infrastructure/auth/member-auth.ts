@@ -41,7 +41,7 @@ export async function getMemberSessionUserId(): Promise<number | null> {
 export async function getLoggedInMember(): Promise<PublicUser | null> {
   const userId = await getMemberSessionUserId();
   if (!userId) return null;
-  const user = getUserById(userId);
+  const user = await getUserById(userId);
   if (!user || user.status === "suspended") return null;
   return toPublicUser(user);
 }

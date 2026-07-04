@@ -8,8 +8,11 @@ const mockedUsers = vi.hoisted(() => ({
 }));
 
 vi.mock("@/infrastructure/persistence/store-access", () => ({
-  getStore: vi.fn(() => mockStore),
-  updateStore: vi.fn((mutator: (store: any) => void) => mutator(mockStore)),
+  getStoreAsync: vi.fn(() => Promise.resolve(mockStore)),
+  updateStoreAsync: vi.fn((mutator: (store: any) => void) => {
+    mutator(mockStore);
+    return Promise.resolve(mockStore);
+  }),
   nextId: vi.fn(() => {
     mockStore._counters.global += 1;
     return mockStore._counters.global;
@@ -74,8 +77,8 @@ describe("domain repositories", () => {
     mockedUsers.getUserById.mockReset();
   });
 
-  it("handles donations lifecycle", () => {
-    const d = createDonation({
+  it("handles donations lifecycle", async () => {
+    const d = await createDonation({
       amount: 50,
       currency: "USD",
       provider: "orange",
@@ -83,89 +86,89 @@ describe("domain repositories", () => {
       user_id: 7,
     });
     expect(d.status).toBe("pending");
-    const completed = completeDonation(d.id, "tx-1");
+    const completed = await completeDonation(d.id, "tx-1");
     expect(completed?.status).toBe("completed");
-    expect(getDonationsForUser(7)).toHaveLength(1);
+    expect(await getDonationsForUser(7)).toHaveLength(1);
   });
 
-  it("creates and signs petitions with duplicate protection", () => {
-    expect(getActivePetitions()).toHaveLength(1);
-    const created = createPetition({
+  it("creates and signs petitions with duplicate protection", async () => {
+    expect(await getActivePetitions()).toHaveLength(1);
+    const created = await createPetition({
       title: "Protection Familles",
       description: "Desc",
       goal: 1000,
     });
     expect(created.slug).toBe("protection-familles");
 
-    signPetition({
+    await signPetition({
       petition_id: 1,
       email: "a@b.cd",
       name: "A B",
     });
-    expect(getPetitionSignatures(1)).toHaveLength(1);
-    expect(() =>
+    expect(await getPetitionSignatures(1)).toHaveLength(1);
+    await expect(
       signPetition({
         petition_id: 1,
         email: "A@B.CD",
         name: "Again",
       })
-    ).toThrow("ALREADY_SIGNED");
+    ).rejects.toThrow("ALREADY_SIGNED");
   });
 
-  it("creates family link and supports approval transitions", () => {
+  it("creates family link and supports approval transitions", async () => {
     mockedUsers.getUserByEmail.mockReturnValueOnce({ id: 90 });
     mockedUsers.getUserById.mockReturnValueOnce({ id: 10, membership_type: "famille" });
-    const link = requestFamilyLinkByParent({
+    const link = await requestFamilyLinkByParent({
       parent_user_id: 10,
       child_email: "kid@cfm.org",
       relationship: "enfant",
     });
     expect(link.status).toBe("pending_child");
 
-    respondFamilyLink(link.id, 90, true);
+    await respondFamilyLink(link.id, 90, true);
     expect(mockStore.family_links[0].status).toBe("approved");
 
-    adminApproveFamilyLink(link.id);
+    await adminApproveFamilyLink(link.id);
     expect(mockStore.family_links[0].status).toBe("approved");
   });
 
-  it("covers child-initiated links and forbidden responses", () => {
+  it("covers child-initiated links and forbidden responses", async () => {
     mockedUsers.getUserByEmail.mockReturnValueOnce({ id: 55 });
-    const childLink = requestFamilyLinkByChild({
+    const childLink = await requestFamilyLinkByChild({
       child_user_id: 77,
       parent_email: "parent@cfm.org",
       relationship: "parent",
     });
     expect(childLink.status).toBe("pending_parent");
 
-    expect(() => respondFamilyLink(childLink.id, 999, true)).toThrow("FORBIDDEN");
-    respondFamilyLink(childLink.id, 55, false);
+    await expect(respondFamilyLink(childLink.id, 999, true)).rejects.toThrow("FORBIDDEN");
+    await respondFamilyLink(childLink.id, 55, false);
     expect(mockStore.family_links[0].status).toBe("rejected");
   });
 
-  it("runs live flow: create, start, chat, poll, vote, viewers", () => {
-    const ev = createLiveEvent({ title: "Live FIKIN", description: "desc", chat_moderation: true });
+  it("runs live flow: create, start, chat, poll, vote, viewers", async () => {
+    const ev = await createLiveEvent({ title: "Live FIKIN", description: "desc", chat_moderation: true });
     expect(ev.slug).toBe("live-fikin");
 
-    setLiveEventStatus(ev.id, "live");
-    const chat = postChatMessage({
+    await setLiveEventStatus(ev.id, "live");
+    const chat = await postChatMessage({
       live_event_id: ev.id,
       author_name: "Alice",
       content: "hello all",
     });
     expect(chat.status).toBe("pending");
 
-    const poll = createLivePoll(ev.id, "Q?", ["Yes", "No"]);
-    voteLivePoll(poll.id, "opt-1", "ip-1");
-    expect(() => voteLivePoll(poll.id, "opt-1", "ip-1")).toThrow("ALREADY_VOTED");
+    const poll = await createLivePoll(ev.id, "Q?", ["Yes", "No"]);
+    await voteLivePoll(poll.id, "opt-1", "ip-1");
+    await expect(voteLivePoll(poll.id, "opt-1", "ip-1")).rejects.toThrow("ALREADY_VOTED");
 
-    incrementViewerCount(ev.id);
-    expect(getPendingChatCount(ev.id)).toBe(1);
+    await incrementViewerCount(ev.id);
+    expect(await getPendingChatCount(ev.id)).toBe(1);
   });
 
-  it("covers live event terminal status updates", () => {
-    const ev = createLiveEvent({ title: "Live 2", description: "desc" });
-    setLiveEventStatus(ev.id, "ended", "https://replay");
+  it("covers live event terminal status updates", async () => {
+    const ev = await createLiveEvent({ title: "Live 2", description: "desc" });
+    await setLiveEventStatus(ev.id, "ended", "https://replay");
     const ended = mockStore.live_events.find((x: any) => x.id === ev.id);
     expect(ended.ended_at).toBeTruthy();
     expect(ended.replay_url).toBe("https://replay");

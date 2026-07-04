@@ -3,9 +3,20 @@
  * Hydrate data/store.json depuis PostgreSQL (tables normalisées ou app_state)
  * Usage: DATABASE_URL=... node scripts/hydrate-from-postgres.mjs
  */
+import { createRequire } from "module";
 import fs from "fs";
 import path from "path";
 import pg from "pg";
+
+const require = createRequire(import.meta.url);
+const Module = require("module");
+const resolveFilename = Module._resolveFilename;
+Module._resolveFilename = function (request, parent, isMain, options) {
+  if (request === "server-only") {
+    return require.resolve("./empty.cjs");
+  }
+  return resolveFilename.call(this, request, parent, isMain, options);
+};
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -18,7 +29,7 @@ const pool = new pg.Pool({ connectionString: databaseUrl });
 async function main() {
   const client = await pool.connect();
   try {
-    const { loadStoreFromTables } = await import("../src/lib/persistence/pg-sync.ts");
+    const { loadStoreFromTables } = await import("../src/infrastructure/persistence/pg-sync.ts");
     let store = await loadStoreFromTables(client);
 
     if (!store) {

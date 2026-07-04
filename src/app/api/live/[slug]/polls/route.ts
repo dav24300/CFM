@@ -8,11 +8,11 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const event = getLiveEventBySlug(slug);
+  const event = await getLiveEventBySlug(slug);
   if (!event) {
     return jsonNotFound("Introuvable");
   }
-  return jsonData({ polls: getPollsForEvent(event.id) });
+  return jsonData({ polls: await getPollsForEvent(event.id) });
 }
 
 export async function POST(
@@ -24,7 +24,7 @@ export async function POST(
   }
 
   const { slug } = await params;
-  const event = getLiveEventBySlug(slug);
+  const event = await getLiveEventBySlug(slug);
   if (!event) {
     return jsonNotFound("Introuvable");
   }
@@ -34,6 +34,6 @@ export async function POST(
     return jsonError("Question et 2+ options requis", 400);
   }
 
-  const poll = createLivePoll(event.id, question, options);
+  const poll = await createLivePoll(event.id, question, options);
   return jsonData({ poll });
 }

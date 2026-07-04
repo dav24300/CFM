@@ -1,70 +1,79 @@
 import {
-  getStore,
-  updateStore,
+  getStoreAsync,
+  updateStoreAsync,
   nextId,
 } from "@/infrastructure/persistence/store-access";
-import { slugify } from "@/infrastructure/persistence/store.impl";
+import { slugify } from "@/infrastructure/persistence/store-seed";
+import { withStoreMutation } from "@/infrastructure/persistence/admin-mutation";
+import { invalidateLiveCache } from "@/infrastructure/cache/invalidate";
 import { domainError } from "@/domain/errors/domain-error";
 import { containsBadWord, sanitizeChatContent } from "@/infrastructure/live/moderation";
 import { compareIsoDesc } from "@/infrastructure/persistence/normalize-pg-row";
 import type { LiveEvent, LiveChatMessage, LivePoll } from "@/domain/entities/v3";
 
-export function getLiveEvents(): LiveEvent[] {
-  return [...getStore().live_events].sort((a, b) =>
+export async function getLiveEvents(): Promise<LiveEvent[]> {
+  const store = await getStoreAsync();
+  return [...store.live_events].sort((a, b) =>
     compareIsoDesc(a.created_at, b.created_at)
   );
 }
 
-export function getActiveLiveEvent(): LiveEvent | undefined {
-  return getLiveEvents().find((e) => e.status === "live");
+export async function getActiveLiveEvent(): Promise<LiveEvent | undefined> {
+  const events = await getLiveEvents();
+  return events.find((e) => e.status === "live");
 }
 
-export function getLiveEventBySlug(slug: string): LiveEvent | undefined {
-  return getStore().live_events.find((e) => e.slug === slug);
+export async function getLiveEventBySlug(slug: string): Promise<LiveEvent | undefined> {
+  const store = await getStoreAsync();
+  return store.live_events.find((e) => e.slug === slug);
 }
 
-export function createLiveEvent(data: {
+export async function createLiveEvent(data: {
   title: string;
   description: string;
   youtube_id?: string;
   stream_url?: string;
   chat_moderation?: boolean;
-}): LiveEvent {
+}): Promise<LiveEvent> {
   let created!: LiveEvent;
-  updateStore((store) => {
-    const baseSlug = slugify(data.title);
-    let slug = baseSlug;
-    let n = 1;
-    while (store.live_events.some((e) => e.slug === slug)) {
-      slug = `${baseSlug}-${n++}`;
-    }
-    created = {
-      id: nextId(store),
-      title: data.title,
-      slug,
-      description: data.description,
-      status: "scheduled",
-      youtube_id: data.youtube_id || null,
-      stream_url: data.stream_url || null,
-      replay_url: null,
-      chat_moderation: data.chat_moderation ? 1 : 0,
-      viewer_count: 0,
-      started_at: null,
-      ended_at: null,
-      created_at: new Date().toISOString(),
-    };
-    store.live_events.push(created);
-  });
+  await withStoreMutation(
+    (store) => {
+      const baseSlug = slugify(data.title);
+      let slug = baseSlug;
+      let n = 1;
+      while (store.live_events.some((e) => e.slug === slug)) {
+        slug = `${baseSlug}-${n++}`;
+      }
+      created = {
+        id: nextId(store),
+        title: data.title,
+        slug,
+        description: data.description,
+        status: "scheduled",
+        youtube_id: data.youtube_id || null,
+        stream_url: data.stream_url || null,
+        replay_url: null,
+        chat_moderation: data.chat_moderation ? 1 : 0,
+        viewer_count: 0,
+        started_at: null,
+        ended_at: null,
+        created_at: new Date().toISOString(),
+      };
+      store.live_events.push(created);
+    },
+    { invalidate: "none" }
+  );
+  invalidateLiveCache();
   return created!;
 }
 
-export function setLiveEventStatus(
+export async function setLiveEventStatus(
   eventId: number,
   status: LiveEvent["status"],
   replayUrl?: string
-): LiveEvent | undefined {
+): Promise<LiveEvent | undefined> {
   let result: LiveEvent | undefined;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     const e = store.live_events.find((x) => x.id === eventId);
     if (!e) return;
     e.status = status;
@@ -81,48 +90,47 @@ export function setLiveEventStatus(
     }
     result = e;
   });
+  invalidateLiveCache();
   return result;
 }
 
-export function updateLiveEventMedia(
+export async function updateLiveEventMedia(
   eventId: number,
   patch: { thumbnail?: string | null; thumbnail_alt?: string | null }
-): LiveEvent | undefined {
+): Promise<LiveEvent | undefined> {
   let result: LiveEvent | undefined;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     const e = store.live_events.find((x) => x.id === eventId);
     if (!e) return;
     if (patch.thumbnail !== undefined) e.thumbnail = patch.thumbnail;
     if (patch.thumbnail_alt !== undefined) e.thumbnail_alt = patch.thumbnail_alt;
     result = e;
   });
+  if (result) invalidateLiveCache();
   return result;
 }
 
-export function getChatMessages(
+export async function getChatMessages(
   eventId: number,
   publicOnly = true
-): LiveChatMessage[] {
-  const msgs = getStore().live_chat_messages.filter(
-    (m) => m.live_event_id === eventId
-  );
-  const filtered = publicOnly
-    ? msgs.filter((m) => m.status === "approved")
-    : msgs;
+): Promise<LiveChatMessage[]> {
+  const store = await getStoreAsync();
+  const msgs = store.live_chat_messages.filter((m) => m.live_event_id === eventId);
+  const filtered = publicOnly ? msgs.filter((m) => m.status === "approved") : msgs;
   return filtered.sort((a, b) => compareIsoDesc(b.created_at, a.created_at));
 }
 
-export function postChatMessage(data: {
+export async function postChatMessage(data: {
   live_event_id: number;
   author_name: string;
   content: string;
   user_id?: number;
-}): LiveChatMessage {
+}): Promise<LiveChatMessage> {
   const content = sanitizeChatContent(data.content);
   if (!content) throw domainError("EMPTY_MESSAGE");
 
   let created!: LiveChatMessage;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     const event = store.live_events.find((e) => e.id === data.live_event_id);
     if (!event) throw domainError("EVENT_NOT_FOUND");
     if (event.status !== "live") throw domainError("NOT_LIVE");
@@ -142,27 +150,28 @@ export function postChatMessage(data: {
   return created!;
 }
 
-export function moderateChatMessage(
+export async function moderateChatMessage(
   messageId: number,
   status: "approved" | "rejected"
-): void {
-  updateStore((store) => {
+): Promise<void> {
+  await updateStoreAsync((store) => {
     const m = store.live_chat_messages.find((x) => x.id === messageId);
     if (m) m.status = status;
   });
 }
 
-export function getPollsForEvent(eventId: number): LivePoll[] {
-  return getStore().live_polls.filter((p) => p.live_event_id === eventId);
+export async function getPollsForEvent(eventId: number): Promise<LivePoll[]> {
+  const store = await getStoreAsync();
+  return store.live_polls.filter((p) => p.live_event_id === eventId);
 }
 
-export function createLivePoll(
+export async function createLivePoll(
   eventId: number,
   question: string,
   options: string[]
-): LivePoll {
+): Promise<LivePoll> {
   let created!: LivePoll;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     created = {
       id: nextId(store),
       live_event_id: eventId,
@@ -180,13 +189,13 @@ export function createLivePoll(
   return created!;
 }
 
-export function voteLivePoll(
+export async function voteLivePoll(
   pollId: number,
   optionId: string,
   voterKey: string
-): LivePoll | undefined {
+): Promise<LivePoll | undefined> {
   let poll: LivePoll | undefined;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     const existing = store.live_poll_votes.find(
       (v) => v.poll_id === pollId && v.voter_key === voterKey
     );
@@ -210,15 +219,16 @@ export function voteLivePoll(
   return poll;
 }
 
-export function incrementViewerCount(eventId: number): void {
-  updateStore((store) => {
+export async function incrementViewerCount(eventId: number): Promise<void> {
+  await updateStoreAsync((store) => {
     const e = store.live_events.find((x) => x.id === eventId);
     if (e) e.viewer_count += 1;
   });
 }
 
-export function getPendingChatCount(eventId: number): number {
-  return getStore().live_chat_messages.filter(
+export async function getPendingChatCount(eventId: number): Promise<number> {
+  const store = await getStoreAsync();
+  return store.live_chat_messages.filter(
     (m) => m.live_event_id === eventId && m.status === "pending"
   ).length;
 }

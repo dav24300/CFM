@@ -8,7 +8,7 @@ import { adminPetitionCreateSchema } from "@/lib/validators/admin-api";
 export async function GET() {
   const auth = await requireAdminRole();
   if (!auth.ok) return auth.response;
-  return jsonData({ petitions: getActivePetitions() });
+  return jsonData({ petitions: await getActivePetitions() });
 }
 
 export async function POST(request: NextRequest) {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   if (!parsed.ok) return parsed.response;
 
   try {
-    const petition = createPetition(parsed.data);
+    const petition = await createPetition(parsed.data);
     return jsonSuccess({ petition });
   } catch {
     return jsonError("Erreur serveur", 500);

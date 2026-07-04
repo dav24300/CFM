@@ -35,7 +35,7 @@ export async function postLiveChatMessage(
   slug: string,
   body: { author_name?: string; content: string }
 ) {
-  const event = getLiveEventBySlug(slug);
+  const event = await getLiveEventBySlug(slug);
   if (!event) throw new Error("NOT_FOUND");
 
   const member = await getCurrentMember();
@@ -55,13 +55,13 @@ export function votePoll(pollId: number, optionId: string, voterKey: string) {
   return voteLivePoll(pollId, optionId, voterKey);
 }
 
-export function subscribePush(data: {
+export async function subscribePush(data: {
   endpoint: string;
   p256dh: string;
   auth: string;
   topics: PushTopic[];
-}): void {
-  savePushSubscription(data);
+}): Promise<void> {
+  await savePushSubscription(data);
 }
 
 export { getVapidPublicKey };

@@ -1,31 +1,35 @@
 import {
-  getStore,
-  updateStore,
+  getStoreAsync,
+  updateStoreAsync,
   nextId,
 } from "@/infrastructure/persistence/store-access";
-import { slugify } from "@/infrastructure/persistence/store.impl";
+import { slugify } from "@/infrastructure/persistence/store-seed";
+import { invalidatePetitionsCache } from "@/infrastructure/cache/invalidate";
 import { domainError } from "@/domain/errors/domain-error";
 import type { Petition, PetitionSignature } from "@/domain/entities/v2";
 
-export function getActivePetitions(): Petition[] {
-  return getStore().petitions.filter((p) => p.active === 1);
+export async function getActivePetitions(): Promise<Petition[]> {
+  const store = await getStoreAsync();
+  return store.petitions.filter((p) => p.active === 1);
 }
 
-export function getPetitionBySlug(slug: string): Petition | undefined {
-  return getStore().petitions.find((p) => p.slug === slug && p.active === 1);
+export async function getPetitionBySlug(slug: string): Promise<Petition | undefined> {
+  const store = await getStoreAsync();
+  return store.petitions.find((p) => p.slug === slug && p.active === 1);
 }
 
-export function getPetitionById(id: number): Petition | undefined {
-  return getStore().petitions.find((p) => p.id === id);
+export async function getPetitionById(id: number): Promise<Petition | undefined> {
+  const store = await getStoreAsync();
+  return store.petitions.find((p) => p.id === id);
 }
 
-export function signPetition(data: {
+export async function signPetition(data: {
   petition_id: number;
   user_id?: number;
   email: string;
   name: string;
-}): void {
-  updateStore((store) => {
+}): Promise<void> {
+  await updateStoreAsync((store) => {
     const petition = store.petitions.find((p) => p.id === data.petition_id);
     if (!petition || petition.active !== 1) throw domainError("NOT_FOUND");
 
@@ -46,16 +50,17 @@ export function signPetition(data: {
     });
     petition.signatures_count += 1;
   });
+  invalidatePetitionsCache();
 }
 
-export function createPetition(data: {
+export async function createPetition(data: {
   title: string;
   description: string;
   content?: string;
   goal: number;
-}): Petition {
+}): Promise<Petition> {
   let created!: Petition;
-  updateStore((store) => {
+  await updateStoreAsync((store) => {
     created = {
       id: nextId(store),
       title: data.title,
@@ -69,9 +74,13 @@ export function createPetition(data: {
     };
     store.petitions.push(created);
   });
+  invalidatePetitionsCache();
   return created!;
 }
 
-export function getPetitionSignatures(petitionId: number): PetitionSignature[] {
-  return getStore().petition_signatures.filter((s) => s.petition_id === petitionId);
+export async function getPetitionSignatures(
+  petitionId: number
+): Promise<PetitionSignature[]> {
+  const store = await getStoreAsync();
+  return store.petition_signatures.filter((s) => s.petition_id === petitionId);
 }

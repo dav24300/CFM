@@ -24,7 +24,7 @@ export async function PATCH(
 
   const { id } = await params;
   const donationId = parseInt(id, 10);
-  const updated = adminUpdateDonation(donationId, parsed.data);
+  const updated = await adminUpdateDonation(donationId, parsed.data);
   if (!updated) return jsonNotFound("Don introuvable");
 
   await logAdminAction({
