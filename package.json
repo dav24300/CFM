@@ -41,6 +41,8 @@
     "next": "^15.1.6",
     "nodemailer": "^6.9.16",
     "pg": "^8.13.1",
+    "pusher": "^5.3.4",
+    "pusher-js": "^8.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "server-only": "^0.0.1",

@@ -110,6 +110,33 @@ export async function updateLiveEventMedia(
   return result;
 }
 
+export async function updateLiveEvent(
+  eventId: number,
+  patch: {
+    title?: string;
+    description?: string;
+    youtube_id?: string | null;
+    stream_url?: string | null;
+    replay_url?: string | null;
+    chat_moderation?: 0 | 1;
+  }
+): Promise<LiveEvent | undefined> {
+  let result: LiveEvent | undefined;
+  await updateStoreAsync((store) => {
+    const e = store.live_events.find((x) => x.id === eventId);
+    if (!e) return;
+    if (patch.title !== undefined) e.title = patch.title;
+    if (patch.description !== undefined) e.description = patch.description;
+    if (patch.youtube_id !== undefined) e.youtube_id = patch.youtube_id;
+    if (patch.stream_url !== undefined) e.stream_url = patch.stream_url;
+    if (patch.replay_url !== undefined) e.replay_url = patch.replay_url;
+    if (patch.chat_moderation !== undefined) e.chat_moderation = patch.chat_moderation;
+    result = e;
+  });
+  if (result) invalidateLiveCache();
+  return result;
+}
+
 export async function getChatMessages(
   eventId: number,
   publicOnly = true

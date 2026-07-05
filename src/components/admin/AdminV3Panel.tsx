@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/primitives/button";
 import { Input } from "@/components/ui/primitives/input";
 import { Textarea } from "@/components/ui/primitives/textarea";
@@ -15,7 +15,13 @@ type LiveEvent = {
   viewer_count: number;
   chat_moderation: number;
   thumbnail?: string | null;
+  replay_url?: string | null;
+  stream_url?: string | null;
+  youtube_id?: string | null;
+  description?: string;
 };
+
+type PendingCount = { eventId: number; count: number };
 
 type PendingMsg = {
   id: number;
@@ -30,17 +36,36 @@ type Props = {
 
 export function AdminV3Panel({ initialEvents, onReload }: Props) {
   const [events, setEvents] = useState(initialEvents);
+  const [pendingCounts, setPendingCounts] = useState<PendingCount[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [pending, setPending] = useState<PendingMsg[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<number | null>(null);
+  const [editEventId, setEditEventId] = useState<number | null>(null);
+  const [replayUrl, setReplayUrl] = useState("");
   const [pushForm, setPushForm] = useState({ topic: "lives", title: "", body: "" });
+  const [pushStats, setPushStats] = useState<number | null>(null);
   const [thumbEventId, setThumbEventId] = useState<number | null>(null);
+
+  useEffect(() => {
+    reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function reload() {
     const res = await fetch("/api/admin/live");
     if (res.ok) {
       const data = await res.json();
       setEvents(data.events);
+      setPendingCounts(data.pending || []);
+    }
+    const statsRes = await fetch("/api/admin/live", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "stats" }),
+    });
+    if (statsRes.ok) {
+      const stats = await statsRes.json();
+      setPushStats(stats.push_subscribers ?? 0);
     }
     onReload();
   }
@@ -73,8 +98,42 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
   }
 
   function publishReplay(id: number) {
-    const url = window.prompt("URL du replay (YouTube, etc.)", "https://youtube.com/@cfmasbl");
-    if (url) setStatus(id, "replay", url);
+    const ev = events.find((e) => e.id === id);
+    const url = replayUrl.trim() || ev?.replay_url || "";
+    if (!url) return;
+    setStatus(id, "replay", url);
+    setReplayUrl("");
+    setEditEventId(null);
+  }
+
+  async function saveEventEdit(e: React.FormEvent<HTMLFormElement>, id: number) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    await fetch(`/api/admin/live/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: fd.get("title"),
+        description: fd.get("description"),
+        youtube_id: fd.get("youtube_id") || null,
+        stream_url: fd.get("stream_url") || null,
+        replay_url: fd.get("replay_url") || null,
+      }),
+    });
+    setEditEventId(null);
+    reload();
+  }
+
+  async function moderateBulk(status: "approved" | "rejected") {
+    for (const m of pending) {
+      await fetch("/api/live/chat/moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId: m.id, status }),
+      });
+    }
+    if (selectedEvent) loadPending(selectedEvent);
+    reload();
   }
 
   async function loadPending(eventId: number) {
@@ -140,6 +199,9 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
       <section>
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold">Lives & événements ({events.length})</h2>
+          {pushStats !== null && (
+            <span className="text-sm text-cfm-earth">{pushStats} abonné(s) push</span>
+          )}
           <button
             type="button"
             onClick={() => setShowForm(!showForm)}
@@ -161,12 +223,19 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
           </form>
         )}
         <div className="mt-4 space-y-3">
-          {events.map((ev) => (
+          {events.map((ev) => {
+            const pendingN = pendingCounts.find((p) => p.eventId === ev.id)?.count || 0;
+            return (
             <div key={ev.id} className="rounded-lg bg-white p-4 shadow text-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <strong>{ev.title}</strong>
                   <span className="ml-2 text-cfm-gold">{ev.status}</span>
+                  {pendingN > 0 && (
+                    <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">
+                      {pendingN} chat
+                    </span>
+                  )}
                   <a href={`/live/${ev.slug}`} className="ml-2 text-xs text-blue-600 hover:underline" target="_blank" rel="noreferrer">
                     Voir →
                   </a>
@@ -185,12 +254,18 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
                   {(ev.status === "ended" || ev.status === "live") && (
                     <button
                       type="button"
-                      onClick={() => publishReplay(ev.id)}
+                      onClick={() => {
+                        setEditEventId(ev.id);
+                        setReplayUrl(ev.replay_url || "");
+                      }}
                       className="rounded bg-cfm-navy px-2 py-1 text-xs text-white"
                     >
                       Publier replay
                     </button>
                   )}
+                  <button type="button" onClick={() => setEditEventId(ev.id)} className="rounded border px-2 py-1 text-xs">
+                    Éditer
+                  </button>
                   <button type="button" onClick={() => loadPending(ev.id)} className="rounded border px-2 py-1 text-xs">
                     Modérer chat
                   </button>
@@ -210,14 +285,43 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
                   + Sondage
                 </button>
               </form>
+              {editEventId === ev.id && (
+                <form onSubmit={(e) => saveEventEdit(e, ev.id)} className="mt-3 space-y-2 border-t pt-3">
+                  <Input name="title" defaultValue={ev.title} placeholder="Titre" required className="text-xs" />
+                  <Textarea name="description" defaultValue={ev.description || ""} placeholder="Description" rows={2} className="text-xs" />
+                  <Input name="youtube_id" defaultValue={ev.youtube_id || ""} placeholder="YouTube ID" className="text-xs" />
+                  <Input name="stream_url" defaultValue={ev.stream_url || ""} placeholder="URL stream" className="text-xs" />
+                  <Input name="replay_url" defaultValue={ev.replay_url || replayUrl} placeholder="URL replay" className="text-xs" />
+                  <div className="flex gap-2">
+                    <Button type="submit" size="sm">Enregistrer</Button>
+                    <Button type="button" size="sm" variant="ghost" onClick={() => setEditEventId(null)}>Annuler</Button>
+                    {(ev.status === "ended" || ev.status === "live") && (
+                      <Button type="button" size="sm" variant="secondary" onClick={() => publishReplay(ev.id)}>
+                        Mettre en replay
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              )}
             </div>
-          ))}
+          );
+          })}
         </div>
       </section>
 
       {pending.length > 0 && (
         <section>
-          <h2 className="text-lg font-bold">Chat en attente ({pending.length})</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">Chat en attente ({pending.length})</h2>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => moderateBulk("approved")} className="rounded bg-green-600 px-2 py-1 text-xs text-white">
+                Tout approuver
+              </button>
+              <button type="button" onClick={() => moderateBulk("rejected")} className="rounded bg-red-600 px-2 py-1 text-xs text-white">
+                Tout refuser
+              </button>
+            </div>
+          </div>
           <div className="mt-3 space-y-2">
             {pending.map((m) => (
               <div key={m.id} className="flex justify-between gap-2 rounded-lg bg-amber-50 p-3 text-sm">

@@ -8,9 +8,7 @@ import { Textarea } from "@/components/ui/primitives/textarea";
 import { DataTable, type Column } from "@/components/admin/ui/data-table";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
 import { useAdminToast } from "@/components/admin/context/AdminToastContext";
-import { useAdminApi } from "@/components/admin/hooks/useAdminApi";
 import type { AdminData } from "@/components/admin/types";
-
 import { MediaPicker } from "@/components/admin/ui/media-picker";
 
 type ContentType = "news" | "studies" | "campaigns" | "press_releases" | "testimonials";
@@ -24,6 +22,14 @@ const TABLES: { id: ContentType; label: string }[] = [
   { id: "testimonials", label: "Témoignages" },
 ];
 
+const API_BASE: Record<ContentType, string> = {
+  news: "/api/admin/news",
+  studies: "/api/admin/studies",
+  campaigns: "/api/admin/campaigns",
+  press_releases: "/api/admin/press-releases",
+  testimonials: "/api/admin/testimonials",
+};
+
 type Props = { data: AdminData; onReload: () => void };
 
 export function ContentPanel({ data, onReload }: Props) {
@@ -33,16 +39,31 @@ export function ContentPanel({ data, onReload }: Props) {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [mediaPath, setMediaPath] = useState("");
   const [showPicker, setShowPicker] = useState(false);
-  const { post } = useAdminApi(onReload);
   const { success, error } = useAdminToast();
 
   const rows = (data[table] || []) as Row[];
 
+  const publishKey = table === "campaigns" ? "active" : "published";
+
   const columns: Column<Row>[] = [
     { key: "title", header: "Titre", sortable: true, render: (r) => String(r.title || r.author || "—") },
     { key: "slug", header: "Slug" },
+    {
+      key: publishKey,
+      header: "Publié",
+      render: (r) => (Number(r[publishKey]) === 1 ? "Oui" : "Non"),
+    },
     { key: "created_at", header: "Date", sortable: true },
   ];
+
+  async function apiRequest(method: string, path: string, body?: Record<string, unknown>) {
+    const res = await fetch(path, {
+      method,
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return res.ok;
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -52,46 +73,55 @@ export function ContentPanel({ data, onReload }: Props) {
       payload[k] = String(v);
     });
     if (mediaPath) {
-      if (table === "news") {
-        payload.cover_image = mediaPath;
-      } else if (table === "campaigns") {
-        payload.image_url = mediaPath;
-      } else if (table === "testimonials") {
-        payload.photo = mediaPath;
-      } else if (table === "studies" || table === "press_releases") {
-        payload.file_url = mediaPath;
-      }
+      if (table === "news") payload.cover_image = mediaPath;
+      else if (table === "campaigns") payload.image_url = mediaPath;
+      else if (table === "testimonials") payload.photo = mediaPath;
+      else if (table === "studies" || table === "press_releases") payload.file_url = mediaPath;
+    }
+    if (table === "campaigns" && fd.get("petition_slug")) {
+      payload.petition_slug = String(fd.get("petition_slug"));
+    }
+    if (table === "testimonials" && fd.get("anonymous") === "on") {
+      payload.anonymous = "1";
     }
 
-    if (editId && table === "news") {
-      const res = await fetch(`/api/admin/news/${editId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        error("Échec mise à jour");
-        return;
-      }
-      success("Actualité mise à jour");
-    } else if (editId) {
-      await post({ action: "update_content", table, id: editId, data: payload });
-    } else {
-      await post({ action: "create", table, data: payload });
+    const base = API_BASE[table];
+    const ok = editId
+      ? await apiRequest("PATCH", `${base}/${editId}`, payload)
+      : await apiRequest("POST", base, payload);
+
+    if (!ok) {
+      error("Échec enregistrement");
+      return;
     }
+    success(editId ? "Contenu mis à jour" : "Contenu créé");
     setShowForm(false);
     setEditId(null);
     setMediaPath("");
     onReload();
   }
 
+  async function togglePublish(row: Row) {
+    const id = Number(row.id);
+    const current = Number(row[publishKey]) === 1 ? 1 : 0;
+    const next = current === 1 ? 0 : 1;
+    const ok = await apiRequest("PATCH", `${API_BASE[table]}/${id}`, { [publishKey]: next });
+    if (!ok) {
+      error("Échec publication");
+      return;
+    }
+    success(next === 1 ? "Publié" : "Dépublié");
+    onReload();
+  }
+
   async function confirmDelete() {
     if (!deleteId) return;
-    if (table === "news") {
-      await fetch(`/api/admin/news/${deleteId}`, { method: "DELETE" });
-    } else {
-      await post({ action: "delete", table, id: deleteId });
+    const ok = await apiRequest("DELETE", `${API_BASE[table]}/${deleteId}`);
+    if (!ok) {
+      error("Échec suppression");
+      return;
     }
+    success("Supprimé");
     setDeleteId(null);
     onReload();
   }
@@ -140,12 +170,19 @@ export function ContentPanel({ data, onReload }: Props) {
               {table === "studies" && (
                 <Input name="summary" placeholder="Résumé" defaultValue={String(editing?.summary || "")} />
               )}
+              {table === "campaigns" && (
+                <Input name="petition_slug" placeholder="Slug pétition liée" defaultValue={String(editing?.petition_slug || "")} />
+              )}
             </>
           ) : (
             <>
               <Input name="author" placeholder="Auteur" defaultValue={String(editing?.author || "")} />
               <Input name="role" placeholder="Rôle" defaultValue={String(editing?.role || "")} />
               <Textarea name="content" placeholder="Témoignage" required rows={3} defaultValue={String(editing?.content || "")} />
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="anonymous" defaultChecked={Number(editing?.anonymous) === 1} />
+                Anonyme
+              </label>
             </>
           )}
           <div className="flex flex-wrap items-center gap-2 border-t pt-3">
@@ -170,7 +207,10 @@ export function ContentPanel({ data, onReload }: Props) {
         searchKeys={["title", "slug"]}
         rowKey={(r) => Number(r.id)}
         actions={(row) => (
-          <div className="flex gap-1">
+          <div className="flex flex-wrap gap-1">
+            <Button size="sm" variant="secondary" type="button" onClick={() => togglePublish(row)}>
+              {Number(row[publishKey]) === 1 ? "Dépublier" : "Publier"}
+            </Button>
             <Button size="sm" variant="secondary" type="button" onClick={() => {
               setEditId(Number(row.id));
               setShowForm(false);

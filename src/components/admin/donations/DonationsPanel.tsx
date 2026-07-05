@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/primitives/button";
 import { NativeSelect } from "@/components/ui/primitives/native-select";
 import { DataTable, type Column } from "@/components/admin/ui/data-table";
@@ -16,6 +16,15 @@ export function DonationsPanel({ data, onReload }: Props) {
   const donations = (data.donations || []) as Row[];
   const { success, error } = useAdminToast();
   const [filter, setFilter] = useState("all");
+  const [donorsPublic, setDonorsPublic] = useState(false);
+  const [savingPublic, setSavingPublic] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((r) => r.json())
+      .then((d) => setDonorsPublic(d.settings?.donors_public === "1"))
+      .catch(() => {});
+  }, []);
 
   const filtered =
     filter === "all" ? donations : donations.filter((d) => d.status === filter);
@@ -42,6 +51,23 @@ export function DonationsPanel({ data, onReload }: Props) {
     onReload();
   }
 
+  async function toggleDonorsPublic() {
+    setSavingPublic(true);
+    const next = !donorsPublic;
+    const res = await fetch("/api/admin/settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ settings: { donors_public: next ? "1" : "0" } }),
+    });
+    setSavingPublic(false);
+    if (!res.ok) {
+      error("Échec enregistrement");
+      return;
+    }
+    setDonorsPublic(next);
+    success(next ? "Liste donateurs visible sur le site" : "Liste donateurs masquée");
+  }
+
   const totalCompleted = donations
     .filter((d) => d.status === "completed")
     .reduce((s, d) => s + Number(d.amount || 0), 0);
@@ -55,7 +81,18 @@ export function DonationsPanel({ data, onReload }: Props) {
             Total validé : <strong>{totalCompleted.toLocaleString("fr-FR")} CDF</strong>
           </p>
         </div>
-        <ExportButton entity="donations" />
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant={donorsPublic ? "primary" : "secondary"}
+            loading={savingPublic}
+            onClick={toggleDonorsPublic}
+          >
+            {donorsPublic ? "Masquer liste publique" : "Afficher liste publique"}
+          </Button>
+          <ExportButton entity="donations" />
+        </div>
       </div>
 
       <NativeSelect value={filter} onChange={(e) => setFilter(e.target.value)} className="w-48 text-sm">

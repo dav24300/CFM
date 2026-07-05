@@ -47,6 +47,8 @@ export async function PATCH(
     if (patch.slug !== undefined) item.slug = patch.slug;
     if (patch.excerpt !== undefined) item.excerpt = patch.excerpt || null;
     if (patch.category !== undefined) item.category = patch.category || "actualite";
+    if (patch.cover_image !== undefined) item.cover_image = patch.cover_image || null;
+    if (patch.cover_image_alt !== undefined) item.cover_image_alt = patch.cover_image_alt || null;
     if (patch.published !== undefined) item.published = patch.published;
   });
 

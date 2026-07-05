@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { getAdminAccess } from "@/lib/admin-access";
-import { moderateChatMessage } from "@/lib/live";
+import { moderateLiveChatMessage } from "@/application/services/live.service";
 import { jsonError, jsonSuccess, jsonUnauthorized } from "@/lib/api-response";
 
 export async function POST(request: NextRequest) {
@@ -13,6 +13,6 @@ export async function POST(request: NextRequest) {
     return jsonError("Données invalides", 400);
   }
 
-  await moderateChatMessage(messageId, status);
+  await moderateLiveChatMessage(messageId, status);
   return jsonSuccess();
 }

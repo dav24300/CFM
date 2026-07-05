@@ -225,9 +225,10 @@ export async function adminCreate(
           id: nextId(store),
           title: data.title,
           slug: data.slug || slugify(data.title),
-          description: data.description || null,
+          description: data.description || data.content || null,
           content: data.content || null,
           image_url: data.image_url || null,
+          petition_slug: data.petition_slug || null,
           active: 1,
           created_at: now,
         });

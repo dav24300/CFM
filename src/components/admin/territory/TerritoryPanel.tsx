@@ -44,6 +44,9 @@ export function TerritoryPanel({ data, onReload }: Props) {
     e.currentTarget.reset();
   }
 
+  const actions = (data.actions || []) as Row[];
+  const coveredProvinces = new Set(actions.map((a) => String(a.province)));
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -52,6 +55,29 @@ export function TerritoryPanel({ data, onReload }: Props) {
           + Action
         </Button>
       </div>
+
+      <section className="rounded-xl border bg-white p-4 shadow-sm">
+        <h3 className="mb-3 text-sm font-semibold uppercase text-cfm-earth">
+          Couverture RDC — {coveredProvinces.size}/{PROVINCES_RDC.length} provinces
+        </h3>
+        <div className="flex flex-wrap gap-1">
+          {PROVINCES_RDC.map((p) => (
+            <span
+              key={p}
+              className={`rounded px-2 py-0.5 text-xs ${
+                coveredProvinces.has(p)
+                  ? "bg-green-100 text-green-800"
+                  : "bg-gray-100 text-gray-500"
+              }`}
+            >
+              {p}
+            </span>
+          ))}
+        </div>
+        <a href="/actions" className="mt-3 inline-block text-sm text-blue-600 hover:underline" target="_blank" rel="noreferrer">
+          Voir la carte publique →
+        </a>
+      </section>
 
       {showForm && (
         <form onSubmit={handleCreate} className="grid gap-3 rounded-xl border bg-white p-4 md:grid-cols-2">
@@ -73,7 +99,7 @@ export function TerritoryPanel({ data, onReload }: Props) {
       )}
 
       <DataTable
-        data={data.actions as Row[]}
+        data={actions}
         columns={columns}
         searchKeys={["province", "title"]}
         rowKey={(r) => Number(r.id)}
@@ -85,7 +111,7 @@ export function TerritoryPanel({ data, onReload }: Props) {
       />
 
       <p className="text-sm text-cfm-earth">
-        {data.actions.length} actions sur {PROVINCES_RDC.length} provinces RDC — la carte publique reflète ces données.
+        {data.actions.length} actions sur {PROVINCES_RDC.length} provinces RDC
       </p>
 
       <ConfirmDialog

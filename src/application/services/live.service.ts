@@ -4,6 +4,7 @@ import {
   getLiveEventBySlug,
   createLiveEvent,
   setLiveEventStatus,
+  updateLiveEvent,
   getChatMessages,
   postChatMessage,
   moderateChatMessage,
@@ -15,6 +16,7 @@ import {
 } from "@/infrastructure/repositories/live.repository";
 import { getCurrentMember } from "@/infrastructure/auth/member-auth";
 import { savePushSubscription, getVapidPublicKey } from "@/infrastructure/push/web-push.adapter";
+import { triggerLiveEvent } from "@/infrastructure/realtime/pusher.adapter";
 import type { PushTopic } from "@/domain/entities/v3";
 
 export {
@@ -23,6 +25,7 @@ export {
   getLiveEventBySlug,
   createLiveEvent,
   setLiveEventStatus,
+  updateLiveEvent,
   getChatMessages,
   moderateChatMessage,
   getPollsForEvent,
@@ -43,12 +46,43 @@ export async function postLiveChatMessage(
     body.author_name ||
     (member ? `${member.first_name} ${member.last_name}` : "Anonyme");
 
-  return postChatMessage({
+  const msg = await postChatMessage({
     live_event_id: event.id,
     author_name,
     content: body.content,
     user_id: member?.id,
   });
+
+  await triggerLiveEvent(
+    slug,
+    msg.status === "approved" ? "chat" : "chat-pending",
+    { message: msg }
+  );
+
+  return msg;
+}
+
+export async function moderateLiveChatMessage(
+  messageId: number,
+  status: "approved" | "rejected"
+) {
+  const { getStoreAsync } = await import("@/infrastructure/persistence/store-access");
+  const store = await getStoreAsync();
+  const msg = store.live_chat_messages.find((m) => m.id === messageId);
+  const event = msg
+    ? store.live_events.find((e) => e.id === msg.live_event_id)
+    : undefined;
+
+  await moderateChatMessage(messageId, status);
+
+  if (event && status === "approved" && msg) {
+    await triggerLiveEvent(event.slug, "chat", {
+      message: { ...msg, status: "approved" },
+    });
+  }
+  if (event) {
+    await triggerLiveEvent(event.slug, "moderation", { messageId, status });
+  }
 }
 
 export function votePoll(pollId: number, optionId: string, voterKey: string) {

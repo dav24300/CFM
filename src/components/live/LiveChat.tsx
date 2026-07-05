@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/primitives/input";
 import { Button } from "@/components/ui/primitives/button";
 import { Alert } from "@/components/ui/primitives/alert";
 import { EmptyState } from "@/components/ui/patterns/empty-state";
+import { isLiveRealtimeEnabled, useLiveChannel } from "@/lib/hooks/use-live-channel";
 
 type Message = {
   id: number;
@@ -30,19 +31,35 @@ export function LiveChat({ slug, isLive, labels }: Props) {
   const [content, setContent] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "pending" | "error">("idle");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const realtime = isLiveRealtimeEnabled();
+
+  const loadMessages = useCallback(async () => {
+    const res = await fetch(`/api/live/${slug}/chat`);
+    if (res.ok) {
+      const data = await res.json();
+      setMessages(data.messages);
+    }
+  }, [slug]);
 
   useEffect(() => {
-    async function load() {
-      const res = await fetch(`/api/live/${slug}/chat`);
-      if (res.ok) {
-        const data = await res.json();
-        setMessages(data.messages);
-      }
-    }
-    load();
-    const id = setInterval(load, 3000);
+    loadMessages();
+    if (realtime) return;
+    const id = setInterval(loadMessages, 3000);
     return () => clearInterval(id);
-  }, [slug]);
+  }, [slug, realtime, loadMessages]);
+
+  useLiveChannel(slug, isLive && realtime, {
+    onChat: ({ message }) => {
+      if (message.status && message.status !== "approved") return;
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === message.id)) return prev;
+        return [message, ...prev];
+      });
+    },
+    onModeration: () => {
+      loadMessages();
+    },
+  });
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -62,11 +79,7 @@ export function LiveChat({ slug, isLive, labels }: Props) {
       if (!res.ok) throw new Error(data.error);
       setContent("");
       setStatus(data.pending ? "pending" : "idle");
-      const res2 = await fetch(`/api/live/${slug}/chat`);
-      if (res2.ok) {
-        const d = await res2.json();
-        setMessages(d.messages);
-      }
+      if (!realtime || !data.pending) await loadMessages();
     } catch {
       setStatus("error");
     }
@@ -76,6 +89,9 @@ export function LiveChat({ slug, isLive, labels }: Props) {
     <div className="flex h-[400px] flex-col rounded-xl border border-cfm-gold/20 bg-white shadow">
       <div className="border-b border-gray-100 px-4 py-3 font-semibold text-cfm-navy">
         {labels.title}
+        {realtime && isLive && (
+          <span className="ml-2 text-xs font-normal text-green-600">● temps réel</span>
+        )}
       </div>
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
         {messages.length === 0 && (
