@@ -2,7 +2,7 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils/cn";
 
-const labelVariants = cva("block text-sm font-medium text-cfm-navy", {
+const labelVariants = cva("block text-sm font-medium text-site-ink", {
   variants: {
     required: {
       true: "after:ml-0.5 after:text-red-600 after:content-['*']",

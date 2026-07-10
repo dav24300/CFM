@@ -8,6 +8,7 @@ import {
   getOgImagePath,
   getFaviconPath,
   getActionsHeroImage,
+  getAxesHeroImage,
   getResolvedAxisImage,
   getResolvedLiveThumb,
   getResolvedNewsCover,
@@ -31,6 +32,7 @@ export const getPressKitPathCached = cached("cfm-press-kit", getPressKitPath);
 export const getOgImagePathCached = cached("cfm-og-image", getOgImagePath);
 export const getFaviconPathCached = cached("cfm-favicon", getFaviconPath);
 export const getActionsHeroImageCached = cached("cfm-actions-hero", getActionsHeroImage);
+export const getAxesHeroImageCached = cached("cfm-axes-hero", getAxesHeroImage);
 
 export function getResolvedAxisImageCached(slug: string): Promise<string> {
   return unstable_cache(

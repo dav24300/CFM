@@ -126,7 +126,7 @@ export function AdminV2Panel({
                     {u.status}
                   </span>
                   {u.status === "pending" && (
-                    <button type="button" onClick={() => activateUser(u.id)} className="rounded bg-cfm-navy px-2 py-1 text-xs text-white">
+                    <button type="button" onClick={() => activateUser(u.id)} className="rounded bg-admin-deep px-2 py-1 text-xs text-white">
                       Activer
                     </button>
                   )}
@@ -147,7 +147,7 @@ export function AdminV2Panel({
                 ({l.relationship})
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-cfm-gold">{l.status}</span>
+                <span className="text-admin-accent">{l.status}</span>
                 {l.status !== "approved" && l.status !== "rejected" && (
                   <button type="button" onClick={() => approveLink(l.id)} className="rounded bg-green-600 px-2 py-1 text-xs text-white">
                     Approuver (admin)
@@ -177,7 +177,7 @@ export function AdminV2Panel({
                   <td className="px-4 py-2">{d.amount} {d.currency}</td>
                   <td className="px-4 py-2">{d.provider}</td>
                   <td className="px-4 py-2">{d.phone}</td>
-                  <td className="px-4 py-2 text-cfm-gold">{d.status}</td>
+                  <td className="px-4 py-2 text-admin-accent">{d.status}</td>
                 </tr>
               ))}
             </tbody>
@@ -189,7 +189,7 @@ export function AdminV2Panel({
         <section>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">Pétitions ({petitions.length})</h2>
-            <button type="button" onClick={() => setShowPetitionForm(!showPetitionForm)} className="rounded-lg bg-cfm-gold px-3 py-1 text-sm font-semibold text-cfm-navy">
+            <button type="button" onClick={() => setShowPetitionForm(!showPetitionForm)} className="rounded-lg bg-admin-accent px-3 py-1 text-sm font-semibold text-admin-ink">
               + Nouvelle pétition
             </button>
           </div>
@@ -213,7 +213,7 @@ export function AdminV2Panel({
                 <button
                   type="button"
                   onClick={() => exportPetitionCsv(p.id, p.slug)}
-                  className="rounded bg-cfm-navy px-2 py-1 text-xs text-white"
+                  className="rounded bg-admin-deep px-2 py-1 text-xs text-white"
                 >
                   Export CSV
                 </button>

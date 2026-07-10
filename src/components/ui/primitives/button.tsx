@@ -4,20 +4,20 @@ import { cn } from "@/lib/utils/cn";
 import { Spinner } from "./spinner";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cfm-gold focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-site-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
         primary:
-          "bg-cfm-gold text-cfm-navy shadow-cfm hover:scale-[1.02] hover:bg-amber-400 hover:shadow-cfm-lg",
+          "bg-site-primary text-white hover:bg-site-primary-dark hover:shadow-site-hover",
         secondary:
-          "border-2 border-cfm-navy text-cfm-navy hover:scale-[1.02] hover:bg-cfm-navy hover:text-white",
+          "border border-site-primary text-site-primary hover:bg-site-primary hover:text-white",
         outline:
-          "border-2 border-cfm-navy text-cfm-navy hover:bg-cfm-navy hover:text-white",
+          "border border-site-primary text-site-primary hover:bg-site-primary hover:text-white",
         outlineLight:
-          "border-2 border-white text-white hover:bg-white hover:text-cfm-navy",
-        ghost: "text-cfm-navy hover:bg-cfm-cream",
-        destructive: "bg-red-600 text-white hover:bg-red-700",
+          "border border-white text-white hover:bg-white hover:text-site-primary",
+        ghost: "text-site-primary hover:bg-site-surface",
+        destructive: "bg-site-live text-white hover:bg-red-700",
       },
       size: {
         sm: "px-3 py-2 text-sm",

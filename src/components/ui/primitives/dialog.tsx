@@ -17,7 +17,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-[100] bg-cfm-navy/95",
+      "fixed inset-0 z-[100] bg-site-deep/95",
       className
     )}
     {...props}
@@ -45,7 +45,7 @@ const DialogContent = React.forwardRef<
       {children}
       {showClose && (
         <DialogClose
-          className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cfm-gold"
+          className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-site-primary"
           aria-label={closeLabel}
         >
           <X className="h-6 w-6" aria-hidden />
@@ -62,7 +62,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn("font-display text-lg font-bold text-white", className)}
+    className={cn("font-serif text-lg font-bold text-white", className)}
     {...props}
   />
 ));

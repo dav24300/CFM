@@ -29,7 +29,7 @@ export function MediaCard({
 }: Props) {
   const content = (
     <>
-      <div className="image-zoom-hover relative aspect-video overflow-hidden bg-cfm-cream">
+      <div className="image-zoom-hover relative aspect-video overflow-hidden bg-site-surface">
         {loading ? (
           <Skeleton variant="rect" className="h-full w-full rounded-none" />
         ) : image ? (
@@ -43,25 +43,25 @@ export function MediaCard({
           />
         ) : (
           <div
-            className="flex h-full w-full items-center justify-center bg-cfm-cream text-cfm-earth/40"
+            className="flex h-full w-full items-center justify-center bg-site-surface text-site-muted/40"
             aria-hidden
           >
             <ImageIcon className="h-12 w-12" />
           </div>
         )}
         {badge && (
-          <Badge variant="default" className="absolute left-3 top-3 bg-cfm-navy/90 text-cfm-gold">
+          <Badge variant="default" className="absolute left-3 top-3 bg-site-deep/90 text-site-primary">
             {badge}
           </Badge>
         )}
       </div>
       <div className="p-5">
-        <h3 className="font-display text-lg font-bold text-cfm-navy line-clamp-2">{title}</h3>
+        <h3 className="font-serif text-lg font-bold text-site-ink line-clamp-2">{title}</h3>
         {excerpt && (
-          <p className="mt-2 text-sm text-cfm-earth line-clamp-3">{excerpt}</p>
+          <p className="mt-2 text-sm text-site-muted line-clamp-3">{excerpt}</p>
         )}
         {href && (
-          <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-cfm-gold">
+          <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-site-primary">
             {ctaLabel} <ArrowRight className="h-4 w-4" aria-hidden />
           </span>
         )}

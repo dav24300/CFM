@@ -46,7 +46,7 @@ export function FormField({
       </Label>
       {child}
       {hint && (
-        <p id={hintId} className="text-xs text-cfm-earth">
+        <p id={hintId} className="text-xs text-site-muted">
           {hint}
         </p>
       )}

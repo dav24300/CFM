@@ -90,7 +90,7 @@ export function FamilyLinkManager() {
       </div>
 
       {mode && (
-        <div className="space-y-3 rounded-lg border border-cfm-gold/30 bg-cfm-cream p-4">
+        <div className="space-y-3 rounded-lg border border-site-primary/30 bg-site-surface p-4">
           <p className="text-sm font-medium">
             {mode === "parent" ? "Email de l'enfant (compte CFM requis)" : "Email du parent"}
           </p>
@@ -142,9 +142,9 @@ export function FamilyLinkManager() {
                   {link.parent?.first_name} {link.parent?.last_name}
                   {" → "}
                   {link.child?.first_name} {link.child?.last_name}
-                  <span className="ml-2 text-cfm-earth">({link.relationship})</span>
+                  <span className="ml-2 text-site-muted">({link.relationship})</span>
                 </span>
-                <span className="font-semibold text-cfm-gold">
+                <span className="font-semibold text-site-primary">
                   {statusLabel[link.status] || link.status}
                 </span>
               </div>

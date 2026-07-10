@@ -63,7 +63,7 @@ export function HeroMedia({
   const showVideo = Boolean(video) && !reduceMotion && !isSlowConnection;
 
   return (
-    <section className={`relative min-h-[85vh] overflow-hidden bg-cfm-navy text-white ${className}`}>
+    <section className={`relative min-h-[85vh] overflow-hidden bg-site-deep text-white ${className}`}>
       <div className="absolute inset-0">
         {showVideo ? (
           <video

@@ -46,7 +46,11 @@ async function insertPgAudit(payload: AdminAuditPayload): Promise<void> {
   if (!process.env.DATABASE_URL) return;
   try {
     const pg = await import("pg");
-    const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+    const pool = new pg.Pool({
+      connectionString: process.env.DATABASE_URL,
+      connectionTimeoutMillis: 2_000,
+      max: 1,
+    });
     try {
       await pool.query(
         `INSERT INTO admin_audit_log

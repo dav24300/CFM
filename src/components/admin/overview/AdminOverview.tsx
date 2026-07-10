@@ -26,8 +26,8 @@ function KpiCard({ label, value, alert }: { label: string; value: number; alert?
         alert ? "border-red-200 bg-red-50" : "border-gray-200 bg-white"
       }`}
     >
-      <p className="text-xs font-medium uppercase text-cfm-earth">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-cfm-navy">{value}</p>
+      <p className="text-xs font-medium uppercase text-admin-muted">{label}</p>
+      <p className="mt-1 text-2xl font-bold text-admin-ink">{value}</p>
     </div>
   );
 }
@@ -43,20 +43,20 @@ function ActivityChart({ series }: { series: ActivitySeries }) {
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-      <h3 className="mb-4 text-sm font-semibold uppercase text-cfm-earth">Activité — 7 derniers jours</h3>
+      <h3 className="mb-4 text-sm font-semibold uppercase text-admin-muted">Activité — 7 derniers jours</h3>
       <div className="flex h-32 items-end gap-2">
         {days.map((label, i) => (
           <div key={label} className="flex flex-1 flex-col items-center gap-1">
             <div
-              className="w-full rounded-t bg-cfm-gold/80 transition-all"
+              className="w-full rounded-t bg-admin-accent/80 transition-all"
               style={{ height: `${(totals[i] / max) * 100}%`, minHeight: totals[i] > 0 ? 4 : 0 }}
               title={`${totals[i]} événements`}
             />
-            <span className="text-[10px] text-cfm-earth">{label}</span>
+            <span className="text-[10px] text-admin-muted">{label}</span>
           </div>
         ))}
       </div>
-      <p className="mt-2 text-xs text-cfm-earth">Aide + adhésions + dons par jour</p>
+      <p className="mt-2 text-xs text-admin-muted">Aide + adhésions + dons par jour</p>
     </div>
   );
 }
@@ -79,12 +79,15 @@ export function AdminOverview({ stats }: Props) {
   const v1Total = stats.news + stats.studies + stats.campaigns;
   const communityPending =
     (stats.pending_users || 0) + (stats.pending_memberships || 0) + (stats.pending_family_links || 0);
-  const inboxPending = (stats.new_help || 0) + (stats.pending_memberships || 0);
+  const inboxPending =
+    (stats.new_help || 0) +
+    (stats.pending_memberships || 0) +
+    (stats.new_petition_signatures || 0);
 
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-bold text-cfm-navy">Vue d&apos;ensemble</h2>
+        <h2 className="font-display text-xl font-bold text-admin-ink">Vue d&apos;ensemble</h2>
         <div className="flex flex-wrap gap-2">
           <ExportButton entity="newsletter" label="Newsletter CSV" />
           <ExportButton entity="donations" label="Dons CSV" />
@@ -95,17 +98,22 @@ export function AdminOverview({ stats }: Props) {
       {activity && <ActivityChart series={activity} />}
 
       <section>
-        <h3 className="mb-3 text-sm font-semibold uppercase text-cfm-earth">Alertes</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <h3 className="mb-3 text-sm font-semibold uppercase text-admin-muted">Alertes</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <KpiCard label="Aide — nouveaux dossiers" value={stats.new_help} alert={stats.new_help > 0} />
           <KpiCard label="Adhésions en attente" value={stats.pending_memberships} alert={stats.pending_memberships > 0} />
           <KpiCard label="Membres à activer" value={stats.pending_users || 0} alert={(stats.pending_users || 0) > 0} />
           <KpiCard label="Messages contact" value={stats.contacts} alert={stats.contacts > 0} />
+          <KpiCard
+            label="Signatures pétitions (24h)"
+            value={stats.new_petition_signatures || 0}
+            alert={(stats.new_petition_signatures || 0) > 0}
+          />
         </div>
       </section>
 
       <section>
-        <h3 className="mb-3 text-sm font-semibold uppercase text-cfm-earth">V1 — Contenu & triage</h3>
+        <h3 className="mb-3 text-sm font-semibold uppercase text-admin-muted">V1 — Contenu & triage</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <KpiCard label="Actualités" value={stats.news} />
           <KpiCard label="Études" value={stats.studies} />
@@ -116,7 +124,7 @@ export function AdminOverview({ stats }: Props) {
       </section>
 
       <section>
-        <h3 className="mb-3 text-sm font-semibold uppercase text-cfm-earth">V2 — Communauté</h3>
+        <h3 className="mb-3 text-sm font-semibold uppercase text-admin-muted">V2 — Communauté</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <KpiCard label="Membres" value={stats.users || 0} />
           <KpiCard label="Dons" value={stats.donations || 0} />
@@ -126,7 +134,7 @@ export function AdminOverview({ stats }: Props) {
       </section>
 
       <section>
-        <h3 className="mb-3 text-sm font-semibold uppercase text-cfm-earth">V3 — Mobilisation</h3>
+        <h3 className="mb-3 text-sm font-semibold uppercase text-admin-muted">V3 — Mobilisation</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <KpiCard label="Lives" value={stats.live_events || 0} />
           <KpiCard label="Chat à modérer" value={stats.pending_chat || 0} alert={(stats.pending_chat || 0) > 0} />
@@ -136,12 +144,12 @@ export function AdminOverview({ stats }: Props) {
 
       {audit.length > 0 && (
         <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <h3 className="mb-3 text-sm font-semibold uppercase text-cfm-earth">Journal récent</h3>
+          <h3 className="mb-3 text-sm font-semibold uppercase text-admin-muted">Journal récent</h3>
           <ul className="space-y-2 text-sm">
             {audit.map((entry, i) => (
-              <li key={i} className="flex flex-wrap gap-2 text-cfm-earth">
+              <li key={i} className="flex flex-wrap gap-2 text-admin-muted">
                 <span className="text-xs text-gray-400">{entry.timestamp?.slice(0, 16)}</span>
-                <span className="font-medium text-cfm-navy">{entry.action}</span>
+                <span className="font-medium text-admin-ink">{entry.action}</span>
                 <span>{entry.endpoint}</span>
               </li>
             ))}

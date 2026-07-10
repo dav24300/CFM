@@ -7,6 +7,7 @@ import {
   getChatMessages,
   getPendingChatCount,
   updateLiveEventMedia,
+  getPollsForEvent,
 } from "@/lib/live";
 import { sendPushToTopic } from "@/lib/push";
 import { getStoreAsync } from "@/lib/store";
@@ -53,6 +54,16 @@ export async function POST(request: NextRequest) {
       (m) => m.status === "pending"
     );
     return jsonData({ messages: msgs });
+  }
+
+  if (action === "all_chat" && body.eventId) {
+    const msgs = await getChatMessages(body.eventId, false);
+    return jsonData({ messages: msgs });
+  }
+
+  if (action === "polls" && body.eventId) {
+    const polls = await getPollsForEvent(body.eventId);
+    return jsonData({ polls });
   }
 
   if (action === "set_thumbnail" && body.id) {

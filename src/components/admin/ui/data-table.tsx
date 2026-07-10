@@ -79,9 +79,9 @@ export function DataTable<T extends Record<string, unknown>>({
           className="max-w-xs text-sm"
         />
       )}
-      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-admin border border-admin-border bg-white shadow-sm">
         <table className="w-full text-left text-sm">
-          <thead className="border-b bg-cfm-cream/50 text-xs uppercase text-cfm-earth">
+          <thead className="border-b border-admin-border bg-admin-bg text-xs uppercase tracking-wide text-admin-muted">
             <tr>
               {columns.map((col) => (
                 <th
@@ -92,7 +92,7 @@ export function DataTable<T extends Record<string, unknown>>({
                     <button
                       type="button"
                       onClick={() => toggleSort(col.key)}
-                      className="hover:text-cfm-navy"
+                      className="hover:text-admin-ink"
                     >
                       {col.header}
                       {sortKey === col.key ? (sortDir === "asc" ? " ↑" : " ↓") : ""}
@@ -110,14 +110,14 @@ export function DataTable<T extends Record<string, unknown>>({
               <tr>
                 <td
                   colSpan={columns.length + (actions ? 1 : 0)}
-                  className="px-4 py-8 text-center text-gray-500"
+                  className="px-4 py-8 text-center text-admin-muted"
                 >
                   {emptyMessage}
                 </td>
               </tr>
             ) : (
               pageRows.map((row) => (
-                <tr key={rowKey(row)} className="border-b last:border-0 hover:bg-gray-50/80">
+                <tr key={rowKey(row)} className="border-b border-admin-border last:border-0 hover:bg-admin-bg/60">
                   {columns.map((col) => (
                     <td key={col.key} className={cn("px-4 py-3", col.className)}>
                       {col.render
@@ -133,7 +133,7 @@ export function DataTable<T extends Record<string, unknown>>({
         </table>
       </div>
       {filtered.length > pageSize && (
-        <div className="flex items-center justify-between text-xs text-gray-600">
+        <div className="flex items-center justify-between text-xs text-admin-muted">
           <span>
             {filtered.length} résultat{filtered.length > 1 ? "s" : ""} — page {page + 1}/{totalPages}
           </span>

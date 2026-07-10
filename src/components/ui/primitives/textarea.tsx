@@ -3,11 +3,11 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils/cn";
 
 const textareaVariants = cva(
-  "w-full rounded-lg border px-4 py-3 transition focus:outline-none focus:ring-2 focus:ring-cfm-gold/30 disabled:cursor-not-allowed disabled:opacity-50",
+  "w-full rounded-lg border px-4 py-3 transition focus:outline-none focus:ring-2 focus:ring-site-primary/30 disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "border-gray-300 focus:border-cfm-gold",
+        default: "border-gray-300 focus:border-site-primary",
         error: "border-red-500 focus:border-red-500 focus:ring-red-500/30",
         success: "border-green-600 focus:border-green-600 focus:ring-green-600/30",
       },
@@ -42,7 +42,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           {...props}
         />
         {showCount && maxLength && (
-          <p id={countId} className="text-right text-xs text-cfm-earth" aria-live="polite">
+          <p id={countId} className="text-right text-xs text-site-muted" aria-live="polite">
             {length}/{maxLength}
           </p>
         )}

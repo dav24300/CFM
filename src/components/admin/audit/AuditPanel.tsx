@@ -34,7 +34,7 @@ export function AuditPanel() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-bold text-cfm-navy">Journal & exports</h2>
+        <h2 className="font-display text-xl font-bold text-admin-ink">Journal & exports</h2>
         <div className="flex flex-wrap gap-2">
           <ExportButton entity="help_requests" label="Aide CSV" />
           <ExportButton entity="contacts" label="Contacts CSV" />

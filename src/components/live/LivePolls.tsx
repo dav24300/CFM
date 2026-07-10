@@ -63,7 +63,7 @@ export function LivePolls({ slug, polls: initial, isLive, labels }: Props) {
     <div className="space-y-4">
       {polls.map((poll) => (
         <div key={poll.id} className="card">
-          <h3 className="font-semibold text-cfm-navy">{poll.question}</h3>
+          <h3 className="font-semibold text-site-ink">{poll.question}</h3>
           <div className="mt-3 space-y-2">
             {poll.options.map((opt) => {
               const total = totalVotes(poll.options);
@@ -75,15 +75,15 @@ export function LivePolls({ slug, polls: initial, isLive, labels }: Props) {
                   type="button"
                   disabled={!isLive || hasVoted}
                   onClick={() => vote(poll.id, opt.id)}
-                  className="relative w-full overflow-hidden rounded-lg border border-gray-200 px-3 py-2 text-left text-sm disabled:cursor-default hover:border-cfm-gold disabled:hover:border-gray-200"
+                  className="relative w-full overflow-hidden rounded-lg border border-gray-200 px-3 py-2 text-left text-sm disabled:cursor-default hover:border-site-primary disabled:hover:border-gray-200"
                 >
                   <div
-                    className="absolute inset-y-0 left-0 bg-cfm-gold/20"
+                    className="absolute inset-y-0 left-0 bg-site-primary/20"
                     style={{ width: `${hasVoted ? pct : 0}%` }}
                   />
                   <span className="relative flex justify-between">
                     <span>{opt.text}</span>
-                    {hasVoted && <span className="text-cfm-gold">{pct}%</span>}
+                    {hasVoted && <span className="text-site-primary">{pct}%</span>}
                   </span>
                 </button>
               );

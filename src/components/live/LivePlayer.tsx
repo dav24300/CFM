@@ -55,7 +55,7 @@ export function LivePlayer({ youtubeId, streamUrl, replayUrl, status }: Props) {
   if (replayUrl) {
     return (
       <div className="card text-center">
-        <p className="text-cfm-earth">Replay disponible</p>
+        <p className="text-site-muted">Replay disponible</p>
         <AnchorButton href={replayUrl} target="_blank" rel="noopener noreferrer" className="mt-4">
           Voir le replay
         </AnchorButton>
@@ -64,8 +64,8 @@ export function LivePlayer({ youtubeId, streamUrl, replayUrl, status }: Props) {
   }
 
   return (
-    <div className="flex aspect-video items-center justify-center rounded-xl border-2 border-dashed border-cfm-gold/40 bg-cfm-navy/5">
-      <p className="text-cfm-earth">Diffusion à venir</p>
+    <div className="flex aspect-video items-center justify-center rounded-xl border-2 border-dashed border-site-primary/40 bg-site-deep/5">
+      <p className="text-site-muted">Diffusion à venir</p>
     </div>
   );
 }

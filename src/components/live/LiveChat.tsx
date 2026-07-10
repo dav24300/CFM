@@ -86,8 +86,8 @@ export function LiveChat({ slug, isLive, labels }: Props) {
   }
 
   return (
-    <div className="flex h-[400px] flex-col rounded-xl border border-cfm-gold/20 bg-white shadow">
-      <div className="border-b border-gray-100 px-4 py-3 font-semibold text-cfm-navy">
+    <div className="flex h-[400px] flex-col rounded-xl border border-site-primary/20 bg-white shadow">
+      <div className="border-b border-gray-100 px-4 py-3 font-semibold text-site-ink">
         {labels.title}
         {realtime && isLive && (
           <span className="ml-2 text-xs font-normal text-green-600">● temps réel</span>
@@ -102,8 +102,8 @@ export function LiveChat({ slug, isLive, labels }: Props) {
         )}
         {messages.map((m) => (
           <div key={m.id} className="text-sm">
-            <span className="font-semibold text-cfm-gold">{m.author_name}</span>
-            <span className="text-cfm-earth"> — {m.content}</span>
+            <span className="font-semibold text-site-primary">{m.author_name}</span>
+            <span className="text-site-muted"> — {m.content}</span>
           </div>
         ))}
         <div ref={bottomRef} />

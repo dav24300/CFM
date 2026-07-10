@@ -1,15 +1,18 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getLiveEventBySlug, getPollsForEvent } from "@/lib/live";
+import { getLiveEventBySlugCached } from "@/infrastructure/cache/live-cache";
+import { getPollsForEvent } from "@/lib/live";
 import { LiveRoom } from "@/components/live/LiveRoom";
 import { getTranslations } from "@/lib/i18n-server";
 import { PushSubscribeButton } from "@/components/PushSubscribeButton";
+import { NextActionBlock } from "@/components/ux/NextActionBlock";
+import { NewsletterForm } from "@/components/NewsletterForm";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export default async function LiveEventPage({ params }: Props) {
   const { slug } = await params;
-  const event = await getLiveEventBySlug(slug);
+  const event = await getLiveEventBySlugCached(slug);
   if (!event) notFound();
 
   const { t } = await getTranslations();
@@ -18,7 +21,7 @@ export default async function LiveEventPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
-      <Link href="/live" className="text-sm text-cfm-gold hover:underline">
+      <Link href="/live" className="text-sm text-site-primary hover:underline">
         ← {t.nav.live}
       </Link>
       <h1 className="section-title mt-4">{event.title}</h1>
@@ -55,6 +58,12 @@ export default async function LiveEventPage({ params }: Props) {
             },
           }}
         />
+      </div>
+
+      <NextActionBlock labels={t.ux.nextAction} showEngage />
+
+      <div className="mx-auto mt-10 max-w-md">
+        <NewsletterForm />
       </div>
     </div>
   );

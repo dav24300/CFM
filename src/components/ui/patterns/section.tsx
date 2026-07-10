@@ -28,8 +28,8 @@ export function Section({
           {title && (
             <h2
               className={cn(
-                "font-display text-3xl font-bold md:text-4xl",
-                titleLight ? "text-white" : "text-cfm-navy"
+                "font-serif text-3xl font-bold md:text-4xl",
+                titleLight ? "text-white" : "text-site-ink"
               )}
             >
               {title}
@@ -39,7 +39,7 @@ export function Section({
             <p
               className={cn(
                 "mt-3 max-w-3xl text-lg line-clamp-2",
-                titleLight ? "text-gray-200" : "text-cfm-earth"
+                titleLight ? "text-gray-200" : "text-site-muted"
               )}
             >
               {subtitle}

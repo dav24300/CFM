@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MapPin, Calendar } from "lucide-react";
 import Image from "next/image";
-import { PageHero } from "@/components/ui/PageHero";
+import { InteriorHero } from "@/components/ui/InteriorHero";
 import { RDCMap } from "@/components/ui/RDCMap";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { AsyncBoundary } from "@/components/ui/patterns/async-boundary";
 import { EmptyState } from "@/components/ui/patterns/empty-state";
+import { ButtonLink } from "@/components/ui/patterns/button-link";
 import { SkeletonList } from "@/components/ui/primitives/skeleton";
 import { resolveMediaPath } from "@/lib/media";
 import { useTranslations } from "@/lib/i18n-client";
@@ -27,24 +28,14 @@ type Props = {
   heroImage: string;
   heroAlt: string;
   defaultCover: string;
+  initialActions: Action[];
 };
 
-export function ActionsPageClient({ heroImage, heroAlt, defaultCover }: Props) {
+export function ActionsPageClient({ heroImage, heroAlt, defaultCover, initialActions }: Props) {
   const { locale, t } = useTranslations();
   const p = t.pages.actions;
-  const [actions, setActions] = useState<Action[]>([]);
+  const [actions] = useState<Action[]>(initialActions);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/actions")
-      .then((r) => r.json())
-      .then((data) => {
-        setActions(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
 
   const provincesWithActions = [...new Set(actions.map((a) => a.province))];
   const filtered = selectedProvince
@@ -53,9 +44,16 @@ export function ActionsPageClient({ heroImage, heroAlt, defaultCover }: Props) {
 
   return (
     <>
-      <PageHero title={p.title} subtitle={p.subtitle} image={heroImage} imageAlt={heroAlt} />
+      <InteriorHero
+        breadcrumb={[{ label: locale === "en" ? "Home" : "Accueil", href: "/" }, { label: p.title }]}
+        kicker={locale === "en" ? "On the ground" : "Sur le terrain"}
+        title={p.title}
+        subtitle={p.subtitle}
+        image={heroImage}
+        imageAlt={heroAlt}
+      />
 
-      <div className="mx-auto max-w-6xl px-4 py-12 md:py-16">
+      <div className="mx-auto max-w-site px-6 py-16">
         <div className="grid gap-8 lg:grid-cols-3">
           <ScrollReveal direction="left">
             <RDCMap
@@ -67,13 +65,13 @@ export function ActionsPageClient({ heroImage, heroAlt, defaultCover }: Props) {
 
           <div className="lg:col-span-2">
             <AsyncBoundary
-              isLoading={loading}
-              isEmpty={!loading && filtered.length === 0}
+              isLoading={false}
+              isEmpty={filtered.length === 0}
               loading={<SkeletonList count={3} variant="card" />}
               empty={
                 <EmptyState
                   variant="card"
-                  icon={<MapPin className="h-12 w-12 text-cfm-gold/50" aria-hidden />}
+                  icon={<MapPin className="h-12 w-12 text-site-primary/50" aria-hidden />}
                   title={p.empty}
                 />
               }
@@ -99,18 +97,18 @@ export function ActionsPageClient({ heroImage, heroAlt, defaultCover }: Props) {
                         <div className="p-5 md:col-span-2">
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <div>
-                              <span className="rounded-full bg-cfm-cream px-3 py-1 text-xs font-semibold text-cfm-gold">
+                              <span className="rounded-full bg-site-surface px-3 py-1 text-xs font-semibold text-site-primary">
                                 {p.types[action.type] || action.type}
                               </span>
-                              <h3 className="mt-2 font-display text-xl font-bold">{action.title}</h3>
+                              <h3 className="mt-2 font-serif text-xl font-bold">{action.title}</h3>
                             </div>
-                            <div className="flex items-center gap-1 text-sm text-cfm-earth">
+                            <div className="flex items-center gap-1 text-sm text-site-muted">
                               <MapPin className="h-4 w-4" aria-hidden />
                               {action.province}
                             </div>
                           </div>
                           {action.description && (
-                            <p className="mt-2 text-cfm-earth">{action.description}</p>
+                            <p className="mt-2 text-site-muted">{action.description}</p>
                           )}
                           {action.date && (
                             <p className="mt-2 flex items-center gap-1 text-sm text-gray-500">
@@ -130,6 +128,13 @@ export function ActionsPageClient({ heroImage, heroAlt, defaultCover }: Props) {
               </div>
             </AsyncBoundary>
           </div>
+        </div>
+
+        <div className="mt-10 rounded-xl border border-site-primary/30 bg-site-surface p-6 text-center">
+          <p className="font-medium text-site-ink">{t.ux.actions.provinceHelp}</p>
+          <ButtonLink href="/contact#aide" size="sm" className="mt-4" data-cta="cta_aide">
+            {t.ux.actions.provinceHelpCta}
+          </ButtonLink>
         </div>
       </div>
     </>

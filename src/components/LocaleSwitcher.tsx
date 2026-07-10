@@ -23,13 +23,13 @@ export function LocaleSwitcher({ current }: { current: Locale }) {
   }
 
   return (
-    <div className="flex gap-0.5 rounded-lg border border-cfm-gold/30 p-0.5 text-xs font-semibold">
+    <div className="flex gap-0.5 rounded-lg border border-site-primary/30 p-0.5 text-xs font-semibold">
       {(Object.keys(LABELS) as Locale[]).map((loc) => (
         <button
           key={loc}
           type="button"
           onClick={() => setLocale(loc)}
-          className={`rounded px-1.5 py-1 ${current === loc ? "bg-cfm-gold text-cfm-navy" : "text-cfm-navy"}`}
+          className={`rounded px-1.5 py-1 ${current === loc ? "bg-site-primary text-site-ink" : "text-site-ink"}`}
         >
           {LABELS[loc]}
         </button>

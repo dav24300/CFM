@@ -15,6 +15,12 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    pool: "threads",
+    maxWorkers: 1,
+    fileParallelism: false,
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
+    teardownTimeout: 15_000,
     include: ["__tests__/**/*.test.ts", "__tests__/**/*.test.tsx"],
     coverage: {
       provider: "v8",

@@ -6,16 +6,26 @@ const COOKIE_NAME = "cfm_admin_session";
 const SESSION_MAX_AGE = 60 * 60 * 24; // 24h
 const SESSION_PAYLOAD = "authenticated";
 
-export async function createSession(): Promise<void> {
-  const token = signSessionPayload(SESSION_PAYLOAD);
-  const cookieStore = await cookies();
-  cookieStore.set(COOKIE_NAME, token, {
+export const ADMIN_SESSION_COOKIE_NAME = COOKIE_NAME;
+
+export function createSessionToken(): string {
+  return signSessionPayload(SESSION_PAYLOAD);
+}
+
+export function getAdminSessionCookieOptions() {
+  return {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "lax" as const,
     maxAge: SESSION_MAX_AGE,
     path: "/",
-  });
+  };
+}
+
+export async function createSession(): Promise<void> {
+  const token = createSessionToken();
+  const cookieStore = await cookies();
+  cookieStore.set(COOKIE_NAME, token, getAdminSessionCookieOptions());
 }
 
 export async function destroySession(): Promise<void> {

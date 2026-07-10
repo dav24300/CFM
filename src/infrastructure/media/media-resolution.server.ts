@@ -152,3 +152,10 @@ export async function getActionsHeroImage(): Promise<string> {
   const item = gallery[3] ?? gallery[0];
   return item?.src ?? resolveMediaPath(MEDIA.mission);
 }
+
+export async function getAxesHeroImage(): Promise<string> {
+  const settings = await getSettings();
+  const path = settings.axes_hero_image;
+  if (path) return resolveMediaPath(path);
+  return resolveMediaPath(MEDIA.hero.image);
+}

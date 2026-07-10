@@ -15,6 +15,8 @@ import { DonationsPanel } from "@/components/admin/donations/DonationsPanel";
 import { AdminV3Panel } from "@/components/admin/AdminV3Panel";
 import { AdminDesignPanel } from "@/components/admin/AdminDesignPanel";
 import { I18nPanel } from "@/components/admin/i18n/I18nPanel";
+import { IdentityPanel } from "@/components/admin/identity/IdentityPanel";
+import { PagesPanel } from "@/components/admin/pages/PagesPanel";
 import { PartnersPanel } from "@/components/admin/partners/PartnersPanel";
 import { AuditPanel } from "@/components/admin/audit/AuditPanel";
 import { loadAdminBundle } from "@/components/admin/hooks/useAdminApi";
@@ -59,6 +61,10 @@ function DashboardBody({
       );
     case "design":
       return <AdminDesignPanel />;
+    case "identity":
+      return <IdentityPanel />;
+    case "pages":
+      return <PagesPanel />;
     case "i18n":
       return <I18nPanel />;
     case "partners":
@@ -77,22 +83,27 @@ export function AdminDashboard({ access }: Props) {
   const [data, setData] = useState<AdminData | null>(null);
   const [liveEvents, setLiveEvents] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const bundle = await loadAdminBundle();
       if (!bundle) {
-        router.push("/admin");
+        window.location.href = "/admin";
         return;
       }
       setStats(bundle.stats);
       setData(bundle.data);
       setLiveEvents(bundle.liveEvents);
+    } catch {
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     load();
@@ -105,18 +116,38 @@ export function AdminDashboard({ access }: Props) {
 
   return (
     <AdminToastProvider>
-      <div className="flex min-h-screen flex-col bg-cfm-cream/30">
-        <AdminHeader
-          access={access}
+      <div className="flex min-h-screen bg-admin-bg">
+        <AdminSidebar
+          active={section}
+          onChange={setSection}
           stats={stats}
-          onRefresh={load}
-          loading={loading}
-          onLogout={logout}
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
         />
-        <div className="flex flex-1">
-          <AdminSidebar active={section} onChange={setSection} stats={stats} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <AdminHeader
+            access={access}
+            stats={stats}
+            onRefresh={load}
+            loading={loading}
+            onLogout={logout}
+            onMenuToggle={() => setSidebarOpen((v) => !v)}
+          />
           <main className="flex-1 overflow-auto p-6">
-            {loading && !data ? (
+            {loadError ? (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+                <p className="text-sm text-red-800">
+                  Impossible de charger le tableau de bord. Vérifiez la connexion au serveur puis réessayez.
+                </p>
+                <button
+                  type="button"
+                  onClick={load}
+                  className="mt-4 text-sm font-semibold text-admin-ink underline"
+                >
+                  Réessayer
+                </button>
+              </div>
+            ) : loading && !data ? (
               <div className="flex justify-center py-20">
                 <Spinner className="h-8 w-8" />
               </div>

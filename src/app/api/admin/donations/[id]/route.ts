@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { adminUpdateDonation } from "@/infrastructure/repositories/donations.repository";
+import { sendDonationReceiptEmail } from "@/infrastructure/email/nodemailer.adapter";
 import { requireAdminAccess } from "@/lib/admin-rest";
 import { jsonError, jsonNotFound, jsonSuccess } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
@@ -9,6 +10,7 @@ import { parseOrBadRequest } from "@/lib/validators";
 const patchSchema = z.object({
   status: z.enum(["pending", "completed", "failed"]).optional(),
   transaction_id: z.string().nullable().optional(),
+  send_receipt: z.boolean().optional(),
 });
 
 export async function PATCH(
@@ -24,8 +26,28 @@ export async function PATCH(
 
   const { id } = await params;
   const donationId = parseInt(id, 10);
-  const updated = await adminUpdateDonation(donationId, parsed.data);
+  const { send_receipt, ...patch } = parsed.data;
+  const updated = await adminUpdateDonation(donationId, patch);
   if (!updated) return jsonNotFound("Don introuvable");
+
+  if (
+    updated.status === "completed" &&
+    send_receipt !== false &&
+    updated.donor_email
+  ) {
+    try {
+      await sendDonationReceiptEmail({
+        to: updated.donor_email,
+        donorName: updated.donor_name || "Donateur",
+        amount: updated.amount,
+        currency: updated.currency,
+        provider: updated.provider,
+        transactionId: updated.transaction_id || `MANUAL-${donationId}`,
+      });
+    } catch (err) {
+      console.error("Receipt email failed:", err);
+    }
+  }
 
   await logAdminAction({
     actorType: auth.access,

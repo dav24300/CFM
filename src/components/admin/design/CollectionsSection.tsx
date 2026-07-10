@@ -87,8 +87,8 @@ export function CollectionsSection() {
 
       <section>
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-semibold text-cfm-navy">Galerie FIKIN ({gallery.length})</h3>
-          <label className="cursor-pointer text-sm text-cfm-gold">
+          <h3 className="font-semibold text-admin-ink">Galerie FIKIN ({gallery.length})</h3>
+          <label className="cursor-pointer text-sm text-admin-accent">
             + Photo
             <input
               type="file"
@@ -106,7 +106,7 @@ export function CollectionsSection() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {gallery.map((item) => (
             <div key={item.sort} className="rounded-lg border p-3">
-              <div className="relative aspect-video overflow-hidden rounded bg-cfm-cream">
+              <div className="relative aspect-video overflow-hidden rounded bg-admin-bg">
                 <Image src={item.src} alt={item.alt} fill className="object-cover" sizes="200px" />
               </div>
               <Input
@@ -126,17 +126,17 @@ export function CollectionsSection() {
       </section>
 
       <section>
-        <h3 className="mb-4 font-semibold text-cfm-navy">Images des axes (×5)</h3>
+        <h3 className="mb-4 font-semibold text-admin-ink">Images des axes (×5)</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {AXIS_SLUGS.map((slug) => (
             <div key={slug} className="rounded-lg border p-3">
               <p className="text-sm font-medium">{AXIS_LABELS[slug] || slug}</p>
               {axes[slug] && (
-                <div className="relative mt-2 aspect-video overflow-hidden rounded bg-cfm-cream">
+                <div className="relative mt-2 aspect-video overflow-hidden rounded bg-admin-bg">
                   <Image src={axes[slug]} alt="" fill className="object-cover" sizes="160px" />
                 </div>
               )}
-              <label className="mt-2 block cursor-pointer text-xs text-cfm-gold">
+              <label className="mt-2 block cursor-pointer text-xs text-admin-accent">
                 Remplacer
                 <input
                   type="file"

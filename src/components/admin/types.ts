@@ -9,6 +9,8 @@ export type AdminSection =
   | "donations"
   | "live"
   | "design"
+  | "identity"
+  | "pages"
   | "i18n"
   | "partners"
   | "audit";

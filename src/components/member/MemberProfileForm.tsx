@@ -80,7 +80,7 @@ export function MemberProfileForm({ user }: Props) {
         />
       </FormField>
 
-      <p className="text-sm text-cfm-earth">
+      <p className="text-sm text-site-muted">
         {m.email} : {user.email}
       </p>
 

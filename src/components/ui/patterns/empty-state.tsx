@@ -33,9 +33,9 @@ export function EmptyState({
 
   return (
     <div className={wrapperClass} role="status">
-      {icon && <div className="mb-4 text-cfm-gold">{icon}</div>}
-      <h3 className="font-display text-lg font-bold text-cfm-navy">{title}</h3>
-      {description && <p className="mt-2 max-w-md text-sm text-cfm-earth">{description}</p>}
+      {icon && <div className="mb-4 text-site-primary">{icon}</div>}
+      <h3 className="font-serif text-lg font-bold text-site-ink">{title}</h3>
+      {description && <p className="mt-2 max-w-md text-sm text-site-muted">{description}</p>}
       {action && (
         <div className="mt-4">
           {action.href ? (

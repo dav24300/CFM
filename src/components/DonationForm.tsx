@@ -7,6 +7,7 @@ import { NativeSelect } from "@/components/ui/primitives/native-select";
 import { Button } from "@/components/ui/primitives/button";
 import { Alert } from "@/components/ui/primitives/alert";
 import { FormField } from "@/components/ui/patterns/form-field";
+import { FormSuccessPanel } from "@/components/ux/FormSuccessPanel";
 import { useAsyncAction } from "@/lib/hooks/use-async-action";
 
 export function DonationForm() {
@@ -14,8 +15,9 @@ export function DonationForm() {
   const d = t.donate;
   const df = t.donateForm;
   const pay = t.pages.engageExtra;
-  const [successMessage, setSuccessMessage] = useState("");
-  const { isLoading, isSuccess, isError, error, run } = useAsyncAction();
+  const fs = t.ux.formSuccess;
+  const [showLocalSuccess, setShowLocalSuccess] = useState(false);
+  const { isLoading, isError, error, run } = useAsyncAction();
   const [form, setForm] = useState({
     amount: "10",
     currency: "USD",
@@ -42,7 +44,7 @@ export function DonationForm() {
           return;
         }
 
-        setSuccessMessage(data.message || df.thanks);
+        setShowLocalSuccess(true);
       });
     } catch {
       // handled by hook
@@ -112,17 +114,24 @@ export function DonationForm() {
         </FormField>
       </div>
 
-      <p className="text-xs text-cfm-earth">
+      <p className="text-xs text-site-muted">
         {process.env.NEXT_PUBLIC_MOBILE_MONEY_MODE === "production"
           ? pay.prodPayment
           : pay.demoPayment}
       </p>
 
-      <Button type="submit" loading={isLoading} className="w-full">
+      <Button type="submit" loading={isLoading} className="w-full" data-cta="cta_don">
         {df.submitMobile}
       </Button>
 
-      {isSuccess && successMessage && <Alert variant="success">{successMessage}</Alert>}
+      {showLocalSuccess && (
+        <FormSuccessPanel
+          acknowledgment={fs.donationAck}
+          delay={fs.donationDelay}
+          nextLabel={fs.donationNext}
+          nextHref="/s-engager#transparence"
+        />
+      )}
       {isError && error && <Alert variant="error">{error}</Alert>}
     </form>
   );

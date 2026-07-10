@@ -37,11 +37,23 @@ export type AdminLoadResult = {
 
 export async function loadAdminBundle(): Promise<AdminLoadResult | null> {
   const [statsRes, dataRes, liveRes] = await Promise.all([
-    fetch("/api/admin"),
-    fetch("/api/admin/data"),
-    fetch("/api/admin/live"),
+    fetch("/api/admin", { credentials: "include" }),
+    fetch("/api/admin/data", { credentials: "include" }),
+    fetch("/api/admin/live", { credentials: "include" }),
   ]);
-  if (statsRes.status === 401) return null;
+
+  if (
+    statsRes.status === 401 ||
+    dataRes.status === 401 ||
+    liveRes.status === 401
+  ) {
+    return null;
+  }
+
+  if (!statsRes.ok || !dataRes.ok) {
+    throw new Error("admin_bundle_load_failed");
+  }
+
   const stats = await statsRes.json();
   const data = await dataRes.json();
   let liveEvents: Record<string, unknown>[] = [];

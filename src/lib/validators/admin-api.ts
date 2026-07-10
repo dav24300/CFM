@@ -6,6 +6,8 @@ export const adminNewsCreateSchema = z.object({
   slug: z.string().trim().optional(),
   excerpt: z.string().optional(),
   category: z.string().optional(),
+  cover_image: z.string().optional(),
+  cover_image_alt: z.string().optional(),
 });
 
 export const adminNewsPatchSchema = z.object({
@@ -80,6 +82,19 @@ export const adminPetitionCreateSchema = z.object({
   description: z.string().trim().min(1),
   content: z.string().optional(),
   goal: z.coerce.number().int().positive().default(100),
+});
+
+export const adminPetitionPatchSchema = z.object({
+  title: z.string().trim().min(1).optional(),
+  slug: z.string().trim().min(1).optional(),
+  description: z.string().trim().min(1).optional(),
+  content: z.string().nullable().optional(),
+  goal: z.coerce.number().int().positive().optional(),
+  active: z.union([z.literal(0), z.literal(1)]).optional(),
+});
+
+export const adminContactStatusSchema = z.object({
+  status: z.enum(["new", "read", "archived"]),
 });
 
 export const adminUserActivateSchema = z.object({

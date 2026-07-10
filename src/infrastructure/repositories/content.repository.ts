@@ -86,6 +86,16 @@ export async function addNewsletter(email: string): Promise<void> {
   });
 }
 
+export async function deleteNewsletterSubscriber(id: number): Promise<boolean> {
+  let found = false;
+  await updateStoreAsync((store) => {
+    const before = store.newsletter.length;
+    store.newsletter = store.newsletter.filter((n) => n.id !== id);
+    found = store.newsletter.length < before;
+  });
+  return found;
+}
+
 export async function addMembership(data: {
   type: string;
   first_name: string;
@@ -137,9 +147,24 @@ export async function addContactMessage(data: {
     store.contact_messages.push({
       id: nextId(store),
       ...data,
+      status: "new",
       created_at: new Date().toISOString(),
     });
   });
+}
+
+export async function updateContactStatus(
+  id: number,
+  status: "new" | "read" | "archived"
+): Promise<boolean> {
+  let found = false;
+  await updateStoreAsync((store) => {
+    const msg = store.contact_messages.find((m) => m.id === id);
+    if (!msg) return;
+    msg.status = status;
+    found = true;
+  });
+  return found;
 }
 
 export async function getAdminStats() {
@@ -240,6 +265,7 @@ export async function adminCreate(
           description: data.description || null,
           date: data.date || null,
           type: data.type || "action",
+          photo: data.photo || null,
         });
       } else if (table === "testimonials") {
         store.testimonials.push({

@@ -7,10 +7,10 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-cfm-navy text-white",
-        gold: "bg-cfm-gold/20 text-cfm-navy",
+        default: "bg-site-deep text-white",
+        gold: "bg-site-primary/20 text-site-ink",
         live: "animate-live-pulse bg-red-600 text-white",
-        muted: "bg-gray-200 text-cfm-earth",
+        muted: "bg-gray-200 text-site-muted",
       },
     },
     defaultVariants: {

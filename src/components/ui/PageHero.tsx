@@ -21,13 +21,13 @@ export function PageHero({ title, subtitle, image, imageAlt = "", breadcrumbs }:
       <ol className="flex flex-wrap items-center gap-1 text-sm text-gray-300">
         {breadcrumbs.map((crumb, i) => (
           <li key={`${crumb.label}-${i}`} className="flex items-center gap-1">
-            {i > 0 && <ChevronRight className="h-3 w-3 text-cfm-gold/70" aria-hidden />}
+            {i > 0 && <ChevronRight className="h-3 w-3 text-site-primary/70" aria-hidden />}
             {crumb.href ? (
-              <Link href={crumb.href} className="hover:text-cfm-gold">
+              <Link href={crumb.href} className="hover:text-site-primary">
                 {crumb.label}
               </Link>
             ) : (
-              <span aria-current="page" className="text-cfm-gold">
+              <span aria-current="page" className="text-site-primary">
                 {crumb.label}
               </span>
             )}
@@ -39,7 +39,7 @@ export function PageHero({ title, subtitle, image, imageAlt = "", breadcrumbs }:
 
   if (image) {
     return (
-      <section className="relative overflow-hidden bg-cfm-navy text-white">
+      <section className="relative overflow-hidden bg-site-deep text-white">
         <div className="absolute inset-0">
           <Image
             src={image}
@@ -53,7 +53,7 @@ export function PageHero({ title, subtitle, image, imageAlt = "", breadcrumbs }:
         </div>
         <div className="relative mx-auto max-w-6xl px-4 py-20 md:py-28">
           {breadcrumbNav}
-          <h1 className="font-display text-4xl font-bold text-balance md:text-5xl">{title}</h1>
+          <h1 className="font-serif text-4xl font-bold text-balance md:text-5xl">{title}</h1>
           {subtitle && <p className="mt-4 max-w-2xl text-lg text-gray-200">{subtitle}</p>}
         </div>
       </section>
@@ -61,20 +61,20 @@ export function PageHero({ title, subtitle, image, imageAlt = "", breadcrumbs }:
   }
 
   return (
-    <section className="border-b border-cfm-gold/20 bg-cfm-cream">
+    <section className="border-b border-site-primary/20 bg-site-surface">
       <div className="mx-auto max-w-6xl px-4 py-12 md:py-16">
         {breadcrumbNav && (
           <nav aria-label="Fil d'Ariane" className="mb-4">
-            <ol className="flex flex-wrap items-center gap-1 text-sm text-cfm-earth">
+            <ol className="flex flex-wrap items-center gap-1 text-sm text-site-muted">
               {breadcrumbs!.map((crumb, i) => (
                 <li key={`${crumb.label}-${i}`} className="flex items-center gap-1">
                   {i > 0 && <ChevronRight className="h-3 w-3" aria-hidden />}
                   {crumb.href ? (
-                    <Link href={crumb.href} className="hover:text-cfm-gold">
+                    <Link href={crumb.href} className="hover:text-site-primary">
                       {crumb.label}
                     </Link>
                   ) : (
-                    <span aria-current="page" className="font-medium text-cfm-navy">
+                    <span aria-current="page" className="font-medium text-site-ink">
                       {crumb.label}
                     </span>
                   )}

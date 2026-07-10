@@ -24,12 +24,12 @@ export default async function PetitionDetailPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <Link href="/petitions" className="text-sm text-cfm-gold hover:underline">
+      <Link href="/petitions" className="text-sm text-site-primary hover:underline">
         {p.back}
       </Link>
       <h1 className="section-title mt-4">{petition.title}</h1>
       <p className="section-subtitle">{petition.description}</p>
-      {petition.content && <p className="mt-4 text-cfm-earth">{petition.content}</p>}
+      {petition.content && <p className="mt-4 text-site-muted">{petition.content}</p>}
 
       <div className="mt-6 card">
         <div className="flex justify-between text-sm font-semibold">
@@ -40,8 +40,8 @@ export default async function PetitionDetailPage({ params }: Props) {
             {p.goal} : {petition.goal}
           </span>
         </div>
-        <div className="mt-2 h-3 rounded-full bg-cfm-cream">
-          <div className="h-3 rounded-full bg-cfm-gold" style={{ width: `${progress}%` }} />
+        <div className="mt-2 h-3 rounded-full bg-site-surface">
+          <div className="h-3 rounded-full bg-site-primary" style={{ width: `${progress}%` }} />
         </div>
       </div>
 

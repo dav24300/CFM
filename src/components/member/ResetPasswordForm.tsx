@@ -58,7 +58,7 @@ export function ResetPasswordForm({ token, labels }: Props) {
     return (
       <Alert variant="error">
         Lien invalide.{" "}
-        <Link href="/membre/mot-de-passe-oublie" className="text-cfm-gold hover:underline">
+        <Link href="/membre/mot-de-passe-oublie" className="text-site-primary hover:underline">
           Demander un nouveau lien
         </Link>
       </Alert>
@@ -97,7 +97,7 @@ export function ResetPasswordForm({ token, labels }: Props) {
 
       {isSuccess && (
         <p className="text-center text-sm">
-          <Link href="/membre/connexion" className="text-cfm-gold hover:underline">
+          <Link href="/membre/connexion" className="text-site-primary hover:underline">
             {labels.login}
           </Link>
         </p>
