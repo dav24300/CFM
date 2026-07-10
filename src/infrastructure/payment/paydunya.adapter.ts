@@ -106,8 +106,10 @@ export function verifyPayDunyaWebhookHash(
   const normalized = receivedHash.trim();
   if (!normalized) return false;
 
-  // Backward-compatible fallback.
-  if (normalized === masterKey) return true;
+  // Backward-compatible fallback (demo/dev only).
+  if (process.env.MOBILE_MONEY_MODE !== "production" && normalized === masterKey) {
+    return true;
+  }
 
   if (!rawBody) return false;
   const secret = process.env.PAYDUNYA_WEBHOOK_SECRET || masterKey;

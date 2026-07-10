@@ -169,6 +169,8 @@ export async function updateContactStatus(
 
 export async function getAdminStats() {
   const store = await getStoreAsync();
+  const seenAtRaw = store.site_settings?.petition_signatures_seen_at || "";
+  const seenAt = Date.parse(seenAtRaw);
   const pendingUsers = (store.users || []).filter((u) => u.status === "pending").length;
   const pendingFamily = (store.family_links || []).filter(
     (l) => l.status !== "approved" && l.status !== "rejected"
@@ -176,6 +178,12 @@ export async function getAdminStats() {
   const pendingChat = (store.live_chat_messages || []).filter(
     (m) => m.status === "pending"
   ).length;
+  const newPetitionSignatures = (store.petition_signatures || []).filter((s) => {
+    const ts = Date.parse(s.signed_at);
+    if (!Number.isFinite(ts)) return false;
+    if (!Number.isFinite(seenAt)) return true;
+    return ts > seenAt;
+  }).length;
   return {
     news: store.news.length,
     studies: store.studies.length,
@@ -190,6 +198,8 @@ export async function getAdminStats() {
     pending_users: pendingUsers,
     donations: (store.donations || []).length,
     petitions: (store.petitions || []).length,
+    petition_signatures: (store.petition_signatures || []).length,
+    new_petition_signatures: newPetitionSignatures,
     family_links: (store.family_links || []).length,
     pending_family_links: pendingFamily,
     live_events: (store.live_events || []).length,

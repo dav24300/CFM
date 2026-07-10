@@ -32,7 +32,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // `standalone` sert au self-hosting (Docker/VPS) ; sur Vercel il casse le packaging
+  // des fonctions serverless — on le désactive quand VERCEL est présent.
+  ...(process.env.VERCEL ? {} : { output: "standalone" as const }),
   serverExternalPackages: ["pg", "bcryptjs", "nodemailer", "web-push", "sharp"],
   images: {
     dangerouslyAllowSVG: true,

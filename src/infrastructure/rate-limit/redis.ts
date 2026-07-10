@@ -19,6 +19,24 @@ export function isRedisRateLimitEnabled(): boolean {
   return Boolean(getRedisConfig());
 }
 
+export type RedisHealthStatus = "ok" | "degraded" | "skipped";
+
+export async function checkRedisHealth(): Promise<RedisHealthStatus> {
+  const cfg = getRedisConfig();
+  if (!cfg) return "skipped";
+
+  try {
+    const res = await fetch(`${cfg.url}/ping`, {
+      headers: { Authorization: `Bearer ${cfg.token}` },
+      cache: "no-store",
+      signal: AbortSignal.timeout(3000),
+    });
+    return res.ok ? "ok" : "degraded";
+  } catch {
+    return "degraded";
+  }
+}
+
 export async function checkRateLimitRedis(
   key: string,
   { windowMs, max }: CheckOptions

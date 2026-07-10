@@ -32,6 +32,99 @@ export type Supplement = {
     legal: string;
     privacyPolicy: string;
     copyright: string;
+    actNow: string;
+    live: string;
+    petitions: string;
+    donate: string;
+    axes: string;
+    press: string;
+  };
+  ux: {
+    nextAction: {
+      title: string;
+      subtitle: string;
+      signPetition: string;
+      makeDonation: string;
+      getInvolved: string;
+    };
+    membershipCompare: {
+      title: string;
+      colFeature: string;
+      colAccount: string;
+      colQuick: string;
+      rowGoal: string;
+      rowAccountGoal: string;
+      rowQuickGoal: string;
+      rowDelay: string;
+      rowAccountDelay: string;
+      rowQuickDelay: string;
+      rowFollowUp: string;
+      rowAccountFollowUp: string;
+      rowQuickFollowUp: string;
+      ctaAccount: string;
+      ctaQuick: string;
+    };
+    memberPromo: {
+      title: string;
+      body: string;
+      benefit1: string;
+      benefit2: string;
+      benefit3: string;
+      cta: string;
+    };
+    formSuccess: {
+      helpAck: string;
+      helpDelay: string;
+      helpNext: string;
+      contactAck: string;
+      contactDelay: string;
+      contactNext: string;
+      membershipAck: string;
+      membershipDelay: string;
+      membershipNext: string;
+      donationAck: string;
+      donationDelay: string;
+      donationNext: string;
+      petitionAck: string;
+      petitionDelay: string;
+      petitionNext: string;
+    };
+    helpInfo: {
+      title: string;
+      confidentiality: string;
+      delay: string;
+      memberFollowUp: string;
+    };
+    plaidoyer: {
+      viewPetitions: string;
+    };
+    actions: {
+      provinceHelp: string;
+      provinceHelpCta: string;
+    };
+    axes: {
+      ctaActions: string;
+      ctaHelp: string;
+    };
+    about: {
+      ctaTransparency: string;
+      ctaEngage: string;
+    };
+    transparency: {
+      impactTitle: string;
+      impactBody: string;
+    };
+    memberDashboard: {
+      citizenActionsTitle: string;
+      citizenActionsBody: string;
+      liveNow: string;
+      openPetitions: string;
+      viewLive: string;
+    };
+    news: {
+      viewCampaign: string;
+      viewAdvocacy: string;
+    };
   };
   membershipTypes: Record<string, { label: string; description: string }>;
   axesContent: Record<string, { title: string; description: string; details: string[] }>;
@@ -198,6 +291,102 @@ const fr: Supplement = {
     legal: "Mentions légales",
     privacyPolicy: "Politique de confidentialité",
     copyright: "ASBL",
+    actNow: "Agir maintenant",
+    live: "Rejoindre le live",
+    petitions: "Signer une pétition",
+    donate: "Faire un don",
+    axes: "Nos axes",
+    press: "Presse",
+  },
+  ux: {
+    nextAction: {
+      title: "Passez à l'action",
+      subtitle: "Transformez votre engagement en impact concret pour les familles militaires.",
+      signPetition: "Signer une pétition",
+      makeDonation: "Faire un don",
+      getInvolved: "Adhérer",
+    },
+    membershipCompare: {
+      title: "Quel parcours choisir ?",
+      colFeature: "Critère",
+      colAccount: "Compte membre",
+      colQuick: "Adhésion rapide",
+      rowGoal: "Objectif",
+      rowAccountGoal: "Espace privé, suivi et participation continue",
+      rowQuickGoal: "Demande d'adhésion sans mot de passe",
+      rowDelay: "Délai",
+      rowAccountDelay: "Activation après validation (24-72 h)",
+      rowQuickDelay: "Traitement manuel sous 7 jours",
+      rowFollowUp: "Suivi",
+      rowAccountFollowUp: "Tableau de bord, demandes, dons, pétitions",
+      rowQuickFollowUp: "Contact par l'équipe CFM uniquement",
+      ctaAccount: "Créer un compte",
+      ctaQuick: "Adhésion rapide",
+    },
+    memberPromo: {
+      title: "Pourquoi créer un compte membre ?",
+      body: "Allez plus loin après votre action : suivez vos démarches et restez informé des mobilisations.",
+      benefit1: "Suivre vos demandes d'aide en toute confidentialité",
+      benefit2: "Recevoir les alertes live et les prochaines pétitions",
+      benefit3: "Centraliser vos dons et votre participation",
+      cta: "Créer un compte",
+    },
+    formSuccess: {
+      helpAck: "Votre demande confidentielle a bien été enregistrée.",
+      helpDelay: "Notre équipe vous répond sous 7 jours ouvrés.",
+      helpNext: "Créer un compte pour suivre votre demande",
+      contactAck: "Votre message a bien été envoyé.",
+      contactDelay: "Nous vous répondrons sous 7 jours ouvrés.",
+      contactNext: "Consulter nos actions sur le terrain",
+      membershipAck: "Votre demande d'adhésion a bien été enregistrée.",
+      membershipDelay: "Nous vous contacterons sous peu pour la suite.",
+      membershipNext: "Créer un compte pour un suivi en ligne",
+      donationAck: "Merci pour votre générosité !",
+      donationDelay: "Votre don sera confirmé après traitement du paiement.",
+      donationNext: "Voir la transparence financière",
+      petitionAck: "Merci ! Votre signature a été enregistrée.",
+      petitionDelay: "Chaque signature renforce notre plaidoyer.",
+      petitionNext: "Créer un compte pour les prochaines mobilisations",
+    },
+    helpInfo: {
+      title: "Avant de remplir le formulaire",
+      confidentiality:
+        "Ce formulaire est strictement confidentiel. Vos données ne sont accessibles qu'à l'équipe autorisée.",
+      delay: "Délai de réponse : 7 jours ouvrés maximum.",
+      memberFollowUp:
+        "Créez un compte membre pour suivre l'état de votre demande depuis votre espace privé.",
+    },
+    plaidoyer: {
+      viewPetitions: "Voir toutes les pétitions →",
+    },
+    actions: {
+      provinceHelp: "Besoin d'aide dans votre province ?",
+      provinceHelpCta: "Demander de l'aide",
+    },
+    axes: {
+      ctaActions: "Voir nos actions sur le terrain",
+      ctaHelp: "Demander de l'aide",
+    },
+    about: {
+      ctaTransparency: "Voir la transparence financière",
+      ctaEngage: "Adhérer",
+    },
+    transparency: {
+      impactTitle: "Impact de vos dons",
+      impactBody:
+        "Chaque contribution finance directement le plaidoyer, les études et l'accompagnement des familles militaires sur le terrain.",
+    },
+    memberDashboard: {
+      citizenActionsTitle: "Prochaines actions citoyennes",
+      citizenActionsBody: "Participez aux mobilisations en cours et suivez les événements live.",
+      liveNow: "Live en cours",
+      openPetitions: "Pétitions ouvertes",
+      viewLive: "Rejoindre le live",
+    },
+    news: {
+      viewCampaign: "Signer la pétition liée",
+      viewAdvocacy: "Retour au plaidoyer",
+    },
   },
   membershipTypes: {
     famille: {
@@ -450,6 +639,101 @@ const en: Supplement = {
     legal: "Legal notice",
     privacyPolicy: "Privacy policy",
     copyright: "Non-profit",
+    actNow: "Take action now",
+    live: "Join live",
+    petitions: "Sign a petition",
+    donate: "Make a donation",
+    axes: "Our focus areas",
+    press: "Press",
+  },
+  ux: {
+    nextAction: {
+      title: "Take the next step",
+      subtitle: "Turn your engagement into concrete impact for military families.",
+      signPetition: "Sign a petition",
+      makeDonation: "Make a donation",
+      getInvolved: "Join us",
+    },
+    membershipCompare: {
+      title: "Which path should you choose?",
+      colFeature: "Criteria",
+      colAccount: "Member account",
+      colQuick: "Quick membership",
+      rowGoal: "Goal",
+      rowAccountGoal: "Private space, tracking and ongoing participation",
+      rowQuickGoal: "Membership request without password",
+      rowDelay: "Timeline",
+      rowAccountDelay: "Activation after review (24-72 h)",
+      rowQuickDelay: "Manual processing within 7 days",
+      rowFollowUp: "Follow-up",
+      rowAccountFollowUp: "Dashboard, requests, donations, petitions",
+      rowQuickFollowUp: "Contact by CFM team only",
+      ctaAccount: "Create account",
+      ctaQuick: "Quick membership",
+    },
+    memberPromo: {
+      title: "Why create a member account?",
+      body: "Go further after your action: track your requests and stay informed about mobilisations.",
+      benefit1: "Track help requests confidentially",
+      benefit2: "Receive live alerts and upcoming petitions",
+      benefit3: "Centralise donations and participation",
+      cta: "Create account",
+    },
+    formSuccess: {
+      helpAck: "Your confidential request has been recorded.",
+      helpDelay: "Our team will respond within 7 business days.",
+      helpNext: "Create an account to track your request",
+      contactAck: "Your message has been sent.",
+      contactDelay: "We will respond within 7 business days.",
+      contactNext: "See our field actions",
+      membershipAck: "Your membership request has been recorded.",
+      membershipDelay: "We will contact you shortly with next steps.",
+      membershipNext: "Create an account for online tracking",
+      donationAck: "Thank you for your generosity!",
+      donationDelay: "Your donation will be confirmed after payment processing.",
+      donationNext: "View financial transparency",
+      petitionAck: "Thank you! Your signature has been recorded.",
+      petitionDelay: "Every signature strengthens our advocacy.",
+      petitionNext: "Create an account for upcoming mobilisations",
+    },
+    helpInfo: {
+      title: "Before you fill in the form",
+      confidentiality:
+        "This form is strictly confidential. Your data is only accessible to authorised staff.",
+      delay: "Response time: maximum 7 business days.",
+      memberFollowUp: "Create a member account to track your request from your private space.",
+    },
+    plaidoyer: {
+      viewPetitions: "View all petitions →",
+    },
+    actions: {
+      provinceHelp: "Need help in your province?",
+      provinceHelpCta: "Request help",
+    },
+    axes: {
+      ctaActions: "See our field actions",
+      ctaHelp: "Request help",
+    },
+    about: {
+      ctaTransparency: "View financial transparency",
+      ctaEngage: "Join us",
+    },
+    transparency: {
+      impactTitle: "Impact of your donations",
+      impactBody:
+        "Every contribution directly funds advocacy, studies and support for military families on the ground.",
+    },
+    memberDashboard: {
+      citizenActionsTitle: "Upcoming citizen actions",
+      citizenActionsBody: "Join current mobilisations and follow live events.",
+      liveNow: "Live now",
+      openPetitions: "Open petitions",
+      viewLive: "Join live",
+    },
+    news: {
+      viewCampaign: "Sign related petition",
+      viewAdvocacy: "Back to advocacy",
+    },
   },
   membershipTypes: {
     famille: {

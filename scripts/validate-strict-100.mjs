@@ -83,12 +83,27 @@ try {
   record("3b", "PayDunya webhook live (prod keys)", false, "401 si cles configurees");
 }
 
-// 4. Backup PostgreSQL
-try {
-  execSync("node scripts/backup-restore-pg-test.mjs", { cwd: root, stdio: "inherit" });
-  record("4", "Backup PostgreSQL", true);
-} catch {
-  record("4", "Backup PostgreSQL", false);
+// 4. Backup PostgreSQL (prod URL via CFM_BACKUP_DATABASE_URL)
+const backupUrl = process.env.CFM_BACKUP_DATABASE_URL?.trim();
+if (!backupUrl) {
+  record(
+    "4",
+    "Backup PostgreSQL",
+    false,
+    "CFM_BACKUP_DATABASE_URL requis pour gate strict"
+  );
+} else {
+  try {
+    execSync("node scripts/backup-restore-pg-test.mjs", {
+      cwd: root,
+      stdio: "inherit",
+      shell: true,
+      env: { ...process.env, DATABASE_URL: backupUrl },
+    });
+    record("4", "Backup PostgreSQL", true);
+  } catch {
+    record("4", "Backup PostgreSQL", false, "export echoue — verifier connexion Supabase");
+  }
 }
 
 // 5. Production readiness (health + pages critiques)

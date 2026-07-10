@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isPostgresEnabled } from "@/infrastructure/persistence/db-adapter";
-import { isRedisRateLimitEnabled } from "@/infrastructure/rate-limit/redis";
+import { checkRedisHealth } from "@/infrastructure/rate-limit/redis";
 import { bootstrapPostgresStore } from "@/infrastructure/persistence/postgres-store.adapter";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +22,7 @@ export async function GET() {
   const checks: Record<string, CheckStatus> = {
     app: "ok",
     database: await checkDatabase(),
-    redis: isRedisRateLimitEnabled() ? "ok" : "skipped",
+    redis: await checkRedisHealth(),
   };
 
   const healthy =

@@ -26,7 +26,7 @@ const messages = {
       live: "Live",
     },
     member: {
-      login: "Connexion",
+      login: "Se connecter",
       register: "Inscription",
       dashboard: "Mon espace",
       logout: "Déconnexion",
@@ -46,7 +46,7 @@ const messages = {
       signTitle: "Signer",
       name: "Nom complet",
       email: "Email",
-      submit: "Signer la pétition",
+      submit: "Signer une pétition",
       success: "Merci ! Votre signature a été enregistrée.",
     },
     donate: {
@@ -63,7 +63,8 @@ const messages = {
     pages: {
       home: {
         heroCtaHelp: "Demander de l'aide",
-        heroCtaEngage: "S'engager",
+        heroCtaLive: "Rejoindre le live",
+        heroCtaEngage: "Adhérer",
         heroCtaAbout: "Notre histoire",
         heroQuote:
           "Derrière chaque militaire, il y a une famille qui n'a que comme héritage le sang versé sous le drapeau — signe du plus grand amour, le sacrifice suprême.",
@@ -168,7 +169,7 @@ const messages = {
       live: "Live",
     },
     member: {
-      login: "Login",
+      login: "Sign in",
       register: "Register",
       dashboard: "My account",
       logout: "Logout",
@@ -188,7 +189,7 @@ const messages = {
       signTitle: "Sign",
       name: "Full name",
       email: "Email",
-      submit: "Sign petition",
+      submit: "Sign a petition",
       success: "Thank you! Your signature has been recorded.",
     },
     donate: {
@@ -205,7 +206,8 @@ const messages = {
     pages: {
       home: {
         heroCtaHelp: "Request help",
-        heroCtaEngage: "Get involved",
+        heroCtaLive: "Join live",
+        heroCtaEngage: "Join us",
         heroCtaAbout: "Our story",
         heroQuote:
           "Behind every soldier stands a family whose only inheritance is the blood shed under the flag — the sign of the greatest love, the supreme sacrifice.",

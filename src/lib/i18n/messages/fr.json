@@ -14,7 +14,7 @@
     "live": "Live"
   },
   "member": {
-    "login": "Connexion",
+    "login": "Se connecter",
     "register": "Inscription",
     "dashboard": "Mon espace",
     "logout": "Déconnexion",
@@ -34,7 +34,7 @@
     "signTitle": "Signer",
     "name": "Nom complet",
     "email": "Email",
-    "submit": "Signer la pétition",
+    "submit": "Signer une pétition",
     "success": "Merci ! Votre signature a été enregistrée."
   },
   "donate": {
@@ -51,7 +51,8 @@
   "pages": {
     "home": {
       "heroCtaHelp": "Demander de l'aide",
-      "heroCtaEngage": "S'engager",
+      "heroCtaLive": "Rejoindre le live",
+      "heroCtaEngage": "Adhérer",
       "heroCtaAbout": "Notre histoire",
       "heroQuote": "Derrière chaque militaire, il y a une famille qui n'a que comme héritage le sang versé sous le drapeau — signe du plus grand amour, le sacrifice suprême.",
       "missionTitle": "Notre mission",
