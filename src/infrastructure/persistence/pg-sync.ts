@@ -322,5 +322,9 @@ export async function loadStoreFromTables(client: PoolClient): Promise<Store | n
     live_polls,
     live_poll_votes,
     push_subscriptions,
+    // Portail membre (non persisté en PG pour l'instant — normalisé au chargement)
+    events: [],
+    member_messages: [],
+    member_resources: [],
   };
 }

@@ -27,7 +27,11 @@ describe("postgresStoreAdapter", () => {
     mockGetCache.mockReturnValue(null);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    const { resetPgFallbackForTests } = await import(
+      "@/infrastructure/persistence/postgres-store.adapter"
+    );
+    resetPgFallbackForTests();
     process.env = env;
   });
 
@@ -58,6 +62,9 @@ describe("postgresStoreAdapter", () => {
       live_polls: [],
       live_poll_votes: [],
       push_subscriptions: [],
+      events: [],
+      member_messages: [],
+      member_resources: [],
     } as Store;
 
     mockLoad.mockResolvedValue(seed);
@@ -83,6 +90,18 @@ describe("postgresStoreAdapter", () => {
     expect(mockSave).toHaveBeenCalledTimes(1);
     expect(mockSave.mock.calls[0][0].news).toHaveLength(1);
     expect(mockSetCache).toHaveBeenCalled();
+  });
+
+  it("falls back to JSON store when postgres read fails", async () => {
+    mockLoad.mockRejectedValue(new AggregateError([], "connection refused"));
+
+    const { postgresStoreAdapter } = await import(
+      "@/infrastructure/persistence/postgres-store.adapter"
+    );
+
+    const store = await postgresStoreAdapter.read();
+    expect(store.news.length).toBeGreaterThan(0);
+    expect(mockLoad).toHaveBeenCalledTimes(1);
   });
 });
 

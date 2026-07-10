@@ -6,6 +6,7 @@ import {
   defaultStore,
   migrateV2,
   migrateV3,
+  migrateV4,
   nextId,
 } from "@/infrastructure/persistence/store-seed";
 
@@ -38,6 +39,7 @@ function ensureStore(): Store {
   const store = JSON.parse(raw) as Store;
   let changed = migrateV2(store);
   if (migrateV3(store)) changed = true;
+  if (migrateV4(store)) changed = true;
   if (changed) {
     saveStore(store);
   } else {

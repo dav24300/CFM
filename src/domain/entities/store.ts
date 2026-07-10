@@ -23,6 +23,11 @@ import type {
   Action,
   PressRelease,
 } from "@/domain/entities/content";
+import type {
+  PortalEvent,
+  MemberMessage,
+  MemberResource,
+} from "@/domain/entities/v4";
 
 export type Store = {
   _counters: Record<string, number>;
@@ -50,4 +55,8 @@ export type Store = {
   live_polls: LivePoll[];
   live_poll_votes: LivePollVote[];
   push_subscriptions: PushSubscription[];
+  // Portail membre (Phase 3)
+  events: PortalEvent[];
+  member_messages: MemberMessage[];
+  member_resources: MemberResource[];
 };
