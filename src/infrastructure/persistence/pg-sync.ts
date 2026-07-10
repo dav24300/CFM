@@ -21,6 +21,9 @@ export async function hasNormalizedData(client: PoolClient): Promise<boolean> {
 }
 
 const TRUNCATE_TABLES = [
+  "events",
+  "member_messages",
+  "member_resources",
   "live_poll_votes",
   "live_polls",
   "live_chat_messages",
@@ -234,6 +237,31 @@ export async function saveStoreToTables(client: PoolClient, store: Store): Promi
       [s.id, s.endpoint, s.p256dh, s.auth, s.topics || ["lives"], s.created_at]
     );
   }
+
+  for (const ev of store.events || []) {
+    await client.query(
+      `INSERT INTO events (id, title, description, province, "date", "time", type, location, capacity, rsvp_user_ids, created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11)`,
+      [ev.id, ev.title, ev.description, ev.province, ev.date, ev.time, ev.type, ev.location,
+        ev.capacity ?? null, JSON.stringify(ev.rsvp_user_ids || []), ev.created_at]
+    );
+  }
+
+  for (const m of store.member_messages || []) {
+    await client.query(
+      `INSERT INTO member_messages (id, user_id, direction, author_name, subject, body, "read", created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [m.id, m.user_id, m.direction, m.author_name, m.subject ?? null, m.body, m.read, m.created_at]
+    );
+  }
+
+  for (const r of store.member_resources || []) {
+    await client.query(
+      `INSERT INTO member_resources (id, title, category, description, file_url, external_url, created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      [r.id, r.title, r.category, r.description, r.file_url ?? null, r.external_url ?? null, r.created_at]
+    );
+  }
 }
 
 export async function loadStoreFromTables(client: PoolClient): Promise<Store | null> {
@@ -295,6 +323,13 @@ export async function loadStoreFromTables(client: PoolClient): Promise<Store | n
   const push_subscriptions = await q<Store["push_subscriptions"][0]>(
     "SELECT * FROM push_subscriptions ORDER BY id"
   );
+  const events = await q<Store["events"][0]>("SELECT * FROM events ORDER BY id");
+  const member_messages = await q<Store["member_messages"][0]>(
+    "SELECT * FROM member_messages ORDER BY id"
+  );
+  const member_resources = await q<Store["member_resources"][0]>(
+    "SELECT * FROM member_resources ORDER BY id"
+  );
 
   return {
     _counters: counters,
@@ -322,9 +357,9 @@ export async function loadStoreFromTables(client: PoolClient): Promise<Store | n
     live_polls,
     live_poll_votes,
     push_subscriptions,
-    // Portail membre (non persisté en PG pour l'instant — normalisé au chargement)
-    events: [],
-    member_messages: [],
-    member_resources: [],
+    // Portail membre (Phase 3)
+    events,
+    member_messages,
+    member_resources,
   };
 }
