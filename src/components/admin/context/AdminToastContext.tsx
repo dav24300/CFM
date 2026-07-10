@@ -49,7 +49,7 @@ export function AdminToastProvider({ children }: { children: ReactNode }) {
               "rounded-lg px-4 py-3 text-sm font-medium shadow-lg text-white animate-in slide-in-from-right",
               t.type === "success" && "bg-green-700",
               t.type === "error" && "bg-red-700",
-              t.type === "info" && "bg-cfm-navy"
+              t.type === "info" && "bg-admin-deep"
             )}
           >
             {t.message}

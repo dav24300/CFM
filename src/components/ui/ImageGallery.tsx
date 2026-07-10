@@ -84,7 +84,7 @@ export function ImageGallery({
               className="zoom-target object-cover"
               sizes="(max-width:768px) 100vw, 33vw"
             />
-            <span className="absolute inset-0 bg-cfm-navy/0 transition group-hover:bg-cfm-navy/20" aria-hidden />
+            <span className="absolute inset-0 bg-site-deep/0 transition group-hover:bg-site-deep/20" aria-hidden />
           </button>
         ))}
       </div>

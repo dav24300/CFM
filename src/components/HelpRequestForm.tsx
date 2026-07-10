@@ -10,10 +10,13 @@ import { Button } from "@/components/ui/primitives/button";
 import { Alert } from "@/components/ui/primitives/alert";
 import { FormField } from "@/components/ui/patterns/form-field";
 import { FormSelect } from "@/components/ui/patterns/form-select";
+import { FormSuccessPanel } from "@/components/ux/FormSuccessPanel";
 import { useAsyncAction } from "@/lib/hooks/use-async-action";
+import { useTranslations } from "@/lib/i18n-client";
 
 export function HelpRequestForm() {
-  const [successMessage, setSuccessMessage] = useState("");
+  const { t } = useTranslations();
+  const fs = t.ux.formSuccess;
   const [localError, setLocalError] = useState<string | null>(null);
   const { isLoading, isSuccess, isError, error, run } = useAsyncAction();
   const [form, setForm] = useState({
@@ -56,9 +59,6 @@ export function HelpRequestForm() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Erreur");
-        setSuccessMessage(
-          "Votre demande confidentielle a été enregistrée. Nous vous répondrons sous 7 jours ouvrés."
-        );
         setForm({
           first_name: "",
           last_name: "",
@@ -85,7 +85,7 @@ export function HelpRequestForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Alert variant="info" className="flex items-start gap-3">
-        <Shield className="h-5 w-5 shrink-0 text-cfm-gold" aria-hidden />
+        <Shield className="h-5 w-5 shrink-0 text-site-primary" aria-hidden />
         <p>
           Ce formulaire est <strong>strictement confidentiel</strong>. Vos données ne seront
           accessibles qu&apos;à l&apos;équipe autorisée de CFM et ne seront jamais publiées.
@@ -208,12 +208,19 @@ export function HelpRequestForm() {
         />
       </FormField>
 
-      <Button type="submit" loading={isLoading} className="w-full">
+      <Button type="submit" loading={isLoading} className="w-full" data-cta="cta_aide">
         Envoyer ma demande confidentielle
       </Button>
 
       {localError && <Alert variant="error">{localError}</Alert>}
-      {isSuccess && successMessage && <Alert variant="success">{successMessage}</Alert>}
+      {isSuccess && (
+        <FormSuccessPanel
+          acknowledgment={fs.helpAck}
+          delay={fs.helpDelay}
+          nextLabel={fs.helpNext}
+          nextHref="/membre/inscription"
+        />
+      )}
       {isError && error && <Alert variant="error">{error}</Alert>}
     </form>
   );

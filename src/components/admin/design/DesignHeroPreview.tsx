@@ -10,22 +10,35 @@ type Props = {
 };
 
 export function DesignHeroPreview({ image, video, poster, alt }: Props) {
+  const imageSrc = (poster || image).trim();
+  const videoSrc = video?.trim() ?? "";
+
   return (
     <div className="sticky top-4 space-y-3">
-      <p className="text-xs font-semibold uppercase text-cfm-earth">Aperçu accueil</p>
-      <div className="relative aspect-video overflow-hidden rounded-xl border bg-cfm-navy shadow-lg">
-        {video ? (
+      <p className="text-xs font-semibold uppercase text-admin-muted">Aperçu accueil</p>
+      <div className="relative aspect-video overflow-hidden rounded-xl border bg-admin-deep shadow-lg">
+        {videoSrc ? (
           <video
-            src={video}
+            src={videoSrc}
             className="h-full w-full object-cover"
             muted
             loop
             autoPlay
             playsInline
-            poster={poster || image}
+            {...(imageSrc ? { poster: imageSrc } : {})}
+          />
+        ) : imageSrc ? (
+          <Image
+            src={imageSrc}
+            alt={alt || "Hero"}
+            fill
+            className="object-cover"
+            sizes="400px"
           />
         ) : (
-          <Image src={poster || image} alt={alt || "Hero"} fill className="object-cover" sizes="400px" />
+          <div className="flex h-full w-full items-center justify-center bg-admin-deep/80 text-sm text-gray-400">
+            Aucun média hero sélectionné
+          </div>
         )}
         <div className="hero-overlay absolute inset-0" />
         <div className="absolute bottom-4 left-4 right-4 text-white">

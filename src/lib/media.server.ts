@@ -7,6 +7,7 @@ export {
   getOgImagePathCached as getOgImagePath,
   getFaviconPathCached as getFaviconPath,
   getActionsHeroImageCached as getActionsHeroImage,
+  getAxesHeroImageCached as getAxesHeroImage,
   getResolvedAxisImageCached as getResolvedAxisImage,
   getResolvedLiveThumbCached as getResolvedLiveThumb,
   getResolvedNewsCoverCached as getResolvedNewsCover,

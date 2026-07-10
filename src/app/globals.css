@@ -2,9 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =====================================================================
+   CFM ASBL — tokens CSS (deux design systems)
+   Public/Portail (bleu, coins nets) & Admin (teal, 8px)
+   ===================================================================== */
+:root {
+  /* ---- Public & Portail ---- */
+  --site-ink: #14171c;
+  --site-muted: #4a4d54;
+  --site-muted-2: #6b6b63;
+  --site-hairline: #e6e6e2;
+  --site-surface: #f6f8fc;
+  --site-primary: #14418a;
+  --site-primary-dark: #0f367a;
+  --site-deep: #0b1a38;
+  --site-light: #7aa7f5;
+  --site-pale: #eaf0fb;
+  --site-live: #e23b3b;
+  --site-success: #1f8a5b;
+
+  /* ---- Admin ---- */
+  --admin-bg: #f6f7f9;
+  --admin-sidebar: #16181d;
+  --admin-sidebar-active: #22252c;
+  --admin-ink: #1c1c1a;
+  --admin-muted: #6b7076;
+  --admin-muted-2: #8b9099;
+  --admin-border: #e6e8ec;
+  --admin-accent: #127d73;
+  --admin-accent-dark: #0e6b62;
+  --admin-deep: #12325f;
+  --admin-warn-fg: #b7791f;
+  --admin-warn-bg: #fef3e2;
+  --admin-ok-fg: #127d73;
+  --admin-ok-bg: #e3f3f0;
+  --admin-info-fg: #2563aa;
+  --admin-info-bg: #e7effa;
+  --admin-danger-fg: #c0362c;
+  --admin-danger-bg: #fbeae8;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
+  }
+
+  body {
+    background: #fff;
+    color: var(--site-ink);
+  }
+
+  a {
+    color: var(--site-primary);
+  }
+  a:hover {
+    color: var(--site-primary-dark);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -23,44 +75,47 @@
 }
 
 @layer components {
+  /* ---- Boutons (public/portail : coins nets, bleu institutionnel) ---- */
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-lg bg-cfm-gold px-6 py-3 font-semibold text-cfm-navy shadow-cfm transition hover:scale-[1.02] hover:bg-amber-400 hover:shadow-cfm-lg focus:outline-none focus:ring-2 focus:ring-cfm-gold focus:ring-offset-2;
+    @apply inline-flex items-center justify-center bg-site-primary px-6 py-3 font-semibold text-white transition hover:bg-site-primary-dark focus:outline-none focus:ring-2 focus:ring-site-primary focus:ring-offset-2;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-lg border-2 border-cfm-navy px-6 py-3 font-semibold text-cfm-navy transition hover:scale-[1.02] hover:bg-cfm-navy hover:text-white focus:outline-none focus:ring-2 focus:ring-cfm-navy focus:ring-offset-2;
+    @apply inline-flex items-center justify-center border border-site-primary px-6 py-3 font-semibold text-site-primary transition hover:bg-site-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-site-primary focus:ring-offset-2;
   }
 
   .btn-outline-light {
-    @apply inline-flex items-center justify-center rounded-lg border-2 border-white px-6 py-3 font-semibold text-white transition hover:bg-white hover:text-cfm-navy;
+    @apply inline-flex items-center justify-center border border-white px-6 py-3 font-semibold text-white transition hover:bg-white hover:text-site-primary;
   }
 
+  /* ---- Typographie de section (serif éditorial) ---- */
   .section-title {
-    @apply font-display text-3xl font-bold text-cfm-navy md:text-4xl;
+    @apply font-serif text-3xl font-semibold text-site-ink md:text-4xl;
   }
 
   .section-subtitle {
-    @apply mt-3 text-lg text-cfm-earth;
+    @apply mt-3 text-lg text-site-muted;
   }
 
+  /* ---- Cartes (coins nets, hairline 1px, ombre au survol) ---- */
   .card {
-    @apply rounded-xl bg-white p-6 shadow-cfm transition hover:shadow-cfm-lg;
+    @apply border border-site-hairline bg-white p-6 transition hover:shadow-site-hover;
   }
 
   .card-media {
-    @apply overflow-hidden rounded-xl bg-white shadow-cfm transition hover:shadow-cfm-lg;
+    @apply overflow-hidden border border-site-hairline bg-white transition hover:shadow-site-hover;
   }
 
   .card-glass {
-    @apply rounded-xl border border-white/20 bg-white/80 p-6 shadow-cfm backdrop-blur-md;
+    @apply border border-white/20 bg-white/80 p-6 shadow-site-hover backdrop-blur-md;
   }
 
   .hero-overlay {
-    @apply absolute inset-0 bg-gradient-to-b from-cfm-navy/80 via-cfm-navy/60 to-cfm-navy/90;
+    @apply absolute inset-0 bg-gradient-to-b from-site-deep/80 via-site-deep/60 to-site-deep/90;
   }
 
   .media-frame {
-    @apply overflow-hidden rounded-2xl shadow-cfm-lg;
+    @apply overflow-hidden border border-site-hairline shadow-site-hover;
   }
 
   .text-balance {
@@ -87,11 +142,29 @@
   }
 
   .input-field {
-    @apply w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-cfm-gold focus:outline-none focus:ring-2 focus:ring-cfm-gold/30;
+    @apply w-full border border-site-hairline px-4 py-3 focus:border-site-primary focus:outline-none focus:ring-2 focus:ring-site-primary/30;
   }
 
   .label-field {
-    @apply mb-1 block text-sm font-medium text-cfm-navy;
+    @apply mb-1 block text-sm font-medium text-site-ink;
+  }
+
+  /* ---- Badges de statut admin ---- */
+  .badge-warn {
+    color: var(--admin-warn-fg);
+    background: var(--admin-warn-bg);
+  }
+  .badge-ok {
+    color: var(--admin-ok-fg);
+    background: var(--admin-ok-bg);
+  }
+  .badge-info {
+    color: var(--admin-info-fg);
+    background: var(--admin-info-bg);
+  }
+  .badge-danger {
+    color: var(--admin-danger-fg);
+    background: var(--admin-danger-bg);
   }
 
   .page-enter {
@@ -107,6 +180,70 @@
     }
   }
 }
+
+/* =====================================================================
+   Keyframes de référence (portées en Framer Motion côté composants)
+   ===================================================================== */
+@keyframes kb {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: scale(1.16);
+  }
+} /* ken-burns hero */
+@keyframes fu {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+} /* fade-up */
+@keyframes mq {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+} /* marquee */
+@keyframes cfmpulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(226, 59, 59, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 9px rgba(226, 59, 59, 0);
+  }
+}
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+} /* frise qui se dessine */
+@keyframes shim {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+} /* shimmer dégradé */
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(7px);
+  }
+} /* indicateur de défilement */
 
 @media (prefers-reduced-motion: reduce) {
   .page-enter {

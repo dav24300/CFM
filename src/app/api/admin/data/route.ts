@@ -4,7 +4,7 @@ import {
   getAllUsers,
   getAllDonations,
   getAllFamilyLinks,
-  getActivePetitions,
+  getAllPetitions,
   getPetitionSignatures,
   getUserById,
 } from "@/lib/members";
@@ -29,7 +29,7 @@ export async function GET() {
     }))
   );
   const petitions = await Promise.all(
-    (await getActivePetitions()).map(async (p) => ({
+    (await getAllPetitions()).map(async (p) => ({
       ...p,
       signatures: (await getPetitionSignatures(p.id)).length,
     }))

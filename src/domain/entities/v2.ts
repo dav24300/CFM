@@ -1,4 +1,4 @@
-export type UserRole = "member" | "volunteer";
+export type UserRole = "member" | "volunteer" | "coordinator";
 export type MembershipType = "famille" | "soutien" | "benevole";
 export type UserStatus = "pending" | "active" | "suspended";
 

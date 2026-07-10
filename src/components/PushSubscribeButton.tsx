@@ -66,7 +66,7 @@ export function PushSubscribeButton({ labels }: Props) {
         onClick={subscribe}
         loading={status === "loading"}
         disabled={status === "done"}
-        className="border-cfm-gold/40 hover:bg-cfm-gold/10"
+        className="border-site-primary/40 hover:bg-site-primary/10"
       >
         <Bell className="h-4 w-4" aria-hidden />
         {status === "done" ? labels.subscribed : labels.subscribe}

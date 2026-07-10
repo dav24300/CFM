@@ -17,7 +17,7 @@ export default async function MemberProfilePage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-12">
-      <Link href="/membre/tableau-de-bord" className="text-sm text-cfm-gold hover:underline">
+      <Link href="/membre/tableau-de-bord" className="text-sm text-site-primary hover:underline">
         {m.profileBack}
       </Link>
       <h1 className="section-title mt-4">{m.profileTitle}</h1>

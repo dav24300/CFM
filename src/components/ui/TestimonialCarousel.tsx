@@ -86,7 +86,7 @@ export function TestimonialCarousel({
             aria-hidden={i !== activeIndex ? true : undefined}
           >
             <div className="mb-4 flex items-center gap-4">
-              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full ring-2 ring-cfm-gold/40">
+              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full ring-2 ring-site-primary/40">
                 <Image
                   src={item.photo || "/media/temoignages/portrait-01.svg"}
                   alt={item.photoAlt || item.author}
@@ -100,9 +100,9 @@ export function TestimonialCarousel({
                   }
                 />
               </div>
-              <figcaption className="text-sm text-cfm-gold">
+              <figcaption className="text-sm text-site-primary">
                 <span className="font-semibold text-white">{item.author}</span>
-                {item.role && <span className="block text-cfm-gold/80">{item.role}</span>}
+                {item.role && <span className="block text-site-primary/80">{item.role}</span>}
               </figcaption>
             </div>
             <blockquote className="italic text-gray-200">
@@ -134,7 +134,7 @@ export function TestimonialCarousel({
                 aria-label={`Témoignage ${i + 1}`}
                 className={cn(
                   "h-2 w-2 rounded-full transition",
-                  i === activeIndex ? "bg-cfm-gold" : "bg-white/30"
+                  i === activeIndex ? "bg-site-primary" : "bg-white/30"
                 )}
                 onClick={() => scrollToIndex(i)}
               />

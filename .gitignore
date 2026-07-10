@@ -46,6 +46,11 @@ next-env.d.ts
 # IDE / runtime
 .cursor/
 data/admin-audit.log
+data/emails.log
+typecheck-out.txt
+
+# Backups locaux
+/backups/
 
 # User uploads (keep placeholder only)
 public/media/uploads/*

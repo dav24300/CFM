@@ -32,28 +32,28 @@ export async function DonationTransparency() {
   return (
     <div className="mt-6 space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-lg bg-cfm-cream p-4 text-center">
-          <p className="text-2xl font-bold text-cfm-navy">{count}</p>
-          <p className="text-sm text-cfm-earth">{t.common.donationsRecorded}</p>
+        <div className="rounded-lg bg-site-surface p-4 text-center">
+          <p className="text-2xl font-bold text-site-ink">{count}</p>
+          <p className="text-sm text-site-muted">{t.common.donationsRecorded}</p>
         </div>
-        <div className="rounded-lg bg-cfm-cream p-4 text-center">
-          <p className="text-2xl font-bold text-cfm-navy">{totalUsd.toLocaleString("fr-FR")} USD</p>
-          <p className="text-sm text-cfm-earth">{t.common.totalUsd}</p>
+        <div className="rounded-lg bg-site-surface p-4 text-center">
+          <p className="text-2xl font-bold text-site-ink">{totalUsd.toLocaleString("fr-FR")} USD</p>
+          <p className="text-sm text-site-muted">{t.common.totalUsd}</p>
         </div>
-        <div className="rounded-lg bg-cfm-cream p-4 text-center">
-          <p className="text-2xl font-bold text-cfm-navy">{totalCdf.toLocaleString("fr-FR")} CDF</p>
-          <p className="text-sm text-cfm-earth">{t.common.totalCdf}</p>
+        <div className="rounded-lg bg-site-surface p-4 text-center">
+          <p className="text-2xl font-bold text-site-ink">{totalCdf.toLocaleString("fr-FR")} CDF</p>
+          <p className="text-sm text-site-muted">{t.common.totalCdf}</p>
         </div>
       </div>
 
       {showDonorList && recentPublic.length > 0 && (
-        <div className="rounded-lg border border-cfm-gold/20 bg-white p-4">
-          <h3 className="mb-3 font-semibold text-cfm-navy">Derniers dons (anonymisés)</h3>
+        <div className="rounded-lg border border-site-primary/20 bg-white p-4">
+          <h3 className="mb-3 font-semibold text-site-ink">Derniers dons (anonymisés)</h3>
           <ul className="space-y-2 text-sm">
             {recentPublic.map((d) => (
               <li key={d.id} className="flex justify-between gap-4 border-b border-gray-50 pb-2 last:border-0">
-                <span className="text-cfm-navy">{d.label}</span>
-                <span className="text-cfm-earth">
+                <span className="text-site-ink">{d.label}</span>
+                <span className="text-site-muted">
                   {d.amount} · {d.date}
                 </span>
               </li>

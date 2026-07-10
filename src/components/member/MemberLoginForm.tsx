@@ -59,13 +59,13 @@ export function MemberLoginForm() {
       {isError && error && <Alert variant="error">{error}</Alert>}
 
       <p className="text-right text-sm">
-        <Link href="/membre/mot-de-passe-oublie" className="text-cfm-gold hover:underline">
+        <Link href="/membre/mot-de-passe-oublie" className="text-site-primary hover:underline">
           {m.forgotLink}
         </Link>
       </p>
-      <p className="text-center text-sm text-cfm-earth">
+      <p className="text-center text-sm text-site-muted">
         {m.noAccount}{" "}
-        <Link href="/membre/inscription" className="text-cfm-gold hover:underline">
+        <Link href="/membre/inscription" className="text-site-primary hover:underline">
           {m.registerLink}
         </Link>
       </p>

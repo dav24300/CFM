@@ -1,5 +1,5 @@
 import { getAdminData } from "@/lib/db";
-import { getAllDonations } from "@/lib/members";
+import { getAllDonations, getAllUsers } from "@/lib/members";
 import { requireAdminAccess } from "@/lib/admin-rest";
 import { jsonError, jsonNotFound } from "@/lib/api-response";
 
@@ -10,6 +10,10 @@ const EXPORTERS: Record<string, () => Promise<Record<string, unknown>[]>> = {
   help_requests: async () => (await getAdminData()).help_requests,
   news: async () => (await getAdminData()).news,
   donations: async () => (await getAllDonations()) as unknown as Record<string, unknown>[],
+  users: async () => {
+    const users = await getAllUsers();
+    return users.map(({ password_hash: _, ...pub }) => pub) as unknown as Record<string, unknown>[];
+  },
 };
 
 function toCsv(rows: Record<string, unknown>[]): string {

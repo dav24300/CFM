@@ -291,3 +291,42 @@ CREATE INDEX IF NOT EXISTS idx_help_requests_status ON help_requests(status);
 CREATE INDEX IF NOT EXISTS idx_admin_audit_created_at ON admin_audit_log(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_live_chat_event_created ON live_chat_messages(live_event_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
+
+-- Portail membre (Phase 3) -------------------------------------------------
+CREATE TABLE IF NOT EXISTS events (
+  id INTEGER PRIMARY KEY,
+  title VARCHAR(500) NOT NULL,
+  description TEXT,
+  province VARCHAR(120),
+  "date" TEXT,
+  "time" TEXT,
+  type VARCHAR(50),
+  location TEXT,
+  capacity INTEGER,
+  rsvp_user_ids JSONB DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS member_messages (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  direction VARCHAR(10) NOT NULL,
+  author_name VARCHAR(200),
+  subject TEXT,
+  body TEXT NOT NULL,
+  "read" SMALLINT DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS member_resources (
+  id INTEGER PRIMARY KEY,
+  title VARCHAR(500) NOT NULL,
+  category VARCHAR(120),
+  description TEXT,
+  file_url TEXT,
+  external_url TEXT,
+  created_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_events_date ON events("date");
+CREATE INDEX IF NOT EXISTS idx_member_messages_user ON member_messages(user_id);

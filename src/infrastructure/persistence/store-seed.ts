@@ -16,11 +16,18 @@ import type {
   LivePollVote,
   PushSubscription,
 } from "@/domain/entities/v3";
+import type {
+  PortalEvent,
+  MemberMessage,
+  MemberResource,
+} from "@/domain/entities/v4";
 
 export function loadSeedStore(): Store {
-  const store = structuredClone(seedData) as Store;
+  // Le JSON de seed ne contient pas les collections récentes ; migrateV4 les normalise.
+  const store = structuredClone(seedData) as unknown as Store;
   migrateV2(store);
   migrateV3(store);
+  migrateV4(store);
   return store;
 }
 
@@ -196,6 +203,9 @@ export function defaultStore(): Store {
     live_polls: [] as LivePoll[],
     live_poll_votes: [] as LivePollVote[],
     push_subscriptions: [] as PushSubscription[],
+    events: [] as PortalEvent[],
+    member_messages: [] as MemberMessage[],
+    member_resources: [] as MemberResource[],
   };
 }
 
@@ -272,6 +282,113 @@ export function migrateV3(store: Store): boolean {
     });
     changed = true;
   }
+  return changed;
+}
+
+export function migrateV4(store: Store): boolean {
+  let changed = false;
+  if (!store.events) { store.events = []; changed = true; }
+  if (!store.member_messages) { store.member_messages = []; changed = true; }
+  if (!store.member_resources) { store.member_resources = []; changed = true; }
+
+  if (store.events.length === 0) {
+    const now = new Date().toISOString();
+    // Dates relatives au futur (garantit des événements "à venir" quelle que soit la date).
+    const futureDate = (days: number): string =>
+      new Date(Date.now() + days * 86400000).toISOString().slice(0, 10);
+    const base = (store._counters.global || 100) + 1;
+    store.events.push(
+      {
+        id: base,
+        title: "Atelier entrepreneuriat pour veuves",
+        description:
+          "Formation pratique à la création de petites entreprises et à l'accès au microcrédit.",
+        province: "Nord-Kivu",
+        date: futureDate(21),
+        time: "09:00",
+        type: "atelier",
+        location: "Goma — Maison des familles",
+        capacity: 40,
+        rsvp_user_ids: [],
+        created_at: now,
+      },
+      {
+        id: base + 1,
+        title: "Rencontre des familles militaires — Kinshasa",
+        description: "Temps d'échange, d'écoute et d'orientation pour les familles.",
+        province: "Kinshasa",
+        date: futureDate(38),
+        time: "14:00",
+        type: "rencontre",
+        location: "Kinshasa — Centre communautaire",
+        capacity: null,
+        rsvp_user_ids: [],
+        created_at: now,
+      },
+      {
+        id: base + 2,
+        title: "Distribution de kits scolaires",
+        description: "Remise de fournitures aux enfants et orphelins de militaires.",
+        province: "Haut-Katanga",
+        date: futureDate(60),
+        time: "10:00",
+        type: "distribution",
+        location: "Lubumbashi",
+        capacity: 120,
+        rsvp_user_ids: [],
+        created_at: now,
+      }
+    );
+    store._counters.global = base + 2;
+    changed = true;
+  }
+
+  if (store.member_resources.length === 0) {
+    const now = new Date().toISOString();
+    const base = (store._counters.global || 100) + 1;
+    store.member_resources.push(
+      {
+        id: base,
+        title: "Obtenir une pension de survie",
+        category: "Démarches",
+        description:
+          "Guide pas à pas pour constituer le dossier de pension de survie des veuves de militaires.",
+        file_url: null,
+        external_url: null,
+        created_at: now,
+      },
+      {
+        id: base + 1,
+        title: "Inscrire un orphelin à l'école",
+        category: "Éducation",
+        description: "Documents requis et bourses disponibles pour la scolarisation.",
+        file_url: null,
+        external_url: null,
+        created_at: now,
+      },
+      {
+        id: base + 2,
+        title: "Accès aux soins de santé reproductive",
+        category: "Santé",
+        description: "Où trouver des services adaptés et gratuits près des camps militaires.",
+        file_url: null,
+        external_url: null,
+        created_at: now,
+      },
+      {
+        id: base + 3,
+        title: "Faire valoir ses droits juridiques",
+        category: "Juridique",
+        description: "Contacts et procédures pour un accompagnement juridique gratuit.",
+        file_url: null,
+        external_url: null,
+        created_at: now,
+      }
+    );
+    store._counters.global = base + 3;
+    changed = true;
+  }
+
   return changed;
 }
 

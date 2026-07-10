@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/primitives/button";
 import { Input } from "@/components/ui/primitives/input";
 import { DataTable, type Column } from "@/components/admin/ui/data-table";
 import { StatusBadge } from "@/components/admin/ui/status-badge";
+import { ExportButton } from "@/components/admin/ui/export-button";
 import { useAdminApi } from "@/components/admin/hooks/useAdminApi";
 import type { AdminData } from "@/components/admin/types";
 
@@ -18,8 +19,13 @@ type Props = {
 
 export function InboxPanel({ data, onReload }: Props) {
   const { post } = useAdminApi(onReload);
-  const [subTab, setSubTab] = useState<"help" | "contact" | "memberships">("help");
+  const [subTab, setSubTab] = useState<"help" | "contact" | "memberships" | "petitions">("help");
   const [helpNote, setHelpNote] = useState<Record<number, string>>({});
+
+  const contacts = (data.contacts as Row[]).filter((c) => c.status !== "archived");
+  const archivedCount = (data.contacts as Row[]).filter((c) => c.status === "archived").length;
+  const petitionSignatures = (data.petition_signatures || []) as Row[];
+  const newPetitionSignatures = petitionSignatures.filter((s) => Boolean(s.is_new)).length;
 
   const helpCols: Column<Row>[] = [
     { key: "first_name", header: "Nom", sortable: true },
@@ -33,6 +39,11 @@ export function InboxPanel({ data, onReload }: Props) {
     { key: "email", header: "Email" },
     { key: "subject", header: "Sujet" },
     { key: "message", header: "Message", className: "max-w-xs truncate" },
+    {
+      key: "status",
+      header: "Statut",
+      render: (r) => <StatusBadge status={String(r.status || "new")} />,
+    },
     { key: "created_at", header: "Date", sortable: true },
   ];
 
@@ -42,15 +53,47 @@ export function InboxPanel({ data, onReload }: Props) {
     { key: "email", header: "Email" },
     { key: "status", header: "Statut", render: (r) => <StatusBadge status={String(r.status)} /> },
   ];
+  const petitionCols: Column<Row>[] = [
+    { key: "petition_title", header: "Pétition", sortable: true },
+    { key: "name", header: "Signataire", sortable: true },
+    { key: "email", header: "Email" },
+    {
+      key: "is_new",
+      header: "Statut",
+      render: (r) => (
+        <StatusBadge status={Boolean(r.is_new) ? "new" : "read"} />
+      ),
+    },
+    { key: "signed_at", header: "Signé le", sortable: true },
+  ];
 
   return (
     <div className="space-y-6">
-      <h2 className="font-display text-xl font-bold text-cfm-navy">Boîte de réception</h2>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h2 className="font-display text-xl font-bold text-admin-ink">Boîte de réception</h2>
+        {subTab === "contact" && <ExportButton entity="contacts" label="Exporter contacts" />}
+        {subTab === "petitions" && newPetitionSignatures > 0 && (
+          <Button
+            size="sm"
+            variant="secondary"
+            type="button"
+            onClick={() => post({ action: "petition_signatures_mark_read" })}
+          >
+            Marquer toutes les signatures comme lues
+          </Button>
+        )}
+      </div>
       <Tabs value={subTab} onValueChange={(v) => setSubTab(v as typeof subTab)}>
         <TabsList>
           <TabsTrigger value="help">Aide ({data.help_requests.length})</TabsTrigger>
-          <TabsTrigger value="contact">Contact ({data.contacts.length})</TabsTrigger>
+          <TabsTrigger value="contact">
+            Contact ({contacts.length}{archivedCount ? ` · ${archivedCount} archivés` : ""})
+          </TabsTrigger>
           <TabsTrigger value="memberships">Adhésions ({data.memberships.length})</TabsTrigger>
+          <TabsTrigger value="petitions">
+            Signatures pétitions ({petitionSignatures.length}
+            {newPetitionSignatures ? ` · ${newPetitionSignatures} nouvelles` : ""})
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -96,10 +139,32 @@ export function InboxPanel({ data, onReload }: Props) {
 
       {subTab === "contact" && (
         <DataTable
-          data={data.contacts as Row[]}
+          data={contacts}
           columns={contactCols}
           searchKeys={["name", "email", "subject"]}
           rowKey={(r) => Number(r.id)}
+          actions={(row) => (
+            <div className="flex flex-wrap gap-1">
+              {row.status !== "read" && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  type="button"
+                  onClick={() => post({ action: "contact_update", id: row.id, data: { status: "read" } })}
+                >
+                  Marquer lu
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="destructive"
+                type="button"
+                onClick={() => post({ action: "contact_update", id: row.id, data: { status: "archived" } })}
+              >
+                Archiver
+              </Button>
+            </div>
+          )}
         />
       )}
 
@@ -134,6 +199,15 @@ export function InboxPanel({ data, onReload }: Props) {
               )}
             </div>
           )}
+        />
+      )}
+
+      {subTab === "petitions" && (
+        <DataTable
+          data={petitionSignatures}
+          columns={petitionCols}
+          searchKeys={["petition_title", "name", "email"]}
+          rowKey={(r) => Number(r.id)}
         />
       )}
     </div>

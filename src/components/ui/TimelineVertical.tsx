@@ -16,22 +16,22 @@ type Props = {
 
 export function TimelineVertical({ events }: Props) {
   return (
-    <div className="relative space-y-10 pl-8 before:absolute before:left-[11px] before:top-2 before:h-[calc(100%-1rem)] before:w-0.5 before:bg-cfm-gold/30">
+    <div className="relative space-y-10 pl-8 before:absolute before:left-[11px] before:top-2 before:h-[calc(100%-1rem)] before:w-0.5 before:bg-site-primary/30">
       {events.map((event, i) => (
         <ScrollReveal key={event.date + event.title} delay={i * 0.08}>
           <div className="relative">
             <span
-              className="absolute -left-8 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-cfm-gold ring-4 ring-cfm-cream"
+              className="absolute -left-8 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-site-primary ring-4 ring-site-surface"
               aria-hidden
             >
-              <span className="h-2 w-2 rounded-full bg-cfm-navy" />
+              <span className="h-2 w-2 rounded-full bg-site-deep" />
             </span>
-            <time className="text-sm font-semibold uppercase tracking-wide text-cfm-gold">
+            <time className="text-sm font-semibold uppercase tracking-wide text-site-primary">
               {event.date}
             </time>
-            <h3 className="mt-1 font-display text-xl font-bold text-cfm-navy">{event.title}</h3>
+            <h3 className="mt-1 font-serif text-xl font-bold text-site-ink">{event.title}</h3>
             {event.description && (
-              <p className="mt-2 text-cfm-earth leading-relaxed">{event.description}</p>
+              <p className="mt-2 text-site-muted leading-relaxed">{event.description}</p>
             )}
             {event.image && (
               <div className="media-frame relative mt-4 aspect-video max-w-md">

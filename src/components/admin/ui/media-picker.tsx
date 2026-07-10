@@ -46,13 +46,13 @@ export function MediaPicker({ open, onClose, onSelect, title = "Choisir un médi
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="flex max-h-[85vh] w-full max-w-3xl flex-col rounded-xl bg-white shadow-xl">
         <div className="flex items-center justify-between border-b p-4">
-          <h3 className="font-semibold text-cfm-navy">{title}</h3>
+          <h3 className="font-semibold text-admin-ink">{title}</h3>
           <button type="button" onClick={onClose} className="text-sm text-gray-500">
             Fermer
           </button>
         </div>
         <div className="border-b p-3">
-          <label className="cursor-pointer text-sm text-cfm-gold">
+          <label className="cursor-pointer text-sm text-admin-accent">
             {uploading ? "Upload…" : "+ Nouveau fichier"}
             <input
               type="file"
@@ -73,10 +73,10 @@ export function MediaPicker({ open, onClose, onSelect, title = "Choisir un médi
               <button
                 key={item.path}
                 type="button"
-                className="rounded-lg border p-1 text-left hover:border-cfm-gold"
+                className="rounded-lg border p-1 text-left hover:border-admin-accent"
                 onClick={() => onSelect(item.path)}
               >
-                <div className="relative aspect-video overflow-hidden rounded bg-cfm-cream">
+                <div className="relative aspect-video overflow-hidden rounded bg-admin-bg">
                   {item.path.endsWith(".pdf") ? (
                     <span className="flex h-full items-center justify-center text-xs">PDF</span>
                   ) : (

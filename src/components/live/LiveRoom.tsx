@@ -47,12 +47,12 @@ export function LiveRoom({ event, polls, labels }: Props) {
           </span>
         )}
         {!isLive && (
-          <span className="rounded-full bg-cfm-gold/20 px-3 py-1 text-xs font-semibold text-cfm-navy">
+          <span className="rounded-full bg-site-primary/20 px-3 py-1 text-xs font-semibold text-site-ink">
             {statusLabel}
           </span>
         )}
         {event.viewer_count > 0 && (
-          <span className="text-sm text-cfm-earth">
+          <span className="text-sm text-site-muted">
             {event.viewer_count} {labels.viewers}
           </span>
         )}
@@ -65,12 +65,12 @@ export function LiveRoom({ event, polls, labels }: Props) {
         status={event.status}
       />
 
-      <p className="text-cfm-earth">{event.description}</p>
+      <p className="text-site-muted">{event.description}</p>
 
       <div className="grid gap-8 lg:grid-cols-2">
         <LiveChat slug={event.slug} isLive={isLive} labels={labels.chat} />
         <div>
-          <h2 className="mb-4 font-display text-xl font-bold">Sondages</h2>
+          <h2 className="mb-4 font-serif text-xl font-bold">Sondages</h2>
           <LivePolls slug={event.slug} polls={polls} isLive={isLive} labels={labels.poll} />
         </div>
       </div>

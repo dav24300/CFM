@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/primitives/button";
 import { ButtonLink } from "@/components/ui/patterns/button-link";
 
-import { Users, Heart, CreditCard, LogOut } from "lucide-react";
+import { Users, Heart, CreditCard, LogOut, Radio, Megaphone } from "lucide-react";
 
 import { FamilyLinkManager } from "@/components/member/FamilyLinkManager";
 
@@ -19,11 +19,17 @@ import { useTranslations } from "@/lib/i18n-client";
 
 
 
-type Props = { initialUser: PublicUser };
+type Props = {
+  initialUser: PublicUser;
+  activeLive?: { slug: string; title: string } | null;
+  openPetitionsCount?: number;
+};
 
-
-
-export function MemberDashboard({ initialUser }: Props) {
+export function MemberDashboard({
+  initialUser,
+  activeLive = null,
+  openPetitionsCount = 0,
+}: Props) {
 
   const { t } = useTranslations();
 
@@ -109,7 +115,7 @@ export function MemberDashboard({ initialUser }: Props) {
 
           <h1 className="section-title">{m.dashboardHello}, {user.first_name}</h1>
 
-          <p className="text-cfm-earth">
+          <p className="text-site-muted">
 
             {user.membership_type} —{" "}
 
@@ -119,7 +125,7 @@ export function MemberDashboard({ initialUser }: Props) {
 
           {isActive && (
 
-            <Link href="/membre/profil" className="mt-2 inline-block text-sm text-cfm-gold hover:underline">
+            <Link href="/membre/profil" className="mt-2 inline-block text-sm text-site-primary hover:underline">
 
               {m.editProfile}
 
@@ -151,7 +157,7 @@ export function MemberDashboard({ initialUser }: Props) {
 
       {isActive && user.role === "volunteer" && (
 
-        <div className="rounded-xl border border-cfm-gold/30 bg-cfm-cream p-4">
+        <div className="rounded-xl border border-site-primary/30 bg-site-surface p-4">
 
           <p className="text-sm">{m.volunteerBanner}</p>
 
@@ -175,9 +181,9 @@ export function MemberDashboard({ initialUser }: Props) {
 
               <div className="flex items-center gap-2">
 
-                <Users className="h-5 w-5 text-cfm-gold" />
+                <Users className="h-5 w-5 text-site-primary" />
 
-                <h2 className="font-display text-xl font-bold">{f.familyLinks}</h2>
+                <h2 className="font-serif text-xl font-bold">{f.familyLinks}</h2>
 
               </div>
 
@@ -193,19 +199,19 @@ export function MemberDashboard({ initialUser }: Props) {
 
             <div className="flex items-center gap-2">
 
-              <Heart className="h-5 w-5 text-cfm-gold" />
+              <Heart className="h-5 w-5 text-site-primary" />
 
-              <h2 className="font-display text-xl font-bold">{f.myHelpRequests}</h2>
+              <h2 className="font-serif text-xl font-bold">{f.myHelpRequests}</h2>
 
             </div>
 
             {data && data.helpRequests.length === 0 ? (
 
-              <p className="mt-4 text-sm text-cfm-earth">
+              <p className="mt-4 text-sm text-site-muted">
 
                 {m.noHelp}{" "}
 
-                <Link href="/contact#aide" className="text-cfm-gold hover:underline">
+                <Link href="/contact#aide" className="text-site-primary hover:underline">
 
                   {m.requestHelp}
 
@@ -219,7 +225,7 @@ export function MemberDashboard({ initialUser }: Props) {
 
                 {data.helpRequests.map((h) => (
 
-                  <div key={h.id} className="rounded-lg bg-cfm-cream p-3 text-sm">
+                  <div key={h.id} className="rounded-lg bg-site-surface p-3 text-sm">
 
                     <div className="flex justify-between">
 
@@ -229,7 +235,7 @@ export function MemberDashboard({ initialUser }: Props) {
 
                     </div>
 
-                    <p className="mt-1 text-cfm-earth line-clamp-2">{h.description}</p>
+                    <p className="mt-1 text-site-muted line-clamp-2">{h.description}</p>
 
                   </div>
 
@@ -247,19 +253,19 @@ export function MemberDashboard({ initialUser }: Props) {
 
             <div className="flex items-center gap-2">
 
-              <CreditCard className="h-5 w-5 text-cfm-gold" />
+              <CreditCard className="h-5 w-5 text-site-primary" />
 
-              <h2 className="font-display text-xl font-bold">{f.myDonations}</h2>
+              <h2 className="font-serif text-xl font-bold">{f.myDonations}</h2>
 
             </div>
 
             {data && data.donations.length === 0 ? (
 
-              <p className="mt-4 text-sm text-cfm-earth">
+              <p className="mt-4 text-sm text-site-muted">
 
                 {m.noDonations}{" "}
 
-                <Link href="/s-engager#don" className="text-cfm-gold hover:underline">
+                <Link href="/s-engager#don" className="text-site-primary hover:underline">
 
                   {m.donate}
 
@@ -273,7 +279,7 @@ export function MemberDashboard({ initialUser }: Props) {
 
                 {data.donations.map((d) => (
 
-                  <li key={d.id} className="flex justify-between rounded-lg bg-cfm-cream p-3">
+                  <li key={d.id} className="flex justify-between rounded-lg bg-site-surface p-3">
 
                     <span>
 
@@ -281,7 +287,7 @@ export function MemberDashboard({ initialUser }: Props) {
 
                     </span>
 
-                    <span className="text-cfm-gold">{d.status}</span>
+                    <span className="text-site-primary">{d.status}</span>
 
                   </li>
 
@@ -295,13 +301,39 @@ export function MemberDashboard({ initialUser }: Props) {
 
 
 
+          <section className="card">
+            <div className="flex items-center gap-2">
+              <Megaphone className="h-5 w-5 text-site-primary" />
+              <h2 className="font-serif text-xl font-bold">{t.ux.memberDashboard.citizenActionsTitle}</h2>
+            </div>
+            <p className="mt-2 text-sm text-site-muted">{t.ux.memberDashboard.citizenActionsBody}</p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {activeLive && (
+                <ButtonLink href={`/live/${activeLive.slug}`} size="sm" data-cta="cta_live">
+                  <Radio className="mr-1 h-4 w-4" />
+                  {t.ux.memberDashboard.liveNow}
+                </ButtonLink>
+              )}
+              {openPetitionsCount > 0 && (
+                <ButtonLink href="/petitions" variant="secondary" size="sm" data-cta="cta_petition">
+                  {t.ux.memberDashboard.openPetitions} ({openPetitionsCount})
+                </ButtonLink>
+              )}
+              <ButtonLink href="/s-engager#don" variant="secondary" size="sm" data-cta="cta_don">
+                {m.donate}
+              </ButtonLink>
+            </div>
+          </section>
+
+
+
           <div className="flex flex-wrap gap-3">
 
-            <ButtonLink href="/petitions" size="sm">
+              <ButtonLink href="/petitions" size="sm" data-cta="cta_petition">
               {t.common.viewPetitions}
             </ButtonLink>
 
-            <ButtonLink href="/s-engager#don" variant="secondary" size="sm">
+              <ButtonLink href="/s-engager#don" variant="secondary" size="sm" data-cta="cta_don">
               {m.donate}
             </ButtonLink>
 

@@ -44,7 +44,7 @@ export function AdminFileUpload({
       className={cn(
         variant === "button"
           ? cn(buttonVariants({ variant: "secondary", size: "sm" }), "inline-flex cursor-pointer", className)
-          : cn("cursor-pointer text-sm text-cfm-gold", className),
+          : cn("cursor-pointer text-sm text-admin-accent", className),
         (disabled || uploading) && "pointer-events-none opacity-50"
       )}
     >

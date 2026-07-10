@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { createPetition, getActivePetitions } from "@/lib/members";
+import { createPetition, getAllPetitions } from "@/lib/members";
 import { jsonData, jsonError, jsonSuccess } from "@/lib/api-response";
 import { requireAdminRole } from "@/lib/admin-rest";
 import { parseOrBadRequest } from "@/lib/validators";
@@ -8,7 +8,7 @@ import { adminPetitionCreateSchema } from "@/lib/validators/admin-api";
 export async function GET() {
   const auth = await requireAdminRole();
   if (!auth.ok) return auth.response;
-  return jsonData({ petitions: await getActivePetitions() });
+  return jsonData({ petitions: await getAllPetitions() });
 }
 
 export async function POST(request: NextRequest) {

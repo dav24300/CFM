@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import nodemailer from "nodemailer";
 import { SITE } from "@/lib/constants";
+import { isServerlessRuntime } from "@/lib/runtime";
 
 const logPath = path.join(process.cwd(), "data", "emails.log");
 
@@ -16,11 +17,26 @@ function isSmtpConfigured(): boolean {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER);
 }
 
+function formatEmailLogEntry(opts: SendOptions): string {
+  return `\n--- ${new Date().toISOString()} ---\nTo: ${opts.to}\nSubject: ${opts.subject}\n${opts.text || opts.html}\n`;
+}
+
 function logEmail(opts: SendOptions): void {
-  const dataDir = path.dirname(logPath);
-  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-  const entry = `\n--- ${new Date().toISOString()} ---\nTo: ${opts.to}\nSubject: ${opts.subject}\n${opts.text || opts.html}\n`;
-  fs.appendFileSync(logPath, entry, "utf-8");
+  const entry = formatEmailLogEntry(opts);
+
+  if (isServerlessRuntime()) {
+    console.log(`[CFM Email - mode console] → ${opts.to}: ${opts.subject}`, entry);
+    return;
+  }
+
+  try {
+    const dataDir = path.dirname(logPath);
+    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+    fs.appendFileSync(logPath, entry, "utf-8");
+  } catch (err) {
+    console.warn("[CFM] email file write failed:", err);
+    console.log(`[CFM Email - mode console] → ${opts.to}: ${opts.subject}`, entry);
+  }
 }
 
 export async function sendEmail(opts: SendOptions): Promise<boolean> {

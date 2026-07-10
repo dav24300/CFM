@@ -67,3 +67,8 @@ export async function isVolunteerSession(): Promise<boolean> {
   const user = await getCurrentMember();
   return user?.role === "volunteer";
 }
+
+export async function isCoordinatorSession(): Promise<boolean> {
+  const user = await getCurrentMember();
+  return user?.role === "coordinator";
+}

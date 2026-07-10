@@ -259,3 +259,22 @@ export async function getPendingChatCount(eventId: number): Promise<number> {
     (m) => m.live_event_id === eventId && m.status === "pending"
   ).length;
 }
+
+export async function closeLivePoll(pollId: number): Promise<LivePoll | undefined> {
+  let poll: LivePoll | undefined;
+  await updateStoreAsync((store) => {
+    poll = store.live_polls.find((p) => p.id === pollId);
+    if (poll) poll.active = 0;
+  });
+  return poll;
+}
+
+export async function getPollById(pollId: number): Promise<LivePoll | undefined> {
+  const store = await getStoreAsync();
+  return store.live_polls.find((p) => p.id === pollId);
+}
+
+export async function getPollVotes(pollId: number) {
+  const store = await getStoreAsync();
+  return store.live_poll_votes.filter((v) => v.poll_id === pollId);
+}

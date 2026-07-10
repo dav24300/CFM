@@ -12,6 +12,7 @@ export const CACHE_TAGS = {
   live: "cfm:live",
   petitions: "cfm:petitions",
   i18n: "cfm:i18n",
+  siteConfig: "cfm:site-config",
 } as const;
 
 export type ContentTable =

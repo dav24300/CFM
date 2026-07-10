@@ -22,7 +22,7 @@ export function I18nPanel() {
     ]);
     if (i18nRes.ok) {
       const data = await i18nRes.json();
-      setLocales(data.locales || []);
+      setLocales((data.locales || []).filter((l: string) => l === "fr" || l === "en"));
       setOverrides(data.overrides || {});
     }
     if (settingsRes.ok) {
@@ -68,7 +68,7 @@ export function I18nPanel() {
 
   return (
     <div className="space-y-8">
-      <h2 className="font-display text-xl font-bold text-cfm-navy">Langues & textes</h2>
+      <h2 className="font-display text-xl font-bold text-admin-ink">Langues & textes</h2>
 
       <section className="rounded-xl border bg-white p-4">
         <h3 className="font-semibold">Override i18n</h3>

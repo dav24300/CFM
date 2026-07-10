@@ -184,9 +184,9 @@ export function MemberRegisterForm() {
       {isSuccess && successMessage && <Alert variant="success">{successMessage}</Alert>}
       {isError && error && <Alert variant="error">{error}</Alert>}
 
-      <p className="text-center text-sm text-cfm-earth">
+      <p className="text-center text-sm text-site-muted">
         {m.hasAccount}{" "}
-        <Link href="/membre/connexion" className="text-cfm-gold hover:underline">
+        <Link href="/membre/connexion" className="text-site-primary hover:underline">
           {m.loginLink}
         </Link>
       </p>

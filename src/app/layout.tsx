@@ -1,21 +1,49 @@
 import "@/app/globals.css";
 import type { Metadata, Viewport } from "next";
-import { Nunito, Playfair_Display } from "next/font/google";
-import { SITE } from "@/lib/constants";
+import {
+  Newsreader,
+  Archivo,
+  Space_Grotesk,
+  IBM_Plex_Sans,
+  IBM_Plex_Mono,
+} from "next/font/google";
 import { getOgImagePath, getFaviconPath } from "@/lib/media.server";
+import { getSiteConfig } from "@/lib/site-config.server";
 import { PWARegister } from "@/components/PWARegister";
 
-const nunito = Nunito({
+// Public / Portail
+const newsreader = Newsreader({
   subsets: ["latin"],
-  variable: "--font-nunito",
+  variable: "--font-newsreader",
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+});
+const archivo = Archivo({
+  subsets: ["latin"],
+  variable: "--font-archivo",
+  weight: ["400", "500", "600", "700"],
+});
+// Admin
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  weight: ["500", "600", "700"],
+});
+const plexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  variable: "--font-plex-sans",
+  weight: ["400", "500", "600", "700"],
+});
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  variable: "--font-plex-mono",
+  weight: ["400", "500"],
 });
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-});
+const fontVars = `${newsreader.variable} ${archivo.variable} ${spaceGrotesk.variable} ${plexSans.variable} ${plexMono.variable}`;
 
 export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSiteConfig();
   const ogImage = await getOgImagePath();
   const favicon = await getFaviconPath();
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -24,10 +52,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: {
-      default: `${SITE.sigle} — ${SITE.name}`,
-      template: `%s | ${SITE.sigle}`,
+      default: `${site.sigle} — ${site.name}`,
+      template: `%s | ${site.sigle}`,
     },
-    description: SITE.tagline,
+    description: site.tagline,
     keywords: [
       "familles militaires",
       "RDC",
@@ -47,7 +75,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#1a2f4a",
+  themeColor: "#14418a",
 };
 
 export default function RootLayout({
@@ -56,13 +84,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr">
+    <html lang="fr" className={fontVars}>
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body
-        className={`${nunito.variable} ${playfair.variable} font-sans bg-cfm-cream text-cfm-navy antialiased`}
-      >
+      <body className="font-sans bg-white text-site-ink antialiased">
+
         <PWARegister />
         {children}
       </body>

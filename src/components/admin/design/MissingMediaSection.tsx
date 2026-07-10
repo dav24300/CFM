@@ -53,7 +53,7 @@ export function MissingMediaSection() {
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-cfm-earth">{items.length} élément(s) sans visuel</p>
+      <p className="text-sm text-admin-muted">{items.length} élément(s) sans visuel</p>
       <ul className="divide-y rounded-xl border bg-white">
         {items.map((item) => (
           <li key={`${item.type}-${item.id}`} className="flex items-center justify-between gap-4 p-4 text-sm">
@@ -65,7 +65,7 @@ export function MissingMediaSection() {
             </div>
             <button
               type="button"
-              className="shrink-0 rounded bg-cfm-navy px-3 py-1 text-xs text-white"
+              className="shrink-0 rounded bg-admin-deep px-3 py-1 text-xs text-white"
               onClick={() => setPicker(item)}
             >
               Assigner

@@ -13,6 +13,13 @@ export async function getActivePetitions(): Promise<Petition[]> {
   return store.petitions.filter((p) => p.active === 1);
 }
 
+export async function getAllPetitions(): Promise<Petition[]> {
+  const store = await getStoreAsync();
+  return [...store.petitions].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+}
+
 export async function getPetitionBySlug(slug: string): Promise<Petition | undefined> {
   const store = await getStoreAsync();
   return store.petitions.find((p) => p.slug === slug && p.active === 1);
@@ -76,6 +83,38 @@ export async function createPetition(data: {
   });
   invalidatePetitionsCache();
   return created!;
+}
+
+export async function updatePetition(
+  id: number,
+  data: Partial<Pick<Petition, "title" | "slug" | "description" | "content" | "goal" | "active">>
+): Promise<boolean> {
+  let found = false;
+  await updateStoreAsync((store) => {
+    const p = store.petitions.find((x) => x.id === id);
+    if (!p) return;
+    found = true;
+    if (data.title !== undefined) p.title = data.title;
+    if (data.slug !== undefined) p.slug = data.slug;
+    if (data.description !== undefined) p.description = data.description;
+    if (data.content !== undefined) p.content = data.content;
+    if (data.goal !== undefined) p.goal = data.goal;
+    if (data.active !== undefined) p.active = data.active;
+  });
+  if (found) invalidatePetitionsCache();
+  return found;
+}
+
+export async function deletePetition(id: number): Promise<boolean> {
+  let found = false;
+  await updateStoreAsync((store) => {
+    const before = store.petitions.length;
+    store.petitions = store.petitions.filter((p) => p.id !== id);
+    store.petition_signatures = store.petition_signatures.filter((s) => s.petition_id !== id);
+    found = store.petitions.length < before;
+  });
+  if (found) invalidatePetitionsCache();
+  return found;
 }
 
 export async function getPetitionSignatures(

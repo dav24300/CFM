@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import {
-  Heart,
-  Briefcase,
-  BookOpen,
-  Leaf,
-  Activity,
-} from "lucide-react";
+import Link from "next/link";
+import { Heart, Briefcase, BookOpen, Leaf, Activity } from "lucide-react";
 import { AXES } from "@/lib/constants";
-import { getResolvedAxisImage } from "@/lib/media.server";
-import { PageHero } from "@/components/ui/PageHero";
+import { getAxesHeroImage } from "@/lib/media.server";
+import { InteriorHero } from "@/components/ui/InteriorHero";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { getTranslations } from "@/lib/i18n-server";
 
@@ -27,75 +21,78 @@ const iconMap = {
 };
 
 export default async function AxesPage() {
-  const { t } = await getTranslations();
-  const p = t.pages.axes;
-  const axisImages = Object.fromEntries(
-    await Promise.all(
-      AXES.map(async (axe) => [axe.slug, await getResolvedAxisImage(axe.slug)] as const)
-    )
-  );
+  const { locale } = await getTranslations();
+  const axesHero = await getAxesHeroImage();
+  const isEn = locale === "en";
 
   return (
     <>
-      <PageHero
-        title={p.title}
-        subtitle={p.subtitle}
-        image="/media/hero/hero-home.svg"
-        imageAlt={p.heroAlt}
+      <InteriorHero
+        breadcrumb={[{ label: isEn ? "Home" : "Accueil", href: "/" }, { label: isEn ? "Our areas" : "Nos axes" }]}
+        kicker={isEn ? "Our areas of action" : "Nos axes d'action"}
+        title="Cinq domaines, un même combat"
+        subtitle="CFM propose des solutions pragmatiques pour améliorer de manière permanente le social, l'économie, l'éducation, l'environnement et la santé des dépendants des militaires."
+        image={axesHero}
+        imageAlt={isEn ? "Our areas of action" : "Nos axes d'action"}
+        showBar
       />
 
-      <div className="mx-auto max-w-6xl px-4 py-16 md:py-24">
-        <div className="space-y-24">
-          {AXES.map((axe, index) => {
-            const Icon = iconMap[axe.icon as keyof typeof iconMap];
-            const imageFirst = index % 2 === 0;
-            const content = t.axesContent[axe.slug] ?? {
-              title: axe.title,
-              description: axe.description,
-              details: axe.details,
-            };
-
-            return (
-              <ScrollReveal
-                key={axe.slug}
-                direction={imageFirst ? "left" : "right"}
-              >
-                <section
-                  id={axe.slug}
-                  className="scroll-mt-24 grid gap-10 lg:grid-cols-2 lg:items-center"
+      <section className="mx-auto max-w-site px-6 py-24">
+        <ScrollReveal>
+          <div className="grid gap-5 md:grid-cols-2">
+            {AXES.map((axe, i) => {
+              const Icon = iconMap[axe.icon as keyof typeof iconMap] ?? Heart;
+              return (
+                <Link
+                  key={axe.slug}
+                  href={`/axes/${axe.slug}`}
+                  className="group grid grid-cols-[auto_1fr_auto] items-center gap-6 border border-site-hairline bg-white p-[34px] transition-all duration-300 hover:-translate-y-1 hover:border-site-primary hover:shadow-site-hover"
                 >
-                  <div className={imageFirst ? "" : "lg:order-2"}>
-                    <div className="media-frame relative aspect-[4/3]">
-                      <Image
-                        src={axisImages[axe.slug]}
-                        alt={content.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 1024px) 100vw, 50vw"
-                      />
-                      <div className="absolute left-4 top-4 inline-flex rounded-lg bg-cfm-cream/95 p-3 text-cfm-gold shadow-cfm">
-                        <Icon className="h-6 w-6" aria-hidden />
-                      </div>
-                    </div>
-                  </div>
-                  <div className={imageFirst ? "" : "lg:order-1"}>
-                    <h2 className="font-display text-3xl font-bold text-cfm-navy">{content.title}</h2>
-                    <p className="mt-4 text-lg text-cfm-earth leading-relaxed">{content.description}</p>
-                    <ul className="mt-6 space-y-2">
-                      {content.details.map((detail) => (
-                        <li key={detail} className="flex items-start gap-2 text-cfm-earth">
-                          <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-cfm-gold" />
-                          {detail}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </section>
-              </ScrollReveal>
-            );
-          })}
-        </div>
-      </div>
+                  <span className="flex h-14 w-14 items-center justify-center bg-site-pale text-site-primary">
+                    <Icon className="h-[26px] w-[26px]" aria-hidden />
+                  </span>
+                  <span>
+                    <span className="mb-2 block font-mono text-[13px] text-site-primary">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <h2 className="mb-1.5 font-serif text-[26px] font-medium leading-[1.1] text-site-ink">
+                      {axe.title}
+                    </h2>
+                    <p className="text-[14.5px] leading-[1.55] text-site-muted-2">{axe.description}</p>
+                  </span>
+                  <span className="text-[22px] text-site-primary transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
+              );
+            })}
+
+            {/* Cellule CTA */}
+            <div className="flex flex-col justify-center bg-site-primary p-[34px] text-white">
+              <h2 className="font-serif text-2xl font-medium leading-[1.15] text-white">
+                Une cause, plusieurs manières d’agir
+              </h2>
+              <p className="mb-5 mt-3 text-[14.5px] leading-[1.55] text-white/80">
+                Chaque axe est porté par des actions concrètes sur le terrain et un plaidoyer national.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/s-engager"
+                  className="bg-white px-5 py-3 text-sm font-semibold text-site-primary transition hover:bg-white/90"
+                >
+                  {isEn ? "Get involved" : "S'engager"}
+                </Link>
+                <Link
+                  href="/actions"
+                  className="border border-white/60 px-[18px] py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-site-primary"
+                >
+                  {isEn ? "See our actions" : "Voir nos actions"}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
+      </section>
     </>
   );
 }

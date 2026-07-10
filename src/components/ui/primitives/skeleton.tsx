@@ -1,13 +1,13 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils/cn";
 
-const skeletonVariants = cva("animate-pulse bg-cfm-navy/10", {
+const skeletonVariants = cva("animate-pulse bg-site-deep/10", {
   variants: {
     variant: {
       text: "h-4 w-full rounded",
       circle: "rounded-full",
       rect: "rounded-lg",
-      card: "rounded-card h-48 w-full",
+      card: "rounded-none h-48 w-full",
     },
   },
   defaultVariants: {

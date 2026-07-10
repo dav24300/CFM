@@ -1,19 +1,23 @@
 import { cn } from "@/lib/utils/cn";
 
+// Statut → classe helper (globals.css : badge-warn/ok/info/danger).
 const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-800",
-  new: "bg-amber-100 text-amber-800",
-  approved: "bg-green-100 text-green-800",
-  active: "bg-green-100 text-green-800",
-  completed: "bg-green-100 text-green-800",
-  rejected: "bg-red-100 text-red-800",
-  suspended: "bg-red-100 text-red-800",
-  treated: "bg-blue-100 text-blue-800",
-  in_progress: "bg-blue-100 text-blue-800",
-  live: "bg-red-100 text-red-800",
-  scheduled: "bg-purple-100 text-purple-800",
-  ended: "bg-gray-100 text-gray-800",
-  replay: "bg-cfm-navy/10 text-cfm-navy",
+  pending: "badge-warn",
+  new: "badge-warn",
+  approved: "badge-ok",
+  active: "badge-ok",
+  completed: "badge-ok",
+  rejected: "badge-danger",
+  suspended: "badge-danger",
+  live: "badge-danger",
+  treated: "badge-info",
+  in_progress: "badge-info",
+  read: "badge-info",
+  scheduled: "badge-info",
+  ended: "bg-admin-bg text-admin-muted",
+  replay: "bg-admin-bg text-admin-muted",
+  archived: "bg-admin-bg text-admin-muted",
+  inactive: "bg-admin-bg text-admin-muted",
 };
 
 export function StatusBadge({ status }: { status: string }) {
@@ -22,7 +26,7 @@ export function StatusBadge({ status }: { status: string }) {
     <span
       className={cn(
         "inline-flex rounded-full px-2 py-0.5 text-xs font-semibold capitalize",
-        STATUS_COLORS[key] || "bg-gray-100 text-gray-700"
+        STATUS_COLORS[key] || "bg-admin-bg text-admin-muted"
       )}
     >
       {status}

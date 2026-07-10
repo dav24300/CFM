@@ -86,13 +86,13 @@ export function HeroSection({ hero, onChange, onSaved }: Props) {
           {FIELDS.map(({ key, label, accept, isVideo }) => (
             <div key={key} className="rounded-xl border bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between gap-2">
-                <h4 className="text-sm font-semibold text-cfm-navy">{label}</h4>
+                <h4 className="text-sm font-semibold text-admin-ink">{label}</h4>
                 <span className="rounded bg-green-50 px-2 py-0.5 text-[10px] text-green-800">
                   Publié sur le site
                 </span>
               </div>
               {hero[key] && !isVideo && (
-                <div className="relative mt-2 aspect-video overflow-hidden rounded-lg bg-cfm-cream">
+                <div className="relative mt-2 aspect-video overflow-hidden rounded-lg bg-admin-bg">
                   <Image src={hero[key]} alt={label} fill className="object-cover" sizes="200px" />
                 </div>
               )}
@@ -116,7 +116,7 @@ export function HeroSection({ hero, onChange, onSaved }: Props) {
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="text-xs font-medium text-cfm-earth">Alt hero</label>
+            <label className="text-xs font-medium text-admin-muted">Alt hero</label>
             <Input
               value={hero.hero_image_alt}
               onChange={(e) => onChange({ ...hero, hero_image_alt: e.target.value })}
@@ -124,7 +124,7 @@ export function HeroSection({ hero, onChange, onSaved }: Props) {
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-cfm-earth">Alt mission</label>
+            <label className="text-xs font-medium text-admin-muted">Alt mission</label>
             <Input
               value={hero.mission_image_alt}
               onChange={(e) => onChange({ ...hero, mission_image_alt: e.target.value })}

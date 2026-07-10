@@ -67,6 +67,14 @@ Administration locale: `http://localhost:3000/admin`
 | `npm run bootstrap:pg` | Bootstrap schema + migration/hydration |
 | `npm run hydrate:pg` | Hydratation depuis PostgreSQL |
 | `npm run export:i18n` | Regeneration dictionnaires JSON |
+| `node scripts/test-admin-site-e2e.mjs` | E2E admin→site E1–E13 (18 tests) |
+| `node scripts/verify-v1-content.mjs` | Validation contenu V1 |
+| `node scripts/test-v2-petitions-e2e.mjs` | E2E pétitions V2 |
+| `node scripts/test-v2-community.mjs` | E2E communauté V2 |
+| `node scripts/test-v3-live-e2e.mjs` | E2E live V3 |
+| `node scripts/validate-strict-100.mjs [url]` | Validation stricte 100 % (8 checks) |
+| `node scripts/backup-restore-pg-test.mjs` | Backup PostgreSQL (Node) |
+| `node scripts/monitor-stability.mjs [url] [hours]` | Monitoring sante 48h/72h |
 
 ## Qualite et CI
 
@@ -75,11 +83,16 @@ Administration locale: `http://localhost:3000/admin`
   - `npm run typecheck`
   - `npm run test`
   - `npm run build`
-  - `npm run smoke` (apres `npm run start`)
+  - `npm run smoke` (apres `npm run dev` ou `npm run start`)
+- E2E admin→site: `node scripts/test-admin-site-e2e.mjs` → **18/18**
 
 ## Documentation technique
 
 - Plan produit: `PLAN.md`
+- Analyse et stabilisation: `ANALYSE_ETAT_ACTUEL_LOGICIEL.md`
+- Release notes: `RELEASE-NOTES.md`
+- Tests admin↔site: `docs/TEST-ADMIN-SITE-E2E.md`
+- Scope stabilisation: `docs/STABILISATION-SCOPE.md`
 - Correctifs fonctionnels: `Corrective.md`
 - Strategie de refactor: `Strat_Refact.md`
 - Runbook ops/securite: `docs/runbook.md`

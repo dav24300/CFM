@@ -1,4 +1,4 @@
-const CACHE = "cfm-v4";
+const CACHE = "cfm-v5";
 const PRECACHE = ["/", "/live", "/contact", "/s-engager", "/petitions", "/manifest.json", "/icon.svg"];
 const NETWORK_FIRST = ["/membre/", "/admin/", "/api/"];
 
@@ -19,6 +19,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
+  if (url.pathname.startsWith("/_next/")) return;
   if (url.pathname.startsWith("/api/")) return;
   if (NETWORK_FIRST.some((p) => url.pathname.startsWith(p))) return;
 

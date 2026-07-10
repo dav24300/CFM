@@ -46,8 +46,8 @@ export function StatCounter({ value, label, suffix = "" }: Props) {
       animate={inView ? { opacity: 1, scale: 1 } : {}}
       transition={{ duration: 0.4 }}
     >
-      <p className="font-display text-3xl font-bold text-cfm-gold md:text-4xl">{display}</p>
-      <p className="mt-1 text-sm text-cfm-earth">{label}</p>
+      <p className="font-serif text-3xl font-bold text-site-primary md:text-4xl">{display}</p>
+      <p className="mt-1 text-sm text-site-muted">{label}</p>
     </motion.div>
   );
 }

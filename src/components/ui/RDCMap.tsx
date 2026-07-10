@@ -19,8 +19,8 @@ export function RDCMap({ activeProvinces, selected, onSelect }: Props) {
 
   return (
     <div className="card">
-      <h2 className="font-display text-lg font-bold text-cfm-navy">{p.mapTitle}</h2>
-      <p className="mt-1 text-sm text-cfm-earth">
+      <h2 className="font-serif text-lg font-bold text-site-ink">{p.mapTitle}</h2>
+      <p className="mt-1 text-sm text-site-muted">
         {activeProvinces.length} {p.mapSubtitle}
       </p>
 
@@ -32,8 +32,8 @@ export function RDCMap({ activeProvinces, selected, onSelect }: Props) {
         <svg viewBox="0 0 200 250" className="h-full w-full" aria-hidden>
           <path
             d="M100 20 C130 25 160 40 170 70 C175 100 165 130 155 160 C140 200 120 230 100 240 C80 230 60 200 45 160 C35 130 25 100 30 70 C40 40 70 25 100 20 Z"
-            fill="#faf7f2"
-            stroke="#1a2f4a"
+            fill="#f6f8fc"
+            stroke="#0b1a38"
             strokeWidth="2"
           />
           {PROVINCES_RDC.map((province) => {
@@ -48,9 +48,9 @@ export function RDCMap({ activeProvinces, selected, onSelect }: Props) {
                   cx={coords.cx}
                   cy={coords.cy}
                   r={isSelected ? 9 : active ? 7 : 3}
-                  fill={active ? "#c9a227" : "#1a2f4a"}
+                  fill={active ? "#14418a" : "#0b1a38"}
                   fillOpacity={active ? 1 : 0.15}
-                  className={active ? "cursor-pointer transition-all hover:fill-amber-400" : ""}
+                  className={active ? "cursor-pointer transition-all hover:fill-site-primary-dark" : ""}
                   onClick={() => active && onSelect(isSelected ? null : province)}
                   role="button"
                   aria-pressed={isSelected}
@@ -75,8 +75,8 @@ export function RDCMap({ activeProvinces, selected, onSelect }: Props) {
           aria-selected={!selected}
           onClick={() => onSelect(null)}
           className={cn(
-            "w-full rounded-lg px-3 py-2 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cfm-gold",
-            !selected ? "bg-cfm-gold font-semibold text-cfm-navy" : "hover:bg-cfm-cream"
+            "w-full rounded-lg px-3 py-2 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-site-primary",
+            !selected ? "bg-site-primary font-semibold text-site-ink" : "hover:bg-site-surface"
           )}
         >
           {p.allProvinces}
@@ -91,10 +91,10 @@ export function RDCMap({ activeProvinces, selected, onSelect }: Props) {
                 aria-selected={selected === province}
                 onClick={() => onSelect(province)}
                 className={cn(
-                  "w-full rounded-lg px-3 py-2 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cfm-gold",
+                  "w-full rounded-lg px-3 py-2 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-site-primary",
                   selected === province
-                    ? "bg-cfm-gold font-semibold text-cfm-navy"
-                    : "text-cfm-navy hover:bg-cfm-cream"
+                    ? "bg-site-primary font-semibold text-site-ink"
+                    : "text-site-ink hover:bg-site-surface"
                 )}
               >
                 {province}

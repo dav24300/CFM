@@ -7,7 +7,7 @@ import {
   adminDelete,
   getHelpRequestById,
 } from "@/lib/db";
-import { adminUpdateContent } from "@/infrastructure/repositories/content.repository";
+import { adminUpdateContent, updateContactStatus } from "@/infrastructure/repositories/content.repository";
 import {
   activateUser,
   suspendUser,
@@ -91,6 +91,9 @@ export async function POST(request: NextRequest) {
       await adminApproveFamilyLink(id);
     } else if (action === "reject_family_link" && id) {
       await adminRejectFamilyLink(id);
+    } else if (action === "contact_update" && id) {
+      const ok = await updateContactStatus(id, data.status);
+      if (!ok) return jsonError("Message introuvable", 404);
     } else if (action === "help_update" && id) {
       await addHelpRequestUpdate({
         help_request_id: id,

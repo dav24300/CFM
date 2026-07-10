@@ -75,11 +75,11 @@ export function DesignPanel() {
   return (
     <div className="w-full max-w-none space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-bold text-cfm-navy">Médias & design</h2>
+        <h2 className="font-display text-xl font-bold text-admin-ink">Médias & design</h2>
         <button
           type="button"
           onClick={load}
-          className="flex items-center gap-1 text-sm text-cfm-gold"
+          className="flex items-center gap-1 text-sm text-admin-accent"
         >
           <RefreshCw className="h-4 w-4" /> Actualiser
         </button>

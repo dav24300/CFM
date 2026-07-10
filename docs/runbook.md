@@ -70,3 +70,22 @@
 5. Verifier les routes critiques:
    - `/`, `/petitions`, `/contact`, `/api/member/login`, `/api/admin/login`.
 6. Ouvrir une action post-mortem et lier l'ADR/commit correctif.
+
+## Checklist securite (pre-release)
+
+| Point | Verification | Statut local |
+|-------|--------------|--------------|
+| Sessions admin | `httpOnly`, `secure` prod, `sameSite: lax` | OK (code) |
+| Rate limit API | 429 apres seuil sur POST sensibles | OK (`/api/contact`) |
+| Webhook PayDunya | Signature invalide → 401 si cles configurees | A valider prod |
+| Redis Upstash | `/api/health` → `redis: ok` | `skipped` sans `UPSTASH_*` |
+| Chiffrement aide | `DATA_ENCRYPTION_KEY` requis | A confirmer prod |
+| Audit admin | `data/admin-audit.log` + table PG | OK |
+| CSP | Headers dans `next.config.ts` | `unsafe-inline` a durcir |
+
+## Rollback applicatif
+
+1. Basculer DNS / deploiement vers version precedente (Vercel rollback ou tag git).
+2. Si migration DB : restaurer backup PostgreSQL (voir ci-dessus).
+3. Verifier : `npm run smoke` + `node scripts/test-admin-site-e2e.mjs`.
+4. Confirmer `/api/health` → `status: ok`.

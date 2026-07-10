@@ -3,21 +3,45 @@
 import { useState } from "react";
 import { PROVINCES_RDC } from "@/lib/constants";
 import { Button } from "@/components/ui/primitives/button";
-import { Input } from "@/components/ui/primitives/input";
-import { Textarea } from "@/components/ui/primitives/textarea";
-import { NativeSelect } from "@/components/ui/primitives/native-select";
 import { DataTable, type Column } from "@/components/admin/ui/data-table";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
+import { SlideOverEditor, type EditorField } from "@/components/admin/ui/slide-over-editor";
+import { PreviewButton } from "@/components/admin/ui/preview-button";
 import { useAdminApi } from "@/components/admin/hooks/useAdminApi";
 import type { AdminData } from "@/components/admin/types";
+import { CACHE_TAGS } from "@/infrastructure/cache/cache-tags";
 
 type Row = Record<string, unknown>;
 type Props = { data: AdminData; onReload: () => void };
 
+const FIELDS: EditorField[] = [
+  { name: "province", label: "Province", type: "province", required: true, colSpan: 1 },
+  { name: "title", label: "Titre", type: "text", required: true, colSpan: 1 },
+  { name: "date", label: "Date", type: "date", colSpan: 1 },
+  {
+    name: "type",
+    label: "Type",
+    type: "select",
+    colSpan: 1,
+    options: [
+      { value: "action", label: "Action" },
+      { value: "atelier", label: "Atelier" },
+      { value: "plaidoyer", label: "Plaidoyer" },
+    ],
+  },
+  { name: "description", label: "Description", type: "textarea", colSpan: 2, rows: 3 },
+  { name: "photo", label: "Photo", type: "image", colSpan: 2 },
+];
+
 export function TerritoryPanel({ data, onReload }: Props) {
-  const [showForm, setShowForm] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { post } = useAdminApi(onReload);
+
+  const actions = (data.actions || []) as Row[];
+  const editing = editId ? actions.find((a) => Number(a.id) === editId) ?? null : null;
+  const coveredProvinces = new Set(actions.map((a) => String(a.province)));
 
   const columns: Column<Row>[] = [
     { key: "province", header: "Province", sortable: true },
@@ -26,38 +50,50 @@ export function TerritoryPanel({ data, onReload }: Props) {
     { key: "date", header: "Date", sortable: true },
   ];
 
-  async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    await post({
-      action: "create",
-      table: "actions",
-      data: {
-        province: String(fd.get("province")),
-        title: String(fd.get("title")),
-        description: String(fd.get("description") || ""),
-        date: String(fd.get("date") || ""),
-        type: String(fd.get("type") || "action"),
-      },
-    });
-    setShowForm(false);
-    e.currentTarget.reset();
+  function initialValues(): Record<string, unknown> {
+    if (!editing) return { type: "action", province: PROVINCES_RDC[0] };
+    return {
+      province: editing.province ?? "",
+      title: editing.title ?? "",
+      date: editing.date ?? "",
+      type: editing.type ?? "action",
+      description: editing.description ?? "",
+      photo: editing.photo ?? "",
+    };
   }
 
-  const actions = (data.actions || []) as Row[];
-  const coveredProvinces = new Set(actions.map((a) => String(a.province)));
+  async function handleSubmit(values: Record<string, unknown>) {
+    const payload = {
+      province: String(values.province || ""),
+      title: String(values.title || ""),
+      description: String(values.description || ""),
+      date: String(values.date || ""),
+      type: String(values.type || "action"),
+      photo: String(values.photo || ""),
+    };
+    await post(
+      editId
+        ? { action: "update_content", table: "actions", id: editId, data: payload }
+        : { action: "create", table: "actions", data: payload }
+    );
+    setEditorOpen(false);
+    setEditId(null);
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="font-display text-xl font-bold text-cfm-navy">Actions & territoire</h2>
-        <Button type="button" size="sm" onClick={() => setShowForm(!showForm)}>
-          + Action
-        </Button>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h2 className="font-display text-xl font-semibold text-admin-ink">Actions & territoire</h2>
+        <div className="flex gap-2">
+          <PreviewButton href="/actions" tags={[CACHE_TAGS.actions, CACHE_TAGS.content]} />
+          <Button type="button" size="sm" onClick={() => { setEditId(null); setEditorOpen(true); }}>
+            + Action
+          </Button>
+        </div>
       </div>
 
-      <section className="rounded-xl border bg-white p-4 shadow-sm">
-        <h3 className="mb-3 text-sm font-semibold uppercase text-cfm-earth">
+      <section className="rounded-admin border border-admin-border bg-white p-4 shadow-sm">
+        <h3 className="mb-3 text-sm font-semibold uppercase text-admin-muted">
           Couverture RDC — {coveredProvinces.size}/{PROVINCES_RDC.length} provinces
         </h3>
         <div className="flex flex-wrap gap-1">
@@ -65,38 +101,14 @@ export function TerritoryPanel({ data, onReload }: Props) {
             <span
               key={p}
               className={`rounded px-2 py-0.5 text-xs ${
-                coveredProvinces.has(p)
-                  ? "bg-green-100 text-green-800"
-                  : "bg-gray-100 text-gray-500"
+                coveredProvinces.has(p) ? "badge-ok" : "bg-admin-bg text-admin-muted"
               }`}
             >
               {p}
             </span>
           ))}
         </div>
-        <a href="/actions" className="mt-3 inline-block text-sm text-blue-600 hover:underline" target="_blank" rel="noreferrer">
-          Voir la carte publique →
-        </a>
       </section>
-
-      {showForm && (
-        <form onSubmit={handleCreate} className="grid gap-3 rounded-xl border bg-white p-4 md:grid-cols-2">
-          <NativeSelect name="province" required className="text-sm">
-            {PROVINCES_RDC.map((p) => (
-              <option key={p} value={p}>{p}</option>
-            ))}
-          </NativeSelect>
-          <Input name="title" placeholder="Titre" required />
-          <Input name="date" type="date" />
-          <NativeSelect name="type" className="text-sm">
-            <option value="action">Action</option>
-            <option value="atelier">Atelier</option>
-            <option value="plaidoyer">Plaidoyer</option>
-          </NativeSelect>
-          <Textarea name="description" placeholder="Description" className="md:col-span-2" rows={2} />
-          <Button type="submit" size="sm" className="w-fit">Enregistrer</Button>
-        </form>
-      )}
 
       <DataTable
         data={actions}
@@ -104,15 +116,42 @@ export function TerritoryPanel({ data, onReload }: Props) {
         searchKeys={["province", "title"]}
         rowKey={(r) => Number(r.id)}
         actions={(row) => (
-          <Button size="sm" variant="destructive" type="button" onClick={() => setDeleteId(Number(row.id))}>
-            Suppr.
-          </Button>
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="secondary"
+              type="button"
+              onClick={() => { setEditId(Number(row.id)); setEditorOpen(true); }}
+            >
+              Modifier
+            </Button>
+            <Button size="sm" variant="destructive" type="button" onClick={() => setDeleteId(Number(row.id))}>
+              Suppr.
+            </Button>
+          </div>
         )}
       />
 
-      <p className="text-sm text-cfm-earth">
-        {data.actions.length} actions sur {PROVINCES_RDC.length} provinces RDC
-      </p>
+      <SlideOverEditor
+        open={editorOpen}
+        title={editId ? "Modifier l’action" : "Nouvelle action"}
+        fields={FIELDS}
+        initialValues={initialValues()}
+        onClose={() => { setEditorOpen(false); setEditId(null); }}
+        onSubmit={handleSubmit}
+        onDelete={editId ? () => { setEditorOpen(false); setDeleteId(editId); } : undefined}
+        preview={(v) => (
+          <div>
+            <div className="text-xs font-medium uppercase tracking-wide text-admin-muted">
+              {String(v.province || "—")}
+              {v.type ? ` · ${v.type}` : ""}
+            </div>
+            <div className="mt-1 font-display text-sm font-semibold text-admin-ink">
+              {String(v.title || "Nouvelle action")}
+            </div>
+          </div>
+        )}
+      />
 
       <ConfirmDialog
         open={deleteId !== null}
