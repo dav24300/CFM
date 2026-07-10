@@ -105,5 +105,13 @@ Administration locale: `http://localhost:3000/admin`
 
 ## Deploiement
 
-- Netlify (preview): `DEPLOY-NETLIFY.md`
-- VPS production: PostgreSQL + variables prod + HTTPS
+**Cible de production : Vercel (hebergement) + Supabase (PostgreSQL + Storage).**
+
+1. Renseigner toutes les variables d'environnement sur Vercel (voir `.env.example`, source de verite unique). Variables **obligatoires** en prod : `SESSION_SECRET`, `ADMIN_PASSWORD`, `DATA_ENCRYPTION_KEY`, `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`.
+   - Provisioning reproductible : `DATABASE_URL=... SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run setup:vercel-env`
+2. Base de donnees : appliquer le schema + hydrater via `npm run bootstrap:pg`.
+3. Bucket medias : `npm run setup:supabase-bucket`.
+4. Deployer : `npx vercel --prod` (buildCommand `npm run build`, cf. `vercel.json`).
+5. Verifier : `GET /api/health` doit renvoyer `database: ok` (et `redis: ok` si Upstash configure).
+
+Option secondaire (self-hosting) : Docker/VPS via `output: standalone` (`Dockerfile`, `docker-compose.prod.yml`, `DEPLOY-VPS.md`). Non utilise pour la cible Vercel.

@@ -22,6 +22,6 @@ describe("Button", () => {
 
   it("applies variant classes", () => {
     render(<Button variant="secondary">Annuler</Button>);
-    expect(screen.getByRole("button", { name: "Annuler" }).className).toContain("border-cfm-navy");
+    expect(screen.getByRole("button", { name: "Annuler" }).className).toContain("border-site-primary");
   });
 });

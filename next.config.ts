@@ -6,7 +6,7 @@ const cspDirectives = [
   "default-src 'self' https: data: blob:",
   "frame-src 'self' https:",
   "img-src 'self' https: data: blob:",
-  "connect-src 'self' https:",
+  "connect-src 'self' https: wss:",
   isProd
     ? "script-src 'self' 'unsafe-inline' https:"
     : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
