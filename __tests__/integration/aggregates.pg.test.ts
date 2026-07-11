@@ -833,4 +833,199 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
       expect(await live.updateLiveEvent(999999, { title: "x" })).toBeUndefined();
     });
   });
+
+  describe("portail (C11)", () => {
+    let events: typeof import("@/infrastructure/repositories/events.repository");
+    let messages: typeof import("@/infrastructure/repositories/messages.repository");
+    let resources: typeof import("@/infrastructure/repositories/resources.repository");
+
+    beforeAll(async () => {
+      events = await import("@/infrastructure/repositories/events.repository");
+      messages = await import("@/infrastructure/repositories/messages.repository");
+      resources = await import("@/infrastructure/repositories/resources.repository");
+    });
+
+    it("seed hook : 3 events (dates futures) + 4 ressources, idempotent", async () => {
+      const hooks = await import("@/infrastructure/persistence/sql/seed-hooks");
+      await hooks.seedMigratedAggregates();
+      await hooks.seedMigratedAggregates();
+      const evCount = await sqlClient.query<{ n: number }>(
+        "SELECT COUNT(*)::int AS n FROM events"
+      );
+      expect(evCount.rows[0].n).toBe(3);
+      const resCount = await sqlClient.query<{ n: number }>(
+        "SELECT COUNT(*)::int AS n FROM member_resources"
+      );
+      expect(resCount.rows[0].n).toBe(4);
+
+      const all = await events.getAllEvents();
+      const today = new Date().toISOString().slice(0, 10);
+      expect(all).toHaveLength(3);
+      expect(all.every((e) => e.date > today)).toBe(true);
+      expect(all.every((e) => e.rsvp_user_ids.length === 0)).toBe(true);
+      // Seedés à +21/+38/+60 jours → tous "à venir".
+      expect(await events.getUpcomingEvents()).toHaveLength(3);
+
+      const atelier = all.find((e) => e.title === "Atelier entrepreneuriat pour veuves");
+      expect(atelier).toMatchObject({
+        province: "Nord-Kivu",
+        time: "09:00",
+        type: "atelier",
+        capacity: 40,
+      });
+      expect(atelier!.id).toBeGreaterThan(100);
+      expect(typeof atelier!.created_at).toBe("string");
+    });
+
+    it("tri des events : date + heure croissantes, heure vide = 00:00, filtre à venir, province", async () => {
+      const now = new Date().toISOString();
+      const d5 = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10);
+      await sqlClient.query(
+        `INSERT INTO events (title, description, province, "date", "time", type, location, capacity, rsvp_user_ids, created_at)
+         VALUES
+           ('Passé', 'd', 'Kinshasa', '2000-01-01', '10:00', 'rencontre', 'Kin', NULL, '[]'::jsonb, $1),
+           ('Matin', 'd', 'Kinshasa', $2, '08:00', 'atelier', 'Kin', 20, '[]'::jsonb, $1),
+           ('Aube', 'd', 'Ituri', $2, '', 'atelier', 'Bunia', NULL, '[]'::jsonb, $1)`,
+        [now, d5]
+      );
+
+      // getAllEvents inclut le passé ; même date → l'heure vide (00:00) passe en premier.
+      const all = await events.getAllEvents();
+      expect(all).toHaveLength(6);
+      expect(all.map((e) => e.title).slice(0, 3)).toEqual(["Passé", "Aube", "Matin"]);
+
+      const upcoming = await events.getUpcomingEvents();
+      expect(upcoming.map((e) => e.title)).toEqual([
+        "Aube",
+        "Matin",
+        "Atelier entrepreneuriat pour veuves",
+        "Rencontre des familles militaires — Kinshasa",
+        "Distribution de kits scolaires",
+      ]);
+
+      const kin = await events.getEventsForProvince("Kinshasa");
+      expect(kin.map((e) => e.title)).toEqual([
+        "Passé",
+        "Matin",
+        "Rencontre des familles militaires — Kinshasa",
+      ]);
+
+      // listPortalEvents : ordre d'insertion (id ASC), champs normalisés.
+      const list = await events.listPortalEvents();
+      expect(list).toHaveLength(6);
+      expect(list.map((e) => e.id)).toEqual(
+        [...list.map((e) => e.id)].sort((a, b) => a - b)
+      );
+      const matin = list.find((e) => e.title === "Matin")!;
+      expect(matin.date).toBe(d5);
+      expect(matin.time).toBe("08:00");
+      expect(matin.capacity).toBe(20);
+      expect(matin.rsvp_user_ids).toEqual([]);
+    });
+
+    it("rsvp : toggle aller/retour persisté, id inconnu → undefined", async () => {
+      const target = (await events.getUpcomingEvents())[0]; // "Aube"
+      const on = await events.rsvpEvent(target.id, 777);
+      expect(on?.id).toBe(target.id);
+      expect(on?.rsvp_user_ids).toEqual([777]);
+
+      // Relecture : persisté.
+      let again = (await events.getUpcomingEvents())[0];
+      expect(again.rsvp_user_ids).toEqual([777]);
+
+      const off = await events.rsvpEvent(target.id, 777);
+      expect(off?.rsvp_user_ids).toEqual([]);
+      again = (await events.getUpcomingEvents())[0];
+      expect(again.rsvp_user_ids).toEqual([]);
+
+      expect(await events.rsvpEvent(999999, 777)).toBeUndefined();
+    });
+
+    it("rsvp : 10 RSVP parallèles d'users distincts → 10 inscrits", async () => {
+      const target = (await events.getUpcomingEvents())[0];
+      await Promise.all(
+        Array.from({ length: 10 }, (_, i) => events.rsvpEvent(target.id, 1000 + i))
+      );
+      const after = (await events.getUpcomingEvents())[0];
+      expect(after.rsvp_user_ids).toHaveLength(10);
+      expect([...after.rsvp_user_ids].sort((a, b) => a - b)).toEqual(
+        Array.from({ length: 10 }, (_, i) => 1000 + i)
+      );
+    });
+
+    it("messages : envoi + accusé auto, fil chronologique par user, marquage lu", async () => {
+      const sent = await messages.sendMemberMessage(501, {
+        subject: "  Aide  ",
+        body: "Bonjour CFM",
+      });
+      expect(sent.id).toBeGreaterThan(100);
+      expect(sent.direction).toBe("out");
+      expect(sent.author_name).toBe("Vous");
+      expect(sent.subject).toBe("Aide"); // trim
+      expect(sent.body).toBe("Bonjour CFM");
+      expect(sent.read).toBe(1);
+      expect(typeof sent.created_at).toBe("string");
+
+      await messages.sendMemberMessage(502, { body: "Autre membre" });
+
+      const mine = await messages.getMessagesForUser(501);
+      expect(mine).toHaveLength(2); // message + accusé de réception
+      expect(mine[0].id).toBe(sent.id);
+      expect(mine[1]).toMatchObject({
+        user_id: 501,
+        direction: "in",
+        author_name: "Référent CFM",
+        subject: null,
+        read: 0,
+      });
+      // Accusé 1 ms après : ordre chronologique garanti.
+      expect(mine[0].created_at.localeCompare(mine[1].created_at)).toBeLessThan(0);
+
+      await messages.markMessagesRead(501);
+      const after = await messages.getMessagesForUser(501);
+      expect(after.every((m) => m.read === 1)).toBe(true);
+
+      // L'autre membre n'est pas affecté ; subject omis → null.
+      const other = await messages.getMessagesForUser(502);
+      expect(other).toHaveLength(2);
+      expect(other[0].subject).toBeNull();
+      expect(other.find((m) => m.direction === "in")?.read).toBe(0);
+
+      expect(await messages.getMessagesForUser(999999)).toEqual([]);
+    });
+
+    it("ressources : liste id DESC, groupement par catégorie, catégorie vide → Autre", async () => {
+      await sqlClient.query(
+        `INSERT INTO member_resources (title, category, description, file_url, external_url, created_at)
+         VALUES ('Sans catégorie', NULL, 'd', NULL, 'https://ex.cd/doc', $1)`,
+        [new Date().toISOString()]
+      );
+
+      const all = await resources.getAllResources();
+      expect(all).toHaveLength(5);
+      expect(all[0].title).toBe("Sans catégorie"); // plus récente d'abord
+      expect(all[4].title).toBe("Obtenir une pension de survie");
+      expect(all.map((r) => r.id)).toEqual(
+        [...all.map((r) => r.id)].sort((a, b) => b - a)
+      );
+
+      const grouped = await resources.getResourcesByCategory();
+      expect(Object.keys(grouped)).toEqual([
+        "Démarches",
+        "Éducation",
+        "Santé",
+        "Juridique",
+        "Autre",
+      ]);
+      expect(grouped["Santé"].map((r) => r.title)).toEqual([
+        "Accès aux soins de santé reproductive",
+      ]);
+      expect(grouped["Autre"]).toHaveLength(1);
+      expect(grouped["Autre"][0]).toMatchObject({
+        title: "Sans catégorie",
+        file_url: null,
+        external_url: "https://ex.cd/doc",
+      });
+    });
+  });
 });

@@ -285,6 +285,95 @@ export function demoLiveEventSeed(now: string): Omit<LiveEvent, "id"> {
 }
 
 /**
+ * Événements portail de démonstration V4 (sans id — attribué par le compteur
+ * ou la séquence PG). Dates FUTURES relatives à `now` (garantit des événements
+ * « à venir » quelle que soit la date).
+ */
+export function demoPortalEventSeeds(now: string): Omit<PortalEvent, "id">[] {
+  const base = Date.parse(now);
+  const futureDate = (days: number): string =>
+    new Date(base + days * 86400000).toISOString().slice(0, 10);
+  return [
+    {
+      title: "Atelier entrepreneuriat pour veuves",
+      description:
+        "Formation pratique à la création de petites entreprises et à l'accès au microcrédit.",
+      province: "Nord-Kivu",
+      date: futureDate(21),
+      time: "09:00",
+      type: "atelier",
+      location: "Goma — Maison des familles",
+      capacity: 40,
+      rsvp_user_ids: [],
+      created_at: now,
+    },
+    {
+      title: "Rencontre des familles militaires — Kinshasa",
+      description: "Temps d'échange, d'écoute et d'orientation pour les familles.",
+      province: "Kinshasa",
+      date: futureDate(38),
+      time: "14:00",
+      type: "rencontre",
+      location: "Kinshasa — Centre communautaire",
+      capacity: null,
+      rsvp_user_ids: [],
+      created_at: now,
+    },
+    {
+      title: "Distribution de kits scolaires",
+      description: "Remise de fournitures aux enfants et orphelins de militaires.",
+      province: "Haut-Katanga",
+      date: futureDate(60),
+      time: "10:00",
+      type: "distribution",
+      location: "Lubumbashi",
+      capacity: 120,
+      rsvp_user_ids: [],
+      created_at: now,
+    },
+  ];
+}
+
+/** Ressources membres de démonstration V4 (sans id — compteur ou séquence PG). */
+export function demoMemberResourceSeeds(now: string): Omit<MemberResource, "id">[] {
+  return [
+    {
+      title: "Obtenir une pension de survie",
+      category: "Démarches",
+      description:
+        "Guide pas à pas pour constituer le dossier de pension de survie des veuves de militaires.",
+      file_url: null,
+      external_url: null,
+      created_at: now,
+    },
+    {
+      title: "Inscrire un orphelin à l'école",
+      category: "Éducation",
+      description: "Documents requis et bourses disponibles pour la scolarisation.",
+      file_url: null,
+      external_url: null,
+      created_at: now,
+    },
+    {
+      title: "Accès aux soins de santé reproductive",
+      category: "Santé",
+      description: "Où trouver des services adaptés et gratuits près des camps militaires.",
+      file_url: null,
+      external_url: null,
+      created_at: now,
+    },
+    {
+      title: "Faire valoir ses droits juridiques",
+      category: "Juridique",
+      description: "Contacts et procédures pour un accompagnement juridique gratuit.",
+      file_url: null,
+      external_url: null,
+      created_at: now,
+    },
+  ];
+}
+
+/**
  * Seeds de démonstration one-shot (anciennement re-seed sur length===0 à chaque
  * chargement — cause de la résurrection des données supprimées, ZC-5).
  * Ne doit être appelé que si (_seed_version ?? 0) < CURRENT_SEED_VERSION.
@@ -310,99 +399,19 @@ export function seedDemoData(store: Store): boolean {
 
   if (store.events.length === 0) {
     const now = new Date().toISOString();
-    // Dates relatives au futur (garantit des événements "à venir" quelle que soit la date).
-    const futureDate = (days: number): string =>
-      new Date(Date.now() + days * 86400000).toISOString().slice(0, 10);
-    const base = (store._counters.global || 100) + 1;
-    store.events.push(
-      {
-        id: base,
-        title: "Atelier entrepreneuriat pour veuves",
-        description:
-          "Formation pratique à la création de petites entreprises et à l'accès au microcrédit.",
-        province: "Nord-Kivu",
-        date: futureDate(21),
-        time: "09:00",
-        type: "atelier",
-        location: "Goma — Maison des familles",
-        capacity: 40,
-        rsvp_user_ids: [],
-        created_at: now,
-      },
-      {
-        id: base + 1,
-        title: "Rencontre des familles militaires — Kinshasa",
-        description: "Temps d'échange, d'écoute et d'orientation pour les familles.",
-        province: "Kinshasa",
-        date: futureDate(38),
-        time: "14:00",
-        type: "rencontre",
-        location: "Kinshasa — Centre communautaire",
-        capacity: null,
-        rsvp_user_ids: [],
-        created_at: now,
-      },
-      {
-        id: base + 2,
-        title: "Distribution de kits scolaires",
-        description: "Remise de fournitures aux enfants et orphelins de militaires.",
-        province: "Haut-Katanga",
-        date: futureDate(60),
-        time: "10:00",
-        type: "distribution",
-        location: "Lubumbashi",
-        capacity: 120,
-        rsvp_user_ids: [],
-        created_at: now,
-      }
-    );
-    store._counters.global = base + 2;
+    for (const seed of demoPortalEventSeeds(now)) {
+      store._counters.global = (store._counters.global || 100) + 1;
+      store.events.push({ id: store._counters.global, ...seed });
+    }
     changed = true;
   }
 
   if (store.member_resources.length === 0) {
     const now = new Date().toISOString();
-    const base = (store._counters.global || 100) + 1;
-    store.member_resources.push(
-      {
-        id: base,
-        title: "Obtenir une pension de survie",
-        category: "Démarches",
-        description:
-          "Guide pas à pas pour constituer le dossier de pension de survie des veuves de militaires.",
-        file_url: null,
-        external_url: null,
-        created_at: now,
-      },
-      {
-        id: base + 1,
-        title: "Inscrire un orphelin à l'école",
-        category: "Éducation",
-        description: "Documents requis et bourses disponibles pour la scolarisation.",
-        file_url: null,
-        external_url: null,
-        created_at: now,
-      },
-      {
-        id: base + 2,
-        title: "Accès aux soins de santé reproductive",
-        category: "Santé",
-        description: "Où trouver des services adaptés et gratuits près des camps militaires.",
-        file_url: null,
-        external_url: null,
-        created_at: now,
-      },
-      {
-        id: base + 3,
-        title: "Faire valoir ses droits juridiques",
-        category: "Juridique",
-        description: "Contacts et procédures pour un accompagnement juridique gratuit.",
-        file_url: null,
-        external_url: null,
-        created_at: now,
-      }
-    );
-    store._counters.global = base + 3;
+    for (const seed of demoMemberResourceSeeds(now)) {
+      store._counters.global = (store._counters.global || 100) + 1;
+      store.member_resources.push({ id: store._counters.global, ...seed });
+    }
     changed = true;
   }
 

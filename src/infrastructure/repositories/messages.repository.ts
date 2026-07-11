@@ -3,12 +3,22 @@ import {
   updateStoreAsync,
   nextId,
 } from "@/infrastructure/persistence/store-access";
+import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
+import * as sqlPortal from "@/infrastructure/repositories/sql/portal.sql";
 import type { MemberMessage } from "@/domain/entities/v4";
+
+/**
+ * Agrégat portail (messages membres) — dual-mode :
+ * - PG (DATABASE_URL) : SQL ciblé (sql/portal.sql.ts), message sortant et
+ *   accusé de réception insérés dans la même transaction.
+ * - JSON (dev) : branche Store historique inchangée.
+ */
 
 /** Fil de messages d'un membre, trié du plus ancien au plus récent. */
 export async function getMessagesForUser(
   userId: number
 ): Promise<MemberMessage[]> {
+  if (isPgMode()) return sqlPortal.getMessagesForUser(userId);
   const store = await getStoreAsync();
   return (store.member_messages ?? [])
     .filter((m) => m.user_id === userId)
@@ -23,6 +33,7 @@ export async function sendMemberMessage(
   userId: number,
   data: { subject?: string; body: string }
 ): Promise<MemberMessage> {
+  if (isPgMode()) return sqlPortal.sendMemberMessage(userId, data);
   let created!: MemberMessage;
   await updateStoreAsync((store) => {
     if (!store.member_messages) store.member_messages = [];
@@ -58,6 +69,7 @@ export async function sendMemberMessage(
 
 /** Marque comme lus tous les messages entrants ("in") du membre. */
 export async function markMessagesRead(userId: number): Promise<void> {
+  if (isPgMode()) return sqlPortal.markMessagesRead(userId);
   await updateStoreAsync((store) => {
     if (!store.member_messages) store.member_messages = [];
     for (const m of store.member_messages) {
