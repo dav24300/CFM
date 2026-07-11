@@ -30,6 +30,11 @@ const DOMAIN_ERRORS: Record<string, ErrorSpec> = {
   PARENTAL_CONSENT_REQUIRED: { message: "Consentement parental requis", status: 400 },
   MISSING_SIGNER: { message: "Nom et email obligatoires", status: 400 },
   PAYDUNYA_ERROR: { message: "Erreur PayDunya", status: 502 },
+  PERSISTENCE_UNAVAILABLE: {
+    message: "Service temporairement indisponible, réessayez dans un instant",
+    status: 503,
+  },
+  PERSISTENCE_ERROR: { message: "Erreur serveur", status: 500 },
 };
 
 function resolveDomainCode(err: unknown): string | null {

@@ -4,10 +4,22 @@ import {
   nextId,
 } from "@/infrastructure/persistence/store-access";
 import { domainError } from "@/domain/errors/domain-error";
+import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
+import * as sqlFamilyLinks from "@/infrastructure/repositories/sql/family-links.sql";
 import type { FamilyLink } from "@/domain/entities/v2";
 import { getUserByEmail, getUserById } from "@/infrastructure/repositories/users.repository";
 
+/**
+ * Agrégat liens familiaux — dual-mode :
+ * - PG (DATABASE_URL) : SQL ciblé (sql/family-links.sql.ts), anti-doublon en
+ *   transaction — concurrent-safe.
+ * - JSON (dev) : branche Store historique inchangée.
+ * Les gardes métier (CHILD_NOT_FOUND, PARENT_NOT_FOUND, SELF_LINK,
+ * NOT_FAMILY_PARENT) passent par les lookups users dual-modés : communes.
+ */
+
 export async function getFamilyLinksForUser(userId: number): Promise<FamilyLink[]> {
+  if (isPgMode()) return sqlFamilyLinks.getFamilyLinksForUser(userId);
   const store = await getStoreAsync();
   return store.family_links.filter(
     (l) => l.parent_user_id === userId || l.child_user_id === userId
@@ -26,6 +38,16 @@ export async function requestFamilyLinkByParent(data: {
   const parent = await getUserById(data.parent_user_id);
   if (!parent || parent.membership_type !== "famille") {
     throw domainError("NOT_FAMILY_PARENT");
+  }
+
+  if (isPgMode()) {
+    return sqlFamilyLinks.createFamilyLink({
+      parent_user_id: data.parent_user_id,
+      child_user_id: child.id,
+      relationship: data.relationship,
+      status: "pending_child",
+      initiated_by: "parent",
+    });
   }
 
   let created!: FamilyLink;
@@ -61,6 +83,16 @@ export async function requestFamilyLinkByChild(data: {
   if (!parent) throw domainError("PARENT_NOT_FOUND");
   if (parent.id === data.child_user_id) throw domainError("SELF_LINK");
 
+  if (isPgMode()) {
+    return sqlFamilyLinks.createFamilyLink({
+      parent_user_id: parent.id,
+      child_user_id: data.child_user_id,
+      relationship: data.relationship,
+      status: "pending_parent",
+      initiated_by: "child",
+    });
+  }
+
   let created!: FamilyLink;
   await updateStoreAsync((store) => {
     const exists = store.family_links.some(
@@ -90,6 +122,7 @@ export async function respondFamilyLink(
   userId: number,
   approve: boolean
 ): Promise<void> {
+  if (isPgMode()) return sqlFamilyLinks.respondFamilyLink(linkId, userId, approve);
   await updateStoreAsync((store) => {
     const link = store.family_links.find((l) => l.id === linkId);
     if (!link) throw domainError("NOT_FOUND");
@@ -106,6 +139,7 @@ export async function respondFamilyLink(
 }
 
 export async function adminApproveFamilyLink(linkId: number): Promise<void> {
+  if (isPgMode()) return sqlFamilyLinks.setFamilyLinkStatus(linkId, "approved");
   await updateStoreAsync((store) => {
     const link = store.family_links.find((l) => l.id === linkId);
     if (link) link.status = "approved";
@@ -113,6 +147,7 @@ export async function adminApproveFamilyLink(linkId: number): Promise<void> {
 }
 
 export async function adminRejectFamilyLink(linkId: number): Promise<void> {
+  if (isPgMode()) return sqlFamilyLinks.setFamilyLinkStatus(linkId, "rejected");
   await updateStoreAsync((store) => {
     const link = store.family_links.find((l) => l.id === linkId);
     if (link) link.status = "rejected";
@@ -120,6 +155,23 @@ export async function adminRejectFamilyLink(linkId: number): Promise<void> {
 }
 
 export async function getAllFamilyLinks(): Promise<FamilyLink[]> {
+  if (isPgMode()) return sqlFamilyLinks.getAllFamilyLinks();
   const store = await getStoreAsync();
   return [...store.family_links].reverse();
+}
+
+/** Compteurs liens familiaux pour le tableau de bord admin. */
+export async function getFamilyLinkCounters(): Promise<{
+  total: number;
+  pending: number;
+}> {
+  if (isPgMode()) return sqlFamilyLinks.getFamilyLinkCounters();
+  const store = await getStoreAsync();
+  const links = store.family_links || [];
+  return {
+    total: links.length,
+    pending: links.filter(
+      (l) => l.status !== "approved" && l.status !== "rejected"
+    ).length,
+  };
 }

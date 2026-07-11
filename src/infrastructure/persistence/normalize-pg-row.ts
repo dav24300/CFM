@@ -7,7 +7,14 @@ export function toIsoString(value: unknown): string {
 }
 
 export function toDateString(value: unknown): string {
-  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  if (value instanceof Date) {
+    // pg parse le type DATE en Date à minuit LOCAL : utiliser les composants
+    // locaux, pas toISOString() (qui décale d'un jour sur un serveur UTC+X).
+    const y = value.getFullYear();
+    const m = String(value.getMonth() + 1).padStart(2, "0");
+    const d = String(value.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
   if (typeof value === "string") return value;
   if (value == null) return "";
   return String(value);

@@ -4,6 +4,8 @@ import {
   updateStoreAsync,
   nextId,
 } from "@/infrastructure/persistence/store-access";
+import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
+import * as sqlPush from "@/infrastructure/repositories/sql/push.sql";
 import type { PushSubscription, PushTopic } from "@/domain/entities/v3";
 
 function isVapidConfigured(): boolean {
@@ -27,6 +29,7 @@ export async function savePushSubscription(data: {
   auth: string;
   topics: PushTopic[];
 }): Promise<void> {
+  if (isPgMode()) return sqlPush.upsertSubscription(data);
   await updateStoreAsync((store) => {
     if (!store.push_subscriptions) store.push_subscriptions = [];
     const idx = store.push_subscriptions.findIndex(
@@ -46,6 +49,7 @@ export async function savePushSubscription(data: {
 }
 
 export async function removePushSubscription(endpoint: string): Promise<void> {
+  if (isPgMode()) return sqlPush.removeSubscription(endpoint);
   await updateStoreAsync((store) => {
     store.push_subscriptions = store.push_subscriptions.filter(
       (s) => s.endpoint !== endpoint
@@ -54,6 +58,7 @@ export async function removePushSubscription(endpoint: string): Promise<void> {
 }
 
 export async function getPushSubscriberCount(topic?: PushTopic): Promise<number> {
+  if (isPgMode()) return sqlPush.countSubscriptions(topic);
   const store = await getStoreAsync();
   const subs = store.push_subscriptions || [];
   if (!topic) return subs.length;
@@ -64,10 +69,13 @@ export async function sendPushToTopic(
   topic: PushTopic,
   payload: { title: string; body: string; url?: string }
 ): Promise<{ sent: number; failed: number }> {
-  const store = await getStoreAsync();
-  const subs = (store.push_subscriptions || []).filter((s) =>
-    s.topics.includes(topic)
-  );
+  let subs: PushSubscription[];
+  if (isPgMode()) {
+    subs = await sqlPush.listSubscriptionsByTopic(topic);
+  } else {
+    const store = await getStoreAsync();
+    subs = (store.push_subscriptions || []).filter((s) => s.topics.includes(topic));
+  }
 
   if (!isVapidConfigured() || subs.length === 0) {
     console.log(`[CFM Push] ${topic}: ${payload.title} — ${subs.length} abonnés (mode log)`);

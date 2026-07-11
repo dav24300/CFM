@@ -1,0 +1,13 @@
+Run 1 — A: 10/10 acceptées (HTTP), 1 persistées → PERTE 9
+Run 1 — B: signature 200/persistée, newsletter 200/PERDUE
+Run 2 — A: 10/10 acceptées (HTTP), 1 persistées → PERTE 9
+Run 2 — B: signature 200/persistée, newsletter 200/PERDUE
+Run 3 — A: 10/10 acceptées (HTTP), 1 persistées → PERTE 9
+Run 3 — B: signature 200/persistée, newsletter 200/PERDUE
+Run 4 — A: 10/10 acceptées (HTTP), 1 persistées → PERTE 9
+Run 4 — B: signature 200/persistée, newsletter 200/PERDUE
+Run 5 — A: 10/10 acceptées (HTTP), 1 persistées → PERTE 9
+Run 5 — B: signature 200/persistée, newsletter 200/PERDUE
+
+Résultat : 50 écriture(s) perdue(s) sur 5 run(s) (A: 45, B: 5)
+⚠ Pertes documentées (mode --allow-loss)

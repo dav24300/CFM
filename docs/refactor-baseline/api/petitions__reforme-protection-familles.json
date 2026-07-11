@@ -1,0 +1,15 @@
+{
+  "endpoint": "/api/petitions/reforme-protection-familles",
+  "status": 200,
+  "body": {
+    "active": 1,
+    "content": "Cette pétition vise à obtenir une réforme structurelle de la protection des veuves, orphelins et familles de militaires en RDC.",
+    "created_at": "<volatile>",
+    "description": "Appelons le gouvernement à renforcer la protection sociale des dépendants des militaires.",
+    "goal": 1000,
+    "id": 105,
+    "signatures_count": 3,
+    "slug": "reforme-protection-familles",
+    "title": "Réforme de la protection des familles militaires"
+  }
+}

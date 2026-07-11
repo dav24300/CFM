@@ -1,0 +1,244 @@
+{
+  "endpoint": "/api/admin/data",
+  "status": 200,
+  "body": {
+    "actions": [
+      {
+        "date": "2025-03-09",
+        "description": "Formation entrepreneuriat pour veuves",
+        "id": 11,
+        "photo": null,
+        "province": "Nord-Kivu",
+        "title": "Atelier autonomisation femmes",
+        "type": "atelier"
+      },
+      {
+        "date": "2025-02-19",
+        "description": "Rencontre avec les autorités locales",
+        "id": 12,
+        "photo": null,
+        "province": "Kasaï-Oriental",
+        "title": "Plaidoyer provincial",
+        "type": "plaidoyer"
+      },
+      {
+        "date": "2025-01-14",
+        "description": "Grand rassemblement des familles militaires",
+        "id": 10,
+        "photo": "/media/fikin-2025/rassemblement-01.svg",
+        "province": "Kinshasa",
+        "title": "Rassemblement FIKIN 2025",
+        "type": "evenement"
+      }
+    ],
+    "campaigns": [
+      {
+        "active": 1,
+        "content": "Campagne de sensibilisation et de plaidoyer pour l'amélioration de l'accès aux soins de santé sexuelle et reproductive.",
+        "created_at": "<volatile>",
+        "description": "Sensibilisation et accès aux soins de santé reproductive.",
+        "id": 5,
+        "image_url": "/media/axes/sante.svg",
+        "petition_slug": "reforme-protection-familles",
+        "slug": "sante-sexuelle-camps",
+        "title": "Santé sexuelle des femmes dans les camps militaires"
+      },
+      {
+        "active": 1,
+        "content": "Programme d'accompagnement vers l'entrepreneuriat : formation, microcrédit, mentorat et réseau de femmes entrepreneures.",
+        "created_at": "<volatile>",
+        "description": "Entrepreneuriat et indépendance économique pour les femmes et veuves de militaires.",
+        "id": 4,
+        "image_url": "/media/axes/economie.svg",
+        "petition_slug": "autonomisation-femmes-veuves",
+        "slug": "autonomisation-femmes-veuves",
+        "title": "Autonomisation des femmes et veuves"
+      }
+    ],
+    "contacts": [],
+    "donations": [],
+    "family_links": [],
+    "help_requests": [],
+    "memberships": [],
+    "news": [
+      {
+        "category": "campagne",
+        "content": "CFM lance une campagne nationale pour l'autonomisation économique des veuves de militaires par l'entrepreneuriat.",
+        "cover_image": "/media/axes/economie.svg",
+        "cover_image_alt": "Campagne autonomisation des veuves",
+        "created_at": "<volatile>",
+        "excerpt": "Former et accompagner les veuves de militaires vers l'entrepreneuriat.",
+        "id": 2,
+        "published": 1,
+        "slug": "campagne-autonomisation-veuves",
+        "title": "Lancement de la campagne d'autonomisation des veuves"
+      },
+      {
+        "category": "evenement",
+        "content": "En 2025, CFM a organisé un rassemblement majeur des familles de militaires à la Foire Internationale de Kinshasa (FIKIN).",
+        "cover_image": "/media/actualites/fikin-2025.png",
+        "cover_image_alt": "Rassemblement FIKIN 2025 des familles militaires",
+        "created_at": "<volatile>",
+        "excerpt": "Un moment historique de rassemblement et de plaidoyer pour les droits des dépendants des militaires.",
+        "id": 1,
+        "published": 1,
+        "slug": "rassemblement-fikin-2025",
+        "title": "Rassemblement des familles militaires à la FIKIN 2025"
+      }
+    ],
+    "newsletter": [],
+    "petition_signatures": [
+      {
+        "email": "c3-pgup@ex.com",
+        "id": 151,
+        "is_new": true,
+        "name": "Test C3",
+        "petition_id": 105,
+        "petition_slug": "reforme-protection-familles",
+        "petition_title": "Réforme de la protection des familles militaires",
+        "signed_at": "<volatile>",
+        "user_id": null
+      },
+      {
+        "email": "admin@gouv.cd",
+        "id": 125,
+        "is_new": true,
+        "name": "moembo kapinga david",
+        "petition_id": 105,
+        "petition_slug": "reforme-protection-familles",
+        "petition_title": "Réforme de la protection des familles militaires",
+        "signed_at": "<volatile>",
+        "user_id": 124
+      },
+      {
+        "email": "davidmoembo8@gmail.com",
+        "id": 113,
+        "is_new": true,
+        "name": "david",
+        "petition_id": 106,
+        "petition_slug": "autonomisation-femmes-veuves",
+        "petition_title": "Autonomisation économique des femmes et veuves de militaires",
+        "signed_at": "<volatile>",
+        "user_id": 111
+      },
+      {
+        "email": "davidmoembo8@gmail.com",
+        "id": 112,
+        "is_new": true,
+        "name": "david",
+        "petition_id": 105,
+        "petition_slug": "reforme-protection-familles",
+        "petition_title": "Réforme de la protection des familles militaires",
+        "signed_at": "<volatile>",
+        "user_id": 111
+      }
+    ],
+    "petitions": [
+      {
+        "active": 1,
+        "content": "Cette pétition vise à obtenir une réforme structurelle de la protection des veuves, orphelins et familles de militaires en RDC.",
+        "created_at": "<volatile>",
+        "description": "Appelons le gouvernement à renforcer la protection sociale des dépendants des militaires.",
+        "goal": 1000,
+        "id": 105,
+        "signatures": 3,
+        "signatures_count": 3,
+        "slug": "reforme-protection-familles",
+        "title": "Réforme de la protection des familles militaires"
+      },
+      {
+        "active": 1,
+        "content": "Cette pétition demande des mesures concrètes d'accompagnement économique : formation, financement et réseaux d'entraide pour les femmes des familles militaires.",
+        "created_at": "<volatile>",
+        "description": "Soutenons l'accès au microcrédit et à la formation entrepreneuriale pour les veuves et conjoints de militaires.",
+        "goal": 500,
+        "id": 106,
+        "signatures": 1,
+        "signatures_count": 1,
+        "slug": "autonomisation-femmes-veuves",
+        "title": "Autonomisation économique des femmes et veuves de militaires"
+      }
+    ],
+    "press_releases": [
+      {
+        "content": "L'ASBL Cri de Familles Militaires publie un communiqué appelant le gouvernement et les partenaires internationaux à renforcer la protection sociale des dépendants des militaires en RDC.",
+        "created_at": "<volatile>",
+        "file_url": null,
+        "id": 13,
+        "published": 1,
+        "slug": "communique-reforme-protection",
+        "title": "CFM appelle à une réforme de la protection des familles militaires"
+      }
+    ],
+    "studies": [
+      {
+        "content": "Cette étude identifie les lacunes dans la protection sociale, l'accès à l'éducation, au logement et aux soins de santé pour les dépendants des militaires.",
+        "created_at": "<volatile>",
+        "file_url": null,
+        "id": 3,
+        "published": 1,
+        "slug": "analyse-conditions-sociales-2025",
+        "summary": "Étude sur les faiblesses du système de protection des familles de militaires.",
+        "title": "Analyse des conditions sociales des dépendants militaires en RDC"
+      }
+    ],
+    "testimonials": [
+      {
+        "anonymous": 1,
+        "author": "Anonyme",
+        "content": "Derrière chaque militaire, il y a une famille. CFM comprend notre quotidien.",
+        "created_at": "<volatile>",
+        "id": 9,
+        "photo": "/media/temoignages/portrait-02.svg",
+        "photo_alt": "Témoignage anonyme",
+        "published": 1,
+        "role": "Orphelin de militaire"
+      },
+      {
+        "anonymous": 0,
+        "author": "Marie K.",
+        "content": "CFM m'a donné une voix quand je me sentais invisible.",
+        "created_at": "<volatile>",
+        "id": 8,
+        "photo": "/media/temoignages/portrait-01.svg",
+        "photo_alt": "Marie K., veuve de militaire",
+        "published": 1,
+        "role": "Veuve de militaire, Kinshasa"
+      }
+    ],
+    "users": [
+      {
+        "created_at": "<volatile>",
+        "email": "admin@gouv.cd",
+        "first_name": "david",
+        "id": 124,
+        "last_name": "moembo",
+        "membership_type": "famille",
+        "military_link": "enfant",
+        "parent_military_name": "Moembo",
+        "phone": "+243859588332",
+        "province": "Kinshasa",
+        "role": "member",
+        "skills": null,
+        "status": "active",
+        "verified_at": "<volatile>"
+      },
+      {
+        "created_at": "<volatile>",
+        "email": "davidmoembo8@gmail.com",
+        "first_name": "david",
+        "id": 111,
+        "last_name": "moembo",
+        "membership_type": "famille",
+        "military_link": "enfant",
+        "parent_military_name": "moembo",
+        "phone": "0859588332",
+        "province": "Kinshasa",
+        "role": "member",
+        "skills": null,
+        "status": "active",
+        "verified_at": "<volatile>"
+      }
+    ]
+  }
+}

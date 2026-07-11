@@ -1,0 +1,30 @@
+{
+  "endpoint": "/api/admin/testimonials",
+  "status": 200,
+  "body": {
+    "testimonials": [
+      {
+        "anonymous": 1,
+        "author": "Anonyme",
+        "content": "Derrière chaque militaire, il y a une famille. CFM comprend notre quotidien.",
+        "created_at": "<volatile>",
+        "id": 9,
+        "photo": "/media/temoignages/portrait-02.svg",
+        "photo_alt": "Témoignage anonyme",
+        "published": 1,
+        "role": "Orphelin de militaire"
+      },
+      {
+        "anonymous": 0,
+        "author": "Marie K.",
+        "content": "CFM m'a donné une voix quand je me sentais invisible.",
+        "created_at": "<volatile>",
+        "id": 8,
+        "photo": "/media/temoignages/portrait-01.svg",
+        "photo_alt": "Marie K., veuve de militaire",
+        "published": 1,
+        "role": "Veuve de militaire, Kinshasa"
+      }
+    ]
+  }
+}

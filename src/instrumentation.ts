@@ -9,5 +9,11 @@ export async function register(): Promise<void> {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     const { assertProductionConfig } = await import("@/lib/config");
     assertProductionConfig();
+
+    // Mode PG : schéma + seeds de démo one-shot (verrou advisory, non bloquant).
+    const { ensurePgSeedsOnce } = await import(
+      "@/infrastructure/persistence/sql/seed-hooks"
+    );
+    await ensurePgSeedsOnce();
   }
 }

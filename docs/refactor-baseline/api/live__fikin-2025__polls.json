@@ -1,0 +1,7 @@
+{
+  "endpoint": "/api/live/fikin-2025/polls",
+  "status": 200,
+  "body": {
+    "polls": []
+  }
+}

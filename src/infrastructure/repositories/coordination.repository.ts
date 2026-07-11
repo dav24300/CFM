@@ -1,4 +1,6 @@
-import { getStoreAsync } from "@/infrastructure/persistence/store-access";
+import { countFamilyUsers } from "@/infrastructure/repositories/users.repository";
+import { listHelpRequestsRaw } from "@/infrastructure/repositories/content.repository";
+import { listPortalEvents } from "@/infrastructure/repositories/events.repository";
 
 export type CoordinationRequestSummary = {
   id: number;
@@ -18,24 +20,17 @@ export type CoordinationStats = {
 };
 
 /**
- * Agrège les indicateurs de coordination provinciale depuis le store.
- * Lecture seule et défensive : toutes les collections peuvent être absentes.
+ * Agrège les indicateurs de coordination provinciale via les repositories
+ * propriétaires de chaque agrégat. Lecture seule et défensive.
  */
 export async function getCoordinationStats(
   province?: string
 ): Promise<CoordinationStats> {
-  const store = await getStoreAsync();
-  const users = store.users ?? [];
-  const helpRequests = store.help_requests ?? [];
-  const events = store.events ?? [];
-
   const filterProvince = province && province.trim() ? province.trim() : null;
 
-  const familiesFollowed = users.filter((u) => {
-    if (u.membership_type !== "famille") return false;
-    if (filterProvince && u.province !== filterProvince) return false;
-    return true;
-  }).length;
+  const familiesFollowed = await countFamilyUsers(filterProvince);
+  const helpRequests = await listHelpRequestsRaw();
+  const events = await listPortalEvents();
 
   const provinceRequests = helpRequests.filter((h) => {
     if (filterProvince && String(h.province ?? "") !== filterProvince) return false;

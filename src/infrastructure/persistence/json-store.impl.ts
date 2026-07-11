@@ -3,10 +3,8 @@ import path from "path";
 import type { Store } from "@/domain/entities/store";
 import { assertProductionConfig } from "@/lib/config";
 import {
+  applySeedsOnce,
   defaultStore,
-  migrateV2,
-  migrateV3,
-  migrateV4,
   nextId,
 } from "@/infrastructure/persistence/store-seed";
 
@@ -37,9 +35,9 @@ function ensureStore(): Store {
   }
   const raw = fs.readFileSync(storePath, "utf-8");
   const store = JSON.parse(raw) as Store;
-  let changed = migrateV2(store);
-  if (migrateV3(store)) changed = true;
-  if (migrateV4(store)) changed = true;
+  // Normalisation systématique + seeds de démo une seule fois (_seed_version) :
+  // un admin qui vide une collection ne la voit plus re-seedée (ZC-5).
+  const changed = applySeedsOnce(store);
   if (changed) {
     saveStore(store);
   } else {

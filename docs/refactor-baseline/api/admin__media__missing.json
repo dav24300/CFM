@@ -1,0 +1,5 @@
+{
+  "endpoint": "/api/admin/media/missing",
+  "status": 200,
+  "body": {}
+}

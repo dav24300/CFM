@@ -10,7 +10,7 @@ import {
   getPollsForEvent,
 } from "@/lib/live";
 import { sendPushToTopic } from "@/lib/push";
-import { getStoreAsync } from "@/lib/store";
+import { countPushSubscriptions } from "@/infrastructure/repositories/live.repository";
 import {
   jsonData,
   jsonError,
@@ -142,8 +142,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (action === "stats") {
-    const store = await getStoreAsync();
-    const subs = store.push_subscriptions?.length ?? 0;
+    const subs = await countPushSubscriptions();
     return jsonData({ push_subscribers: subs });
   }
 

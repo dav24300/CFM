@@ -1,0 +1,17 @@
+{
+  "endpoint": "/api/admin/press-releases",
+  "status": 200,
+  "body": {
+    "press_releases": [
+      {
+        "content": "L'ASBL Cri de Familles Militaires publie un communiqué appelant le gouvernement et les partenaires internationaux à renforcer la protection sociale des dépendants des militaires en RDC.",
+        "created_at": "<volatile>",
+        "file_url": null,
+        "id": 13,
+        "published": 1,
+        "slug": "communique-reforme-protection",
+        "title": "CFM appelle à une réforme de la protection des familles militaires"
+      }
+    ]
+  }
+}

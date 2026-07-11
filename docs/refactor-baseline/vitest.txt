@@ -1,0 +1,14 @@
+
+> cfm-asbl@1.0.0 test
+> vitest run
+
+
+ RUN  v4.1.9 C:/Users/DAVID KING/Desktop/CFM
+
+
+ Test Files  21 passed (21)
+      Tests  84 passed (84)
+   Start at  21:18:27
+   Duration  40.37s (transform 1.55s, setup 0ms, import 9.92s, tests 2.32s, environment 13.62s)
+
+exit=0

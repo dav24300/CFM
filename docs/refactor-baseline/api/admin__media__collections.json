@@ -1,0 +1,5 @@
+{
+  "endpoint": "/api/admin/media/collections",
+  "status": 200,
+  "body": {}
+}

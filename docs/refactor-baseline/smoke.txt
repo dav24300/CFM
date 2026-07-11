@@ -1,0 +1,35 @@
+
+> cfm-asbl@1.0.0 smoke
+> node scripts/smoke-routes.mjs
+
+Smoke test CFM → http://localhost:58753
+
+OK 200 (expected 200) /
+OK 200 (expected 200) /a-propos
+OK 200 (expected 200) /axes
+OK 200 (expected 200) /plaidoyer
+OK 200 (expected 200) /actions
+OK 200 (expected 200) /petitions
+OK 200 (expected 200) /petitions/reforme-protection-familles
+OK 200 (expected 200) /live
+OK 200 (expected 200) /live/fikin-2025
+OK 200 (expected 200) /s-engager
+OK 200 (expected 200) /presse
+OK 200 (expected 200) /contact
+OK 200 (expected 200) /mentions-legales
+OK 200 (expected 200) /confidentialite
+OK 200 (expected 200) /actualites/rassemblement-fikin-2025
+OK 200 (expected 200) /membre/inscription
+OK 200 (expected 200) /membre/mot-de-passe-oublie
+OK 200 (expected 200) /membre/reinitialiser-mot-de-passe
+OK 307 (expected 307) /membre/tableau-de-bord
+OK 200 (expected 200) /admin
+OK 307 (expected 307) /admin/dashboard
+
+Stability /axes (10x):
+OK 10/10 on /axes
+
+API POST /api/petitions/reforme-protection-familles (empty body):
+OK 400 invalid petition body
+
+✓ All smoke tests passed

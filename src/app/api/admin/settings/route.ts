@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
-import { getStoreAsync } from "@/lib/store";
-import { updateStoreAsync } from "@/infrastructure/persistence/store-access";
+import {
+  getSiteSettings,
+  patchSiteSettings,
+} from "@/infrastructure/repositories/settings.repository";
 import { invalidateSettingsPatch } from "@/infrastructure/persistence/admin-mutation";
 import { requireAdminRole } from "@/lib/admin-rest";
 import { jsonData, jsonError, jsonSuccess } from "@/lib/api-response";
@@ -9,8 +11,7 @@ import { logAdminAction } from "@/lib/admin-audit";
 export async function GET() {
   const auth = await requireAdminRole();
   if (!auth.ok) return auth.response;
-  const store = await getStoreAsync();
-  return jsonData({ settings: store.site_settings });
+  return jsonData({ settings: await getSiteSettings() });
 }
 
 export async function PATCH(request: NextRequest) {
@@ -23,9 +24,7 @@ export async function PATCH(request: NextRequest) {
     return jsonError("settings requis", 400);
   }
 
-  await updateStoreAsync((store) => {
-    store.site_settings = { ...store.site_settings, ...patch };
-  });
+  await patchSiteSettings(patch);
   invalidateSettingsPatch(patch);
 
   await logAdminAction({

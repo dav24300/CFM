@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { slugify } from "@/lib/store";
+import { slugify } from "@/infrastructure/persistence/store-seed";
 
 describe("store slugify", () => {
   it("normalizes accents and punctuation", () => {

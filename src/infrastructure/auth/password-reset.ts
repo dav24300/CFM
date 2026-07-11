@@ -6,8 +6,19 @@ import {
   nextId,
 } from "@/infrastructure/persistence/store-access";
 import { domainError } from "@/domain/errors/domain-error";
+import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
+import * as sqlUsers from "@/infrastructure/repositories/sql/users.sql";
 import type { PasswordResetToken } from "@/domain/entities/v2";
 import { csvCell } from "@/lib/csv";
+
+/**
+ * Tokens de réinitialisation — dual-mode :
+ * - PG (DATABASE_URL) : SQL ciblé (sql/users.sql.ts) ; les écritures
+ *   cross-collections (users + password_reset_tokens) partagent UNE
+ *   transaction.
+ * - JSON (dev) : branche Store historique inchangée.
+ * Génération du token, expiration et codes d'erreur restent communs.
+ */
 
 const TOKEN_BYTES = 32;
 const EXPIRY_HOURS = 1;
@@ -15,6 +26,16 @@ const EXPIRY_HOURS = 1;
 export async function createPasswordResetToken(userId: number): Promise<string> {
   const token = randomBytes(TOKEN_BYTES).toString("hex");
   const expiresAt = new Date(Date.now() + EXPIRY_HOURS * 60 * 60 * 1000).toISOString();
+
+  if (isPgMode()) {
+    await sqlUsers.replacePasswordResetToken({
+      user_id: userId,
+      token,
+      expires_at: expiresAt,
+      created_at: new Date().toISOString(),
+    });
+    return token;
+  }
 
   await updateStoreAsync((store) => {
     store.password_reset_tokens = store.password_reset_tokens.filter(
@@ -36,6 +57,7 @@ export async function createPasswordResetToken(userId: number): Promise<string> 
 export async function getValidResetToken(
   token: string
 ): Promise<PasswordResetToken | null> {
+  if (isPgMode()) return sqlUsers.getValidResetToken(token);
   const store = await getStoreAsync();
   const entry = store.password_reset_tokens.find(
     (t) => t.token === token && t.used === 0
@@ -50,6 +72,11 @@ export async function resetPasswordWithToken(
   newPassword: string
 ): Promise<void> {
   if (newPassword.length < 8) throw domainError("PASSWORD_TOO_SHORT");
+
+  if (isPgMode()) {
+    const hash = await bcrypt.hash(newPassword, 10);
+    return sqlUsers.resetPasswordWithTokenHash(token, hash);
+  }
 
   const entry = await getValidResetToken(token);
   if (!entry) throw domainError("INVALID_TOKEN");

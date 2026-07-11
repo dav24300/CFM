@@ -1,0 +1,167 @@
+
+> cfm-asbl@1.0.0 build
+> next build
+
+   ▲ Next.js 15.5.19
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 41s
+   Linting and checking validity of types ...
+
+./src/lib/hooks/use-live-channel.ts
+50:6  Warning: React Hook useEffect has a missing dependency: 'handlers'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/89) ...
+[cfm-store] PostgreSQL unavailable (). Using local JSON store for this process.
+[CFM] ADMIN_PASSWORD par défaut ignoré pendant build
+[cfm-store] PostgreSQL unavailable (). Using local JSON store for this process.
+[cfm-store] PostgreSQL unavailable (). Using local JSON store for this process.
+[cfm-store] PostgreSQL unavailable (). Using local JSON store for this process.
+[cfm-store] PostgreSQL unavailable (). Using local JSON store for this process.
+[cfm-store] PostgreSQL unavailable (). Using local JSON store for this process.
+[cfm-store] PostgreSQL unavailable (). Using local JSON store for this process.
+[cfm-store] PostgreSQL unavailable (). Using local JSON store for this process.
+[cfm-store] PostgreSQL unavailable (). Using local JSON store for this process.
+[cfm-store] PostgreSQL unavailable (). Using local JSON store for this process.
+[CFM] ADMIN_PASSWORD par défaut ignoré pendant build
+[cfm-store] PostgreSQL unavailable (). Using local JSON store for this process.
+[cfm-store] PostgreSQL unavailable (). Using local JSON store for this process.
+[CFM] ADMIN_PASSWORD par défaut ignoré pendant build
+   Generating static pages (22/89) 
+   Generating static pages (44/89) 
+   Generating static pages (66/89) 
+ ✓ Generating static pages (89/89)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                  Size  First Load JS  Revalidate  Expire
+┌ ƒ /                                     6.39 kB         166 kB
+├ ○ /_not-found                             998 B         103 kB          5m      1y
+├ ƒ /a-propos                             5.86 kB         177 kB
+├ ƒ /actions                              7.51 kB         183 kB
+├ ƒ /actualites/[slug]                      177 B         111 kB
+├ ƒ /admin                                1.15 kB         112 kB
+├ ƒ /admin/dashboard                      31.5 kB         154 kB
+├ ƒ /admin/style-guide                      304 B         103 kB
+├ ƒ /api/actions                            304 B         103 kB
+├ ƒ /api/admin                              304 B         103 kB
+├ ƒ /api/admin/audit                        304 B         103 kB
+├ ƒ /api/admin/campaigns                    304 B         103 kB
+├ ƒ /api/admin/campaigns/[id]               304 B         103 kB
+├ ƒ /api/admin/data                         304 B         103 kB
+├ ƒ /api/admin/donations/[id]               304 B         103 kB
+├ ƒ /api/admin/export/[entity]              304 B         103 kB
+├ ƒ /api/admin/export/petitions/[id]        304 B         103 kB
+├ ƒ /api/admin/i18n                         304 B         103 kB
+├ ƒ /api/admin/live                         304 B         103 kB
+├ ƒ /api/admin/live/[id]                    304 B         103 kB
+├ ƒ /api/admin/live/polls/[id]              304 B         103 kB
+├ ƒ /api/admin/login                        304 B         103 kB
+├ ƒ /api/admin/logout                       304 B         103 kB
+├ ƒ /api/admin/media                        304 B         103 kB
+├ ƒ /api/admin/media/assign                 304 B         103 kB
+├ ƒ /api/admin/media/collections            304 B         103 kB
+├ ƒ /api/admin/media/library                304 B         103 kB
+├ ƒ /api/admin/media/missing                304 B         103 kB
+├ ƒ /api/admin/media/upload-capabilities    304 B         103 kB
+├ ƒ /api/admin/news                         304 B         103 kB
+├ ƒ /api/admin/news/[id]                    304 B         103 kB
+├ ƒ /api/admin/newsletter/[id]              304 B         103 kB
+├ ƒ /api/admin/partners                     304 B         103 kB
+├ ƒ /api/admin/petitions                    304 B         103 kB
+├ ƒ /api/admin/petitions/[id]               304 B         103 kB
+├ ƒ /api/admin/press-releases               304 B         103 kB
+├ ƒ /api/admin/press-releases/[id]          304 B         103 kB
+├ ƒ /api/admin/preview                      304 B         103 kB
+├ ƒ /api/admin/settings                     304 B         103 kB
+├ ƒ /api/admin/stats                        304 B         103 kB
+├ ƒ /api/admin/stats/activity               304 B         103 kB
+├ ƒ /api/admin/studies                      304 B         103 kB
+├ ƒ /api/admin/studies/[id]                 304 B         103 kB
+├ ƒ /api/admin/testimonials                 304 B         103 kB
+├ ƒ /api/admin/testimonials/[id]            304 B         103 kB
+├ ƒ /api/admin/users                        304 B         103 kB
+├ ƒ /api/admin/users/[id]/activate          304 B         103 kB
+├ ƒ /api/contact                            304 B         103 kB
+├ ƒ /api/donations                          304 B         103 kB
+├ ƒ /api/donations/webhook                  304 B         103 kB
+├ ƒ /api/health                             304 B         103 kB
+├ ƒ /api/help                               304 B         103 kB
+├ ƒ /api/live                               304 B         103 kB
+├ ƒ /api/live/[slug]                        304 B         103 kB
+├ ƒ /api/live/[slug]/chat                   304 B         103 kB
+├ ƒ /api/live/[slug]/polls                  304 B         103 kB
+├ ƒ /api/live/[slug]/polls/[pollId]/vote    304 B         103 kB
+├ ƒ /api/live/chat/moderate                 304 B         103 kB
+├ ƒ /api/locale                             304 B         103 kB
+├ ƒ /api/member/entraide                    304 B         103 kB
+├ ƒ /api/member/events                      304 B         103 kB
+├ ƒ /api/member/family                      304 B         103 kB
+├ ƒ /api/member/forgot-password             304 B         103 kB
+├ ƒ /api/member/login                       304 B         103 kB
+├ ƒ /api/member/logout                      304 B         103 kB
+├ ƒ /api/member/me                          304 B         103 kB
+├ ƒ /api/member/messages                    304 B         103 kB
+├ ƒ /api/member/register                    304 B         103 kB
+├ ƒ /api/member/reset-password              304 B         103 kB
+├ ƒ /api/membership                         304 B         103 kB
+├ ƒ /api/newsletter                         304 B         103 kB
+├ ƒ /api/petitions                          304 B         103 kB
+├ ƒ /api/petitions/[slug]                   304 B         103 kB
+├ ƒ /api/push/subscribe                     304 B         103 kB
+├ ƒ /api/push/vapid                         304 B         103 kB
+├ ƒ /axes                                 2.31 kB         153 kB
+├ ● /axes/[slug]                          2.81 kB         154 kB
+├   ├ /axes/social
+├   ├ /axes/economique
+├   ├ /axes/education
+├   └ [+2 more paths]
+├ ƒ /confidentialite                        304 B         103 kB
+├ ƒ /contact                              2.94 kB         174 kB
+├ ƒ /live                                 4.72 kB         164 kB
+├ ƒ /live/[slug]                          7.04 kB         161 kB
+├ ƒ /membre/connexion                     2.42 kB         133 kB
+├ ƒ /membre/inscription                   5.01 kB         166 kB
+├ ƒ /membre/mot-de-passe-oublie           2.85 kB         117 kB
+├ ƒ /membre/profil                          200 B         165 kB
+├ ƒ /membre/reinitialiser-mot-de-passe    3.08 kB         118 kB
+├ ƒ /membre/tableau-de-bord               3.14 kB         137 kB
+├ ƒ /mentions-legales                       304 B         103 kB
+├ ƒ /petitions                            2.31 kB         153 kB
+├ ƒ /petitions/[slug]                      2.8 kB         133 kB
+├ ƒ /plaidoyer                            2.32 kB         153 kB
+├ ƒ /portail                              2.66 kB         122 kB
+├ ƒ /portail/aide                           188 B         166 kB
+├ ƒ /portail/coordination                   304 B         103 kB
+├ ƒ /portail/dons                           171 B         106 kB
+├ ƒ /portail/entraide                     1.01 kB         112 kB
+├ ƒ /portail/evenements                   1.01 kB         112 kB
+├ ƒ /portail/famille                      1.04 kB         115 kB
+├ ƒ /portail/medias                       2.65 kB         110 kB
+├ ƒ /portail/messages                     2.47 kB         114 kB
+├ ƒ /portail/petitions                      171 B         106 kB
+├ ƒ /portail/profil                         184 B         162 kB
+├ ƒ /portail/ressources                     171 B         106 kB
+├ ƒ /presse                               2.23 kB         113 kB
+└ ƒ /s-engager                             7.6 kB         174 kB
++ First Load JS shared by all              102 kB
+  ├ chunks/1255-5c680abb9db89955.js       46.2 kB
+  ├ chunks/4bd1b696-f785427dddbba9fb.js   54.2 kB
+  └ other shared chunks (total)           2.03 kB
+
+
+ƒ Middleware                              35.3 kB
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> cfm-asbl@1.0.0 postbuild
+> node scripts/postbuild-standalone.mjs
+
+[postbuild] standalone prêt (public, static, data)
+exit=0

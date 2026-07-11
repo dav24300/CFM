@@ -22,12 +22,15 @@ import type {
   MemberResource,
 } from "@/domain/entities/v4";
 
+/** Version courante des seeds one-shot (V2 pétitions, V3 live, V4 portail). */
+export const CURRENT_SEED_VERSION = 4;
+
 export function loadSeedStore(): Store {
-  // Le JSON de seed ne contient pas les collections récentes ; migrateV4 les normalise.
+  // Le JSON de seed ne contient pas les collections récentes ; on normalise puis on seede.
   const store = structuredClone(seedData) as unknown as Store;
-  migrateV2(store);
-  migrateV3(store);
-  migrateV4(store);
+  normalizeCollections(store);
+  seedDemoData(store);
+  store._seed_version = CURRENT_SEED_VERSION;
   return store;
 }
 
@@ -209,7 +212,11 @@ export function defaultStore(): Store {
   };
 }
 
-export function migrateV2(store: Store): boolean {
+/**
+ * Normalise les collections manquantes (toujours exécuté, aucune donnée injectée).
+ * Anciennement la première moitié de migrateV2/V3/V4.
+ */
+export function normalizeCollections(store: Store): boolean {
   let changed = false;
   if (!store.users) { store.users = []; changed = true; }
   if (!store.family_links) { store.family_links = []; changed = true; }
@@ -218,12 +225,21 @@ export function migrateV2(store: Store): boolean {
   if (!store.petition_signatures) { store.petition_signatures = []; changed = true; }
   if (!store.help_request_updates) { store.help_request_updates = []; changed = true; }
   if (!store.password_reset_tokens) { store.password_reset_tokens = []; changed = true; }
+  if (!store.live_events) { store.live_events = []; changed = true; }
+  if (!store.live_chat_messages) { store.live_chat_messages = []; changed = true; }
+  if (!store.live_polls) { store.live_polls = []; changed = true; }
+  if (!store.live_poll_votes) { store.live_poll_votes = []; changed = true; }
+  if (!store.push_subscriptions) { store.push_subscriptions = []; changed = true; }
+  if (!store.events) { store.events = []; changed = true; }
+  if (!store.member_messages) { store.member_messages = []; changed = true; }
+  if (!store.member_resources) { store.member_resources = []; changed = true; }
+  return changed;
+}
 
-  if (store.petitions.length === 0) {
-    const now = new Date().toISOString();
-    store._counters.global = (store._counters.global || 100) + 1;
-    store.petitions.push({
-      id: store._counters.global,
+/** Pétitions de démonstration (sans id — attribué par le compteur ou la séquence PG). */
+export function demoPetitionSeeds(now: string): Omit<Petition, "id">[] {
+  return [
+    {
       title: "Réforme de la protection des familles militaires",
       slug: "reforme-protection-familles",
       description:
@@ -234,10 +250,8 @@ export function migrateV2(store: Store): boolean {
       signatures_count: 0,
       active: 1,
       created_at: now,
-    });
-    store._counters.global += 1;
-    store.petitions.push({
-      id: store._counters.global,
+    },
+    {
       title: "Autonomisation des veuves de militaires",
       slug: "autonomisation-veuves-petition",
       description:
@@ -247,148 +261,174 @@ export function migrateV2(store: Store): boolean {
       signatures_count: 0,
       active: 1,
       created_at: now,
-    });
-    changed = true;
-  }
-  return changed;
+    },
+  ];
 }
 
-export function migrateV3(store: Store): boolean {
+/** Live de démonstration V3 (sans id — attribué par le compteur ou la séquence PG). */
+export function demoLiveEventSeed(now: string): Omit<LiveEvent, "id"> {
+  return {
+    title: "FIKIN 2025 — Rassemblement des familles militaires",
+    slug: "fikin-2025",
+    description:
+      "Replay du rassemblement historique des familles de militaires à la Foire Internationale de Kinshasa.",
+    status: "replay",
+    youtube_id: null,
+    stream_url: null,
+    replay_url: "https://youtube.com/@cfmasbl",
+    chat_moderation: 1,
+    viewer_count: 0,
+    started_at: now,
+    ended_at: now,
+    created_at: now,
+  };
+}
+
+/**
+ * Événements portail de démonstration V4 (sans id — attribué par le compteur
+ * ou la séquence PG). Dates FUTURES relatives à `now` (garantit des événements
+ * « à venir » quelle que soit la date).
+ */
+export function demoPortalEventSeeds(now: string): Omit<PortalEvent, "id">[] {
+  const base = Date.parse(now);
+  const futureDate = (days: number): string =>
+    new Date(base + days * 86400000).toISOString().slice(0, 10);
+  return [
+    {
+      title: "Atelier entrepreneuriat pour veuves",
+      description:
+        "Formation pratique à la création de petites entreprises et à l'accès au microcrédit.",
+      province: "Nord-Kivu",
+      date: futureDate(21),
+      time: "09:00",
+      type: "atelier",
+      location: "Goma — Maison des familles",
+      capacity: 40,
+      rsvp_user_ids: [],
+      created_at: now,
+    },
+    {
+      title: "Rencontre des familles militaires — Kinshasa",
+      description: "Temps d'échange, d'écoute et d'orientation pour les familles.",
+      province: "Kinshasa",
+      date: futureDate(38),
+      time: "14:00",
+      type: "rencontre",
+      location: "Kinshasa — Centre communautaire",
+      capacity: null,
+      rsvp_user_ids: [],
+      created_at: now,
+    },
+    {
+      title: "Distribution de kits scolaires",
+      description: "Remise de fournitures aux enfants et orphelins de militaires.",
+      province: "Haut-Katanga",
+      date: futureDate(60),
+      time: "10:00",
+      type: "distribution",
+      location: "Lubumbashi",
+      capacity: 120,
+      rsvp_user_ids: [],
+      created_at: now,
+    },
+  ];
+}
+
+/** Ressources membres de démonstration V4 (sans id — compteur ou séquence PG). */
+export function demoMemberResourceSeeds(now: string): Omit<MemberResource, "id">[] {
+  return [
+    {
+      title: "Obtenir une pension de survie",
+      category: "Démarches",
+      description:
+        "Guide pas à pas pour constituer le dossier de pension de survie des veuves de militaires.",
+      file_url: null,
+      external_url: null,
+      created_at: now,
+    },
+    {
+      title: "Inscrire un orphelin à l'école",
+      category: "Éducation",
+      description: "Documents requis et bourses disponibles pour la scolarisation.",
+      file_url: null,
+      external_url: null,
+      created_at: now,
+    },
+    {
+      title: "Accès aux soins de santé reproductive",
+      category: "Santé",
+      description: "Où trouver des services adaptés et gratuits près des camps militaires.",
+      file_url: null,
+      external_url: null,
+      created_at: now,
+    },
+    {
+      title: "Faire valoir ses droits juridiques",
+      category: "Juridique",
+      description: "Contacts et procédures pour un accompagnement juridique gratuit.",
+      file_url: null,
+      external_url: null,
+      created_at: now,
+    },
+  ];
+}
+
+/**
+ * Seeds de démonstration one-shot (anciennement re-seed sur length===0 à chaque
+ * chargement — cause de la résurrection des données supprimées, ZC-5).
+ * Ne doit être appelé que si (_seed_version ?? 0) < CURRENT_SEED_VERSION.
+ */
+export function seedDemoData(store: Store): boolean {
   let changed = false;
-  if (!store.live_events) { store.live_events = []; changed = true; }
-  if (!store.live_chat_messages) { store.live_chat_messages = []; changed = true; }
-  if (!store.live_polls) { store.live_polls = []; changed = true; }
-  if (!store.live_poll_votes) { store.live_poll_votes = []; changed = true; }
-  if (!store.push_subscriptions) { store.push_subscriptions = []; changed = true; }
+
+  if (store.petitions.length === 0) {
+    const now = new Date().toISOString();
+    for (const seed of demoPetitionSeeds(now)) {
+      store._counters.global = (store._counters.global || 100) + 1;
+      store.petitions.push({ id: store._counters.global, ...seed });
+    }
+    changed = true;
+  }
 
   if (store.live_events.length === 0) {
     const now = new Date().toISOString();
     store._counters.global = (store._counters.global || 100) + 1;
-    store.live_events.push({
-      id: store._counters.global,
-      title: "FIKIN 2025 — Rassemblement des familles militaires",
-      slug: "fikin-2025",
-      description:
-        "Replay du rassemblement historique des familles de militaires à la Foire Internationale de Kinshasa.",
-      status: "replay",
-      youtube_id: null,
-      stream_url: null,
-      replay_url: "https://youtube.com/@cfmasbl",
-      chat_moderation: 1,
-      viewer_count: 0,
-      started_at: now,
-      ended_at: now,
-      created_at: now,
-    });
+    store.live_events.push({ id: store._counters.global, ...demoLiveEventSeed(now) });
     changed = true;
   }
-  return changed;
-}
-
-export function migrateV4(store: Store): boolean {
-  let changed = false;
-  if (!store.events) { store.events = []; changed = true; }
-  if (!store.member_messages) { store.member_messages = []; changed = true; }
-  if (!store.member_resources) { store.member_resources = []; changed = true; }
 
   if (store.events.length === 0) {
     const now = new Date().toISOString();
-    // Dates relatives au futur (garantit des événements "à venir" quelle que soit la date).
-    const futureDate = (days: number): string =>
-      new Date(Date.now() + days * 86400000).toISOString().slice(0, 10);
-    const base = (store._counters.global || 100) + 1;
-    store.events.push(
-      {
-        id: base,
-        title: "Atelier entrepreneuriat pour veuves",
-        description:
-          "Formation pratique à la création de petites entreprises et à l'accès au microcrédit.",
-        province: "Nord-Kivu",
-        date: futureDate(21),
-        time: "09:00",
-        type: "atelier",
-        location: "Goma — Maison des familles",
-        capacity: 40,
-        rsvp_user_ids: [],
-        created_at: now,
-      },
-      {
-        id: base + 1,
-        title: "Rencontre des familles militaires — Kinshasa",
-        description: "Temps d'échange, d'écoute et d'orientation pour les familles.",
-        province: "Kinshasa",
-        date: futureDate(38),
-        time: "14:00",
-        type: "rencontre",
-        location: "Kinshasa — Centre communautaire",
-        capacity: null,
-        rsvp_user_ids: [],
-        created_at: now,
-      },
-      {
-        id: base + 2,
-        title: "Distribution de kits scolaires",
-        description: "Remise de fournitures aux enfants et orphelins de militaires.",
-        province: "Haut-Katanga",
-        date: futureDate(60),
-        time: "10:00",
-        type: "distribution",
-        location: "Lubumbashi",
-        capacity: 120,
-        rsvp_user_ids: [],
-        created_at: now,
-      }
-    );
-    store._counters.global = base + 2;
+    for (const seed of demoPortalEventSeeds(now)) {
+      store._counters.global = (store._counters.global || 100) + 1;
+      store.events.push({ id: store._counters.global, ...seed });
+    }
     changed = true;
   }
 
   if (store.member_resources.length === 0) {
     const now = new Date().toISOString();
-    const base = (store._counters.global || 100) + 1;
-    store.member_resources.push(
-      {
-        id: base,
-        title: "Obtenir une pension de survie",
-        category: "Démarches",
-        description:
-          "Guide pas à pas pour constituer le dossier de pension de survie des veuves de militaires.",
-        file_url: null,
-        external_url: null,
-        created_at: now,
-      },
-      {
-        id: base + 1,
-        title: "Inscrire un orphelin à l'école",
-        category: "Éducation",
-        description: "Documents requis et bourses disponibles pour la scolarisation.",
-        file_url: null,
-        external_url: null,
-        created_at: now,
-      },
-      {
-        id: base + 2,
-        title: "Accès aux soins de santé reproductive",
-        category: "Santé",
-        description: "Où trouver des services adaptés et gratuits près des camps militaires.",
-        file_url: null,
-        external_url: null,
-        created_at: now,
-      },
-      {
-        id: base + 3,
-        title: "Faire valoir ses droits juridiques",
-        category: "Juridique",
-        description: "Contacts et procédures pour un accompagnement juridique gratuit.",
-        file_url: null,
-        external_url: null,
-        created_at: now,
-      }
-    );
-    store._counters.global = base + 3;
+    for (const seed of demoMemberResourceSeeds(now)) {
+      store._counters.global = (store._counters.global || 100) + 1;
+      store.member_resources.push({ id: store._counters.global, ...seed });
+    }
     changed = true;
   }
 
+  return changed;
+}
+
+/**
+ * Normalise toujours ; applique les seeds de démo une seule fois (gate _seed_version)
+ * puis stampe la version. Retourne true si le store a été modifié.
+ */
+export function applySeedsOnce(store: Store): boolean {
+  let changed = normalizeCollections(store);
+  if ((store._seed_version ?? 0) < CURRENT_SEED_VERSION) {
+    seedDemoData(store);
+    store._seed_version = CURRENT_SEED_VERSION;
+    changed = true;
+  }
   return changed;
 }
 

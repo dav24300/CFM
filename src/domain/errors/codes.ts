@@ -22,6 +22,8 @@ export const DOMAIN_ERROR_CODES = [
   "UNAUTHORIZED",
   "USER_NOT_FOUND",
   "PAYDUNYA_KEYS_MISSING",
+  "PERSISTENCE_UNAVAILABLE",
+  "PERSISTENCE_ERROR",
 ] as const;
 
 export type DomainErrorCode = (typeof DOMAIN_ERROR_CODES)[number];

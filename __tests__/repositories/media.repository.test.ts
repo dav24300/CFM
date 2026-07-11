@@ -18,10 +18,21 @@ vi.mock("@/infrastructure/media/file-storage.adapter", () => ({
 
 vi.mock("@/infrastructure/repositories/content.repository", () => ({
   adminUpdateContent: vi.fn(() => true),
+  listAllNews: vi.fn(() => Promise.resolve(mockStore.news ?? [])),
+  listAllCampaigns: vi.fn(() => Promise.resolve(mockStore.campaigns ?? [])),
+  listAllTestimonials: vi.fn(() => Promise.resolve(mockStore.testimonials ?? [])),
+  listAllStudies: vi.fn(() => Promise.resolve(mockStore.studies ?? [])),
+  listAllPressReleases: vi.fn(() => Promise.resolve(mockStore.press_releases ?? [])),
 }));
 
 vi.mock("@/infrastructure/repositories/live.repository", () => ({
   updateLiveEventMedia: vi.fn(() => ({ id: 1 })),
+  getLiveEvents: vi.fn(() => Promise.resolve(mockStore.live_events ?? [])),
+}));
+
+vi.mock("@/infrastructure/repositories/partners.repository", () => ({
+  adminUpdatePartner: vi.fn(() => true),
+  getAllPartners: vi.fn(() => Promise.resolve(mockStore.partners ?? [])),
 }));
 
 import { adminUpdateContent } from "@/infrastructure/repositories/content.repository";

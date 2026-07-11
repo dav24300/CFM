@@ -55,7 +55,9 @@ async function main() {
       [JSON.stringify(store)]
     );
 
-    await saveStoreToTables(client, store);
+    // includeMigrated : le provisionnement one-shot écrit AUSSI les tables
+    // gérées en SQL ciblé au runtime (sinon elles resteraient vides).
+    await saveStoreToTables(client, store, { includeMigrated: true });
     await client.query("COMMIT");
 
     console.log("✓ Migration terminée : app_state + tables normalisées");

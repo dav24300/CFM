@@ -1,3 +1,5 @@
+> **[OBSOLETE — 2026-07]** Ce document decrit le modele de persistance Store global + full-sync, remplace par le SQL cible par agregat (voir `docs/adr/0005-sql-par-agregat-sequences.md`).
+
 # Stratégie de refactorisation — CFM ASBL
 
 > **Document** : plan stratégique architecture & qualité code  
