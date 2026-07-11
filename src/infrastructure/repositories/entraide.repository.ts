@@ -3,6 +3,8 @@ import {
   updateStoreAsync,
 } from "@/infrastructure/persistence/store-access";
 import { decryptSensitive } from "@/infrastructure/encryption/aes.adapter";
+import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
+import * as sqlForms from "@/infrastructure/repositories/sql/forms.sql";
 
 /**
  * Mission bénévole exposée dans la liste publique des missions à pourvoir.
@@ -48,8 +50,9 @@ function hasAssignedVolunteer(entry: Record<string, unknown>): boolean {
  * ({@link OPEN_STATUSES}) et qui n'ont pas encore de bénévole assigné.
  */
 export async function getOpenHelpRequests(): Promise<OpenHelpMission[]> {
-  const store = await getStoreAsync();
-  const requests = store.help_requests ?? [];
+  const requests = isPgMode()
+    ? await sqlForms.listHelpRequestsRaw()
+    : ((await getStoreAsync()).help_requests ?? []);
   return requests
     .filter((entry) => {
       const status = asString(entry.status) ?? "";
@@ -73,6 +76,7 @@ export async function claimHelpRequest(
   volunteerId: number,
   volunteerName: string
 ): Promise<boolean> {
+  if (isPgMode()) return sqlForms.claimHelpRequest(id, volunteerId, volunteerName);
   let updated = false;
   await updateStoreAsync((store) => {
     if (!store.help_requests) store.help_requests = [];
@@ -92,8 +96,9 @@ export async function claimHelpRequest(
 export async function getClaimedByUser(
   userId: number
 ): Promise<ClaimedHelpMission[]> {
-  const store = await getStoreAsync();
-  const requests = store.help_requests ?? [];
+  const requests = isPgMode()
+    ? await sqlForms.listHelpRequestsRaw()
+    : ((await getStoreAsync()).help_requests ?? []);
   return requests
     .filter((entry) => asId(entry.assigned_volunteer_id) === userId)
     .map((entry) => {

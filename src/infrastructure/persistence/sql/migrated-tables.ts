@@ -9,6 +9,10 @@ const MIGRATED_TABLES = new Set<string>([
   "petition_signatures",
   "newsletter",
   "push_subscriptions",
+  "contact_messages",
+  "memberships",
+  "help_requests",
+  "help_request_updates",
 ]);
 
 export function isTableMigrated(table: string): boolean {

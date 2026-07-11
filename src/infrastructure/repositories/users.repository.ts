@@ -6,6 +6,8 @@ import {
 } from "@/infrastructure/persistence/store-access";
 import { domainError } from "@/domain/errors/domain-error";
 import { decryptHelpRequest } from "@/infrastructure/encryption/aes.adapter";
+import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
+import * as sqlForms from "@/infrastructure/repositories/sql/forms.sql";
 import type {
   User,
   HelpRequestUpdate,
@@ -161,8 +163,10 @@ export async function getUserAdminCounters(): Promise<{
 export async function getHelpRequestsForUser(userId: number) {
   const user = await getUserById(userId);
   if (!user) return [];
-  const store = await getStoreAsync();
-  return store.help_requests
+  const helpRequests = isPgMode()
+    ? await sqlForms.listHelpRequestsRaw()
+    : (await getStoreAsync()).help_requests;
+  return helpRequests
     .filter((h) => {
       const linkedUserId = h.user_id as number | undefined;
       if (linkedUserId && linkedUserId === userId) return true;
@@ -182,6 +186,7 @@ export async function addHelpRequestUpdate(data: {
   note: string;
   updated_by: string;
 }): Promise<HelpRequestUpdate> {
+  if (isPgMode()) return sqlForms.addHelpRequestUpdate(data);
   let created!: HelpRequestUpdate;
   await updateStoreAsync((store) => {
     created = {
@@ -203,6 +208,7 @@ export async function addHelpRequestUpdate(data: {
 export async function getHelpRequestUpdates(
   helpRequestId: number
 ): Promise<HelpRequestUpdate[]> {
+  if (isPgMode()) return sqlForms.getHelpRequestUpdates(helpRequestId);
   const store = await getStoreAsync();
   return store.help_request_updates.filter((u) => u.help_request_id === helpRequestId);
 }

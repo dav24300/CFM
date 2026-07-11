@@ -93,4 +93,137 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
       expect(await push.getPushSubscriberCount()).toBe(1);
     });
   });
+
+  describe("formulaires (C7)", () => {
+    it("adhésion : data JSONB = objet complet, id séquence cohérent colonne/objet", async () => {
+      await content.addMembership({
+        type: "famille",
+        first_name: "Jean",
+        last_name: "K",
+        phone: "0999",
+        province: "Kinshasa",
+      });
+      const res = await sqlClient.query<{ id: number; data: Record<string, unknown> }>(
+        "SELECT id, data FROM memberships ORDER BY id"
+      );
+      expect(res.rows).toHaveLength(1);
+      const row = res.rows[0];
+      expect(row.id).toBeGreaterThan(100);
+      expect(row.data.id).toBe(row.id);
+      expect(row.data).toMatchObject({
+        type: "famille",
+        first_name: "Jean",
+        last_name: "K",
+        phone: "0999",
+        province: "Kinshasa",
+        status: "pending",
+      });
+      expect(typeof row.data.created_at).toBe("string");
+    });
+
+    it("demande d'aide + suivi : transaction (ligne de suivi + statut colonne ET data)", async () => {
+      await content.addHelpRequest({
+        first_name: "Marie",
+        need_type: "sante",
+        province: "Goma",
+        email: "marie@ex.cd",
+      });
+      const created = (await content.listHelpRequestsRaw())[0];
+      expect(created.status).toBe("new");
+      const helpId = created.id as number;
+
+      const users = await import("@/infrastructure/repositories/users.repository");
+      const update = await users.addHelpRequestUpdate({
+        help_request_id: helpId,
+        status: "in_progress",
+        note: "Dossier pris en charge",
+        updated_by: "admin",
+      });
+      expect(update.help_request_id).toBe(helpId);
+
+      const updates = await users.getHelpRequestUpdates(helpId);
+      expect(updates).toHaveLength(1);
+      expect(updates[0]).toMatchObject({
+        id: update.id,
+        status: "in_progress",
+        note: "Dossier pris en charge",
+        updated_by: "admin",
+      });
+
+      const after = await content.getHelpRequestById(helpId);
+      expect(after?.status).toBe("in_progress");
+      const col = await sqlClient.query<{ status: string }>(
+        "SELECT status FROM help_requests WHERE id = $1",
+        [helpId]
+      );
+      expect(col.rows[0].status).toBe("in_progress");
+    });
+
+    it("contact : ajout + changement de statut", async () => {
+      await content.addContactMessage({ name: "Alice", email: "a@b.cd", message: "Bonjour" });
+      const res = await sqlClient.query<{ id: number; data: Record<string, unknown> }>(
+        "SELECT id, data FROM contact_messages ORDER BY id"
+      );
+      expect(res.rows).toHaveLength(1);
+      expect(res.rows[0].data).toMatchObject({
+        id: res.rows[0].id,
+        name: "Alice",
+        status: "new",
+      });
+
+      expect(await content.updateContactStatus(res.rows[0].id, "read")).toBe(true);
+      expect(await content.updateContactStatus(999999, "read")).toBe(false);
+      const after = await sqlClient.query<{ status: string }>(
+        "SELECT data->>'status' AS status FROM contact_messages WHERE id = $1",
+        [res.rows[0].id]
+      );
+      expect(after.rows[0].status).toBe("read");
+    });
+
+    it("listes admin id DESC (memberships / help_requests / contacts)", async () => {
+      const forms = await import("@/infrastructure/repositories/sql/forms.sql");
+      await content.addMembership({
+        type: "benevole",
+        first_name: "Paul",
+        last_name: "M",
+        phone: "0888",
+      });
+      await content.addHelpRequest({ first_name: "Luc", need_type: "juridique" });
+      await content.addContactMessage({ name: "Bob", email: "b@c.de", message: "Salut" });
+
+      const memberships = await forms.listMembershipsDesc();
+      expect(memberships.map((m) => m.first_name)).toEqual(["Paul", "Jean"]);
+      const help = await forms.listHelpRequestsDesc();
+      expect(help.map((h) => h.first_name)).toEqual(["Luc", "Marie"]);
+      const contacts = await forms.listContactMessagesDesc();
+      expect(contacts.map((c) => c.name)).toEqual(["Bob", "Alice"]);
+
+      const counters = await forms.getFormsAdminCounters();
+      expect(counters).toEqual({
+        memberships: 2,
+        help_requests: 2,
+        contacts: 2,
+        pending_memberships: 2,
+        new_help: 1,
+      });
+
+      const dates = await content.getFormsActivityDates();
+      expect(dates.memberships).toHaveLength(2);
+      expect(dates.help).toHaveLength(2);
+      expect(dates.contacts).toHaveLength(2);
+      expect(dates.help.every((d) => typeof d === "string" && d.length > 0)).toBe(true);
+    });
+
+    it("écritures parallèles : 10 addContactMessage → 10 persistés", async () => {
+      await Promise.all(
+        Array.from({ length: 10 }, (_, i) =>
+          content.addContactMessage({ name: `Bulk${i}`, email: `bulk${i}@c.cd`, message: "m" })
+        )
+      );
+      const res = await sqlClient.query<{ n: number }>(
+        "SELECT COUNT(*)::int AS n FROM contact_messages WHERE data->>'name' LIKE 'Bulk%'"
+      );
+      expect(res.rows[0].n).toBe(10);
+    });
+  });
 });

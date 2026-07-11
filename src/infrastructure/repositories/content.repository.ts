@@ -20,6 +20,7 @@ import { compareIsoDesc, toDateString } from "@/infrastructure/persistence/norma
 import type { Store } from "@/domain/entities/store";
 import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
 import * as sqlNewsletter from "@/infrastructure/repositories/sql/newsletter.sql";
+import * as sqlForms from "@/infrastructure/repositories/sql/forms.sql";
 import { getPetitionAdminCounters } from "@/infrastructure/repositories/petitions.repository";
 import { getUserAdminCounters } from "@/infrastructure/repositories/users.repository";
 import { getFamilyLinkCounters } from "@/infrastructure/repositories/family-links.repository";
@@ -132,6 +133,7 @@ export async function addMembership(data: {
   skills?: string;
   message?: string;
 }): Promise<void> {
+  if (isPgMode()) return sqlForms.addMembership(data);
   await updateStoreAsync((store) => {
     store.memberships.push({
       id: nextId(store),
@@ -143,6 +145,7 @@ export async function addMembership(data: {
 }
 
 export async function addHelpRequest(data: Record<string, unknown>): Promise<void> {
+  if (isPgMode()) return sqlForms.addHelpRequest(data);
   await updateStoreAsync((store) => {
     store.help_requests.push({
       id: nextId(store),
@@ -153,8 +156,9 @@ export async function addHelpRequest(data: Record<string, unknown>): Promise<voi
   });
 }
 
-/** Demandes d'aide brutes du store (non déchiffrées), sans tri. */
+/** Demandes d'aide brutes (non déchiffrées), sans tri (ordre d'insertion). */
 export async function listHelpRequestsRaw(): Promise<Record<string, unknown>[]> {
+  if (isPgMode()) return sqlForms.listHelpRequestsRaw();
   const store = await getStoreAsync();
   return store.help_requests ?? [];
 }
@@ -165,6 +169,7 @@ export async function getFormsActivityDates(): Promise<{
   memberships: string[];
   contacts: string[];
 }> {
+  if (isPgMode()) return sqlForms.getFormsActivityDates();
   const store = await getStoreAsync();
   return {
     help: store.help_requests.map((h) => h.created_at as string),
@@ -176,6 +181,7 @@ export async function getFormsActivityDates(): Promise<{
 export async function getHelpRequestById(
   id: number
 ): Promise<Record<string, unknown> | undefined> {
+  if (isPgMode()) return sqlForms.getHelpRequestById(id);
   const store = await getStoreAsync();
   return store.help_requests.find((h) => h.id === id);
 }
@@ -187,6 +193,7 @@ export async function addContactMessage(data: {
   message: string;
   type?: string;
 }): Promise<void> {
+  if (isPgMode()) return sqlForms.addContactMessage(data);
   await updateStoreAsync((store) => {
     store.contact_messages.push({
       id: nextId(store),
@@ -201,6 +208,7 @@ export async function updateContactStatus(
   id: number,
   status: "new" | "read" | "archived"
 ): Promise<boolean> {
+  if (isPgMode()) return sqlForms.updateContactStatus(id, status);
   let found = false;
   await updateStoreAsync((store) => {
     const msg = store.contact_messages.find((m) => m.id === id);
@@ -211,6 +219,25 @@ export async function updateContactStatus(
   return found;
 }
 
+/** Compteurs formulaires (dual-mode) pour le tableau de bord admin. */
+async function getFormsAdminCounters(): Promise<{
+  memberships: number;
+  help_requests: number;
+  contacts: number;
+  pending_memberships: number;
+  new_help: number;
+}> {
+  if (isPgMode()) return sqlForms.getFormsAdminCounters();
+  const store = await getStoreAsync();
+  return {
+    memberships: store.memberships.length,
+    help_requests: store.help_requests.length,
+    contacts: store.contact_messages.length,
+    pending_memberships: store.memberships.filter((m) => m.status === "pending").length,
+    new_help: store.help_requests.filter((h) => h.status === "new").length,
+  };
+}
+
 export async function getAdminStats() {
   const store = await getStoreAsync();
   const seenAtRaw = (await getSiteSetting("petition_signatures_seen_at")) || "";
@@ -219,16 +246,17 @@ export async function getAdminStats() {
   const familyCounters = await getFamilyLinkCounters();
   const liveCounters = await getLiveAdminCounters();
   const donations = await countDonations();
+  const formCounters = await getFormsAdminCounters();
   return {
     news: store.news.length,
     studies: store.studies.length,
     campaigns: store.campaigns.length,
-    memberships: store.memberships.length,
-    help_requests: store.help_requests.length,
+    memberships: formCounters.memberships,
+    help_requests: formCounters.help_requests,
     newsletter: await countNewsletterSubscribers(),
-    contacts: store.contact_messages.length,
-    pending_memberships: store.memberships.filter((m) => m.status === "pending").length,
-    new_help: store.help_requests.filter((h) => h.status === "new").length,
+    contacts: formCounters.contacts,
+    pending_memberships: formCounters.pending_memberships,
+    new_help: formCounters.new_help,
     users: userCounters.users,
     pending_users: userCounters.pendingUsers,
     donations,
@@ -244,11 +272,21 @@ export async function getAdminStats() {
 
 export async function getAdminData() {
   const store = await getStoreAsync();
+  const pg = isPgMode();
+  const memberships = pg
+    ? await sqlForms.listMembershipsDesc()
+    : [...store.memberships].reverse();
+  const helpRequests = pg
+    ? await sqlForms.listHelpRequestsDesc()
+    : [...store.help_requests].reverse();
+  const contacts = pg
+    ? await sqlForms.listContactMessagesDesc()
+    : [...store.contact_messages].reverse();
   return {
-    memberships: [...store.memberships].reverse(),
-    help_requests: [...store.help_requests].reverse().map((h) => decryptHelpRequest(h)),
+    memberships,
+    help_requests: helpRequests.map((h) => decryptHelpRequest(h)),
     newsletter: await listNewsletterSubscribers(),
-    contacts: [...store.contact_messages].reverse(),
+    contacts,
     news: [...store.news].reverse(),
     studies: [...store.studies].reverse(),
     campaigns: [...store.campaigns].reverse(),
@@ -381,6 +419,7 @@ export async function adminUpdateStatus(
   id: number,
   status: string
 ): Promise<void> {
+  if (isPgMode()) return sqlForms.adminUpdateStatus(table, id, status);
   await updateStoreAsync((store) => {
     if (table === "memberships") {
       const item = store.memberships.find((m) => m.id === id);
