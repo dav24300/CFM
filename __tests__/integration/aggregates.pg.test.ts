@@ -499,4 +499,121 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
       expect(familyCounters.pending).toBe(0); // approved + rejected exclus
     });
   });
+
+  describe("donations (C9)", () => {
+    let donations: typeof import("@/infrastructure/repositories/donations.repository");
+    let firstId: number;
+    let donorUserId: number;
+
+    beforeAll(async () => {
+      donations = await import("@/infrastructure/repositories/donations.repository");
+    });
+
+    it("create : id séquence, retour conforme, amount number malgré DECIMAL", async () => {
+      const created = await donations.createDonation({
+        amount: 25.5,
+        currency: "USD",
+        provider: "orange",
+        phone: "0991",
+        donor_name: "Donateur Un",
+      });
+      firstId = created.id;
+      expect(created.id).toBeGreaterThan(100);
+      expect(created.user_id).toBeNull();
+      expect(created.amount).toBe(25.5);
+      expect(typeof created.amount).toBe("number");
+      expect(created.currency).toBe("USD");
+      expect(created.provider).toBe("orange");
+      expect(created.phone).toBe("0991");
+      expect(created.transaction_id).toBeNull();
+      expect(created.status).toBe("pending");
+      expect(created.donor_name).toBe("Donateur Un");
+      expect(created.donor_email).toBeNull();
+      expect(typeof created.created_at).toBe("string");
+      expect(created.created_at.length).toBeGreaterThan(0);
+    });
+
+    it("webhook : handleDonationWebhook → statut completed + transaction_id", async () => {
+      const service = await import("@/application/services/donation.service");
+      const completed = await service.handleDonationWebhook(firstId, "TX-001");
+      expect(completed?.id).toBe(firstId);
+      expect(completed?.status).toBe("completed");
+      expect(completed?.transaction_id).toBe("TX-001");
+      expect(typeof completed?.amount).toBe("number");
+
+      // Persisté (relecture) + id inconnu → undefined.
+      const col = await sqlClient.query<{ status: string; transaction_id: string }>(
+        "SELECT status, transaction_id FROM donations WHERE id = $1",
+        [firstId]
+      );
+      expect(col.rows[0]).toEqual({ status: "completed", transaction_id: "TX-001" });
+      expect(await service.completeDonation(999999, "TX-NOPE")).toBeUndefined();
+    });
+
+    it("update admin : patch partiel, patch vide inchangé, id inconnu → undefined", async () => {
+      const failed = await donations.adminUpdateDonation(firstId, { status: "failed" });
+      expect(failed?.status).toBe("failed");
+      expect(failed?.transaction_id).toBe("TX-001"); // non touché
+
+      const cleared = await donations.adminUpdateDonation(firstId, {
+        status: "completed",
+        transaction_id: null,
+      });
+      expect(cleared?.status).toBe("completed");
+      expect(cleared?.transaction_id).toBeNull();
+
+      // Patch vide : renvoie le don inchangé (parité Store).
+      const untouched = await donations.adminUpdateDonation(firstId, {});
+      expect(untouched?.status).toBe("completed");
+      expect(untouched?.transaction_id).toBeNull();
+
+      expect(await donations.adminUpdateDonation(999999, { status: "failed" })).toBeUndefined();
+    });
+
+    it("listes : getAllDonations id DESC, dons d'un membre ordre d'insertion", async () => {
+      const users = await import("@/infrastructure/repositories/users.repository");
+      const donor = await users.registerUser({
+        email: "donateur.one@ex.cd",
+        password: "motdepasse1",
+        first_name: "Don",
+        last_name: "K",
+        phone: "0995",
+        membership_type: "soutien",
+      });
+      donorUserId = donor.id;
+
+      const d2 = await donations.createDonation({
+        user_id: donorUserId,
+        amount: 100,
+        currency: "CDF",
+        provider: "mpesa",
+        phone: "0995",
+        donor_email: "donateur.one@ex.cd",
+      });
+      expect(d2.user_id).toBe(donorUserId);
+      const d3 = await donations.createDonation({
+        user_id: donorUserId,
+        amount: 40,
+        currency: "USD",
+        provider: "airtel",
+        phone: "0995",
+      });
+
+      const all = await donations.getAllDonations();
+      expect(all.map((d) => d.id)).toEqual([d3.id, d2.id, firstId]);
+      expect(all.every((d) => typeof d.amount === "number")).toBe(true);
+      expect(all.find((d) => d.id === d2.id)?.amount).toBe(100);
+
+      const mine = await donations.getDonationsForUser(donorUserId);
+      expect(mine.map((d) => d.id)).toEqual([d2.id, d3.id]);
+      expect(await donations.getDonationsForUser(999999)).toEqual([]);
+    });
+
+    it("compteurs et dates de création", async () => {
+      expect(await donations.countDonations()).toBe(3);
+      const dates = await donations.listDonationCreationDates();
+      expect(dates).toHaveLength(3);
+      expect(dates.every((d) => typeof d === "string" && d.length > 0)).toBe(true);
+    });
+  });
 });
