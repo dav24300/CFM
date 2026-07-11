@@ -59,4 +59,38 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
       expect(subs.filter((s) => s.email.startsWith("bulk"))).toHaveLength(10);
     });
   });
+
+  describe("push_subscriptions (C6)", () => {
+    it("abonnement : upsert par endpoint (id conservé, champs rafraîchis)", async () => {
+      const push = await import("@/infrastructure/push/web-push.adapter");
+      await push.savePushSubscription({
+        endpoint: "https://push/ep-a", p256dh: "k1", auth: "a1", topics: ["lives"],
+      });
+      const first = await sqlClient.query<{ id: number; p256dh: string }>(
+        "SELECT id, p256dh FROM push_subscriptions WHERE endpoint = 'https://push/ep-a'"
+      );
+      await push.savePushSubscription({
+        endpoint: "https://push/ep-a", p256dh: "k2", auth: "a2", topics: ["lives", "campaigns"],
+      });
+      const second = await sqlClient.query<{ id: number; p256dh: string; topics: string[] }>(
+        "SELECT id, p256dh, topics FROM push_subscriptions WHERE endpoint = 'https://push/ep-a'"
+      );
+      expect(second.rows).toHaveLength(1);
+      expect(second.rows[0].id).toBe(first.rows[0].id);
+      expect(second.rows[0].p256dh).toBe("k2");
+      expect(second.rows[0].topics).toEqual(["lives", "campaigns"]);
+    });
+
+    it("compteurs par topic + désabonnement", async () => {
+      const push = await import("@/infrastructure/push/web-push.adapter");
+      await push.savePushSubscription({
+        endpoint: "https://push/ep-b", p256dh: "k", auth: "a", topics: ["campaigns"],
+      });
+      expect(await push.getPushSubscriberCount()).toBe(2);
+      expect(await push.getPushSubscriberCount("campaigns")).toBe(2);
+      expect(await push.getPushSubscriberCount("lives")).toBe(1);
+      await push.removePushSubscription("https://push/ep-a");
+      expect(await push.getPushSubscriberCount()).toBe(1);
+    });
+  });
 });

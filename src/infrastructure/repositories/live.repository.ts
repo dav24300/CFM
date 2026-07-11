@@ -8,6 +8,7 @@ import { withStoreMutation } from "@/infrastructure/persistence/admin-mutation";
 import { invalidateLiveCache } from "@/infrastructure/cache/invalidate";
 import { domainError } from "@/domain/errors/domain-error";
 import { containsBadWord, sanitizeChatContent } from "@/infrastructure/live/moderation";
+import { getPushSubscriberCount } from "@/infrastructure/push/web-push.adapter";
 import { compareIsoDesc } from "@/infrastructure/persistence/normalize-pg-row";
 import type { LiveEvent, LiveChatMessage, LivePoll } from "@/domain/entities/v3";
 
@@ -216,8 +217,7 @@ export async function getLiveAdminCounters(): Promise<{
 
 /** Nombre d'abonnements push enregistrés (stats admin du live). */
 export async function countPushSubscriptions(): Promise<number> {
-  const store = await getStoreAsync();
-  return store.push_subscriptions?.length ?? 0;
+  return getPushSubscriberCount();
 }
 
 export async function getPollsForEvent(eventId: number): Promise<LivePoll[]> {
