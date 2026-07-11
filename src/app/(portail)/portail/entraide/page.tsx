@@ -113,8 +113,8 @@ export default async function PortailEntraidePage() {
                       )}
                     </div>
                     <h3 className="font-serif text-lg font-medium leading-snug text-site-ink">
-                      {mission.description ??
-                        "Une famille a besoin de soutien — détails partagés en toute confidentialité."}
+                      Une famille a besoin de soutien — détails partagés en toute
+                      confidentialité après acceptation de la mission.
                     </h3>
                     {date && (
                       <p className="mt-1.5 text-xs text-site-muted-2">

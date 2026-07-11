@@ -8,12 +8,13 @@ import {
   getPetitionSignatures,
   getUserById,
 } from "@/lib/members";
-import { jsonData, jsonUnauthorized } from "@/lib/api-response";
+import { jsonData, jsonForbidden, jsonUnauthorized } from "@/lib/api-response";
 
 export async function GET() {
-  if (!(await getAdminAccess())) {
-    return jsonUnauthorized();
-  }
+  const access = await getAdminAccess();
+  if (!access) return jsonUnauthorized();
+  // Dump complet (PII membres, dons, signatures) : réservé à l'admin, jamais volunteer.
+  if (access !== "admin") return jsonForbidden();
 
   const base = await getAdminData();
   const seenAtRaw = String((base as { site_settings?: Record<string, string> }).site_settings?.petition_signatures_seen_at || "");
@@ -22,12 +23,17 @@ export async function GET() {
     const { password_hash: _, ...pub } = u;
     return pub;
   });
+  const stripHash = <T extends { password_hash?: unknown }>(u: T | undefined) => {
+    if (!u) return u;
+    const { password_hash: _omit, ...rest } = u;
+    return rest;
+  };
   const familyLinksRaw = await getAllFamilyLinks();
   const familyLinks = await Promise.all(
     familyLinksRaw.map(async (l) => ({
       ...l,
-      parent: await getUserById(l.parent_user_id),
-      child: await getUserById(l.child_user_id),
+      parent: stripHash(await getUserById(l.parent_user_id)),
+      child: stripHash(await getUserById(l.child_user_id)),
     }))
   );
   const petitions = await Promise.all(

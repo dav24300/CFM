@@ -18,7 +18,9 @@ function isSmtpConfigured(): boolean {
 }
 
 function formatEmailLogEntry(opts: SendOptions): string {
-  return `\n--- ${new Date().toISOString()} ---\nTo: ${opts.to}\nSubject: ${opts.subject}\n${opts.text || opts.html}\n`;
+  // Ne JAMAIS journaliser le corps : il peut contenir des secrets (jeton de
+  // réinitialisation, lien d'activation). On ne trace que des métadonnées.
+  return `\n--- ${new Date().toISOString()} ---\nTo: ${opts.to}\nSubject: ${opts.subject}\n[corps non journalisé — contient potentiellement un secret]\n`;
 }
 
 function logEmail(opts: SendOptions): void {

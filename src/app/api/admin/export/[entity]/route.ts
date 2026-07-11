@@ -1,7 +1,8 @@
 import { getAdminData } from "@/lib/db";
 import { getAllDonations, getAllUsers } from "@/lib/members";
-import { requireAdminAccess } from "@/lib/admin-rest";
+import { requireAdminRole } from "@/lib/admin-rest";
 import { jsonError, jsonNotFound } from "@/lib/api-response";
+import { csvCell } from "@/lib/csv";
 
 const EXPORTERS: Record<string, () => Promise<Record<string, unknown>[]>> = {
   newsletter: async () => (await getAdminData()).newsletter,
@@ -19,15 +20,9 @@ const EXPORTERS: Record<string, () => Promise<Record<string, unknown>[]>> = {
 function toCsv(rows: Record<string, unknown>[]): string {
   if (!rows.length) return "";
   const keys = Object.keys(rows[0]);
-  const escape = (v: unknown) => {
-    const s = String(v ?? "");
-    return s.includes(",") || s.includes('"') || s.includes("\n")
-      ? `"${s.replace(/"/g, '""')}"`
-      : s;
-  };
-  const lines = [keys.join(",")];
+  const lines = [keys.map((k) => csvCell(k)).join(",")];
   for (const row of rows) {
-    lines.push(keys.map((k) => escape(row[k])).join(","));
+    lines.push(keys.map((k) => csvCell(row[k])).join(","));
   }
   return lines.join("\n");
 }
@@ -36,7 +31,7 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ entity: string }> }
 ) {
-  const auth = await requireAdminAccess();
+  const auth = await requireAdminRole();
   if (!auth.ok) return auth.response;
 
   const { entity } = await params;

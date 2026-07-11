@@ -15,7 +15,15 @@ export function isEncryptionEnabled(): boolean {
 export function encryptSensitive(value: string): string {
   if (!value) return value;
   const key = getKey();
-  if (!key) return value;
+  if (!key) {
+    // Fail-closed : en production, ne jamais stocker une donnée sensible en clair.
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "[CFM] DATA_ENCRYPTION_KEY absente : refus de stocker une donnée sensible non chiffrée en production."
+      );
+    }
+    return value;
+  }
 
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", key, iv);

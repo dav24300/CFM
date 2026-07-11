@@ -48,41 +48,32 @@ export async function checkRateLimitRedis(
   const redisKey = `cfm:rl:${key}`;
 
   try {
-    const incrRes = await fetch(`${cfg.url}/incr/${encodeURIComponent(redisKey)}`, {
+    // INCR + EXPIRE NX + TTL en un seul pipeline (un aller-retour, ordre garanti).
+    // EXPIRE NX pose le TTL uniquement s'il manque : évite qu'une coupure entre
+    // INCR et EXPIRE laisse une clé sans TTL (bannissement permanent), et évite
+    // de prolonger indéfiniment la fenêtre à chaque requête.
+    const res = await fetch(`${cfg.url}/pipeline`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${cfg.token}`,
+        "Content-Type": "application/json",
       },
       cache: "no-store",
+      body: JSON.stringify([
+        ["INCR", redisKey],
+        ["EXPIRE", redisKey, ttlSeconds, "NX"],
+        ["TTL", redisKey],
+      ]),
     });
-    if (!incrRes.ok) return null;
-    const incrJson = (await incrRes.json()) as { result?: number };
-    const count = typeof incrJson.result === "number" ? incrJson.result : 0;
+    if (!res.ok) return null;
+    const arr = (await res.json()) as Array<{ result?: number }>;
+    if (!Array.isArray(arr) || arr.length < 3) return null;
 
-    if (count === 1) {
-      await fetch(`${cfg.url}/expire/${encodeURIComponent(redisKey)}/${ttlSeconds}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${cfg.token}`,
-        },
-        cache: "no-store",
-      });
-    }
-
+    const count = typeof arr[0]?.result === "number" ? arr[0].result : 0;
     if (count <= max) return { ok: true };
 
-    const ttlRes = await fetch(`${cfg.url}/ttl/${encodeURIComponent(redisKey)}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${cfg.token}`,
-      },
-      cache: "no-store",
-    });
-    const ttlJson = ttlRes.ok
-      ? ((await ttlRes.json()) as { result?: number })
-      : { result: 1 };
-    const retryAfter = Math.max(1, ttlJson.result || 1);
-
+    const ttl = arr[2]?.result;
+    const retryAfter = Math.max(1, typeof ttl === "number" && ttl > 0 ? ttl : ttlSeconds);
     return { ok: false, retryAfter };
   } catch {
     return null;
