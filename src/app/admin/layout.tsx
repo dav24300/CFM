@@ -11,7 +11,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gray-100 font-sans text-gray-900">
+    <div className="theme-admin min-h-screen bg-gray-100 font-sans text-gray-900">
       {children}
     </div>
   );

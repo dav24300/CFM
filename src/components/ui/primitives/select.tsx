@@ -16,14 +16,14 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 text-left text-site-ink focus:border-site-primary focus:outline-none focus:ring-2 focus:ring-site-primary/30 disabled:cursor-not-allowed disabled:opacity-50",
+      "flex w-full items-center justify-between rounded-[var(--control-radius)] border border-[var(--control-border)] bg-[var(--control-bg)] px-4 py-3 text-left text-[var(--control-fg)] focus:border-[var(--control-border-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--control-ring)] disabled:cursor-not-allowed disabled:opacity-50",
       className
     )}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 shrink-0 text-site-muted" aria-hidden />
+      <ChevronDown className="h-4 w-4 shrink-0 text-[var(--control-muted)]" aria-hidden />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));
@@ -37,7 +37,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "z-50 max-h-72 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-lg border border-gray-200 bg-white shadow-site-hover",
+        "z-50 max-h-72 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-[var(--control-radius)] border border-[var(--control-border)] bg-[var(--control-bg)] shadow-site-hover",
         position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1",
         className
       )}
@@ -57,14 +57,14 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-pointer select-none items-center rounded-md py-2 pl-8 pr-3 text-sm text-site-ink outline-none focus:bg-site-surface data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex cursor-pointer select-none items-center rounded-[var(--control-radius)] py-2 pl-8 pr-3 text-sm text-[var(--control-fg)] outline-none focus:bg-[var(--control-surface)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
     {...props}
   >
     <span className="absolute left-2 flex h-4 w-4 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <Check className="h-4 w-4 text-site-primary" aria-hidden />
+        <Check className="h-4 w-4 text-[var(--control-accent)]" aria-hidden />
       </SelectPrimitive.ItemIndicator>
     </span>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
@@ -78,7 +78,7 @@ const SelectLabel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Label
     ref={ref}
-    className={cn("px-3 py-2 text-xs font-semibold uppercase text-site-muted", className)}
+    className={cn("px-3 py-2 text-xs font-semibold uppercase text-[var(--control-muted)]", className)}
     {...props}
   />
 ));
