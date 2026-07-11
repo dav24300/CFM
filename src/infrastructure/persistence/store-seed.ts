@@ -265,6 +265,25 @@ export function demoPetitionSeeds(now: string): Omit<Petition, "id">[] {
   ];
 }
 
+/** Live de démonstration V3 (sans id — attribué par le compteur ou la séquence PG). */
+export function demoLiveEventSeed(now: string): Omit<LiveEvent, "id"> {
+  return {
+    title: "FIKIN 2025 — Rassemblement des familles militaires",
+    slug: "fikin-2025",
+    description:
+      "Replay du rassemblement historique des familles de militaires à la Foire Internationale de Kinshasa.",
+    status: "replay",
+    youtube_id: null,
+    stream_url: null,
+    replay_url: "https://youtube.com/@cfmasbl",
+    chat_moderation: 1,
+    viewer_count: 0,
+    started_at: now,
+    ended_at: now,
+    created_at: now,
+  };
+}
+
 /**
  * Seeds de démonstration one-shot (anciennement re-seed sur length===0 à chaque
  * chargement — cause de la résurrection des données supprimées, ZC-5).
@@ -285,22 +304,7 @@ export function seedDemoData(store: Store): boolean {
   if (store.live_events.length === 0) {
     const now = new Date().toISOString();
     store._counters.global = (store._counters.global || 100) + 1;
-    store.live_events.push({
-      id: store._counters.global,
-      title: "FIKIN 2025 — Rassemblement des familles militaires",
-      slug: "fikin-2025",
-      description:
-        "Replay du rassemblement historique des familles de militaires à la Foire Internationale de Kinshasa.",
-      status: "replay",
-      youtube_id: null,
-      stream_url: null,
-      replay_url: "https://youtube.com/@cfmasbl",
-      chat_moderation: 1,
-      viewer_count: 0,
-      started_at: now,
-      ended_at: now,
-      created_at: now,
-    });
+    store.live_events.push({ id: store._counters.global, ...demoLiveEventSeed(now) });
     changed = true;
   }
 

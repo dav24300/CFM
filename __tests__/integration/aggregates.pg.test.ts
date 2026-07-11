@@ -616,4 +616,221 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
       expect(dates.every((d) => typeof d === "string" && d.length > 0)).toBe(true);
     });
   });
+
+  describe("live (C10)", () => {
+    let live: typeof import("@/infrastructure/repositories/live.repository");
+    let eventId: number;
+    let pollId: number;
+
+    beforeAll(async () => {
+      live = await import("@/infrastructure/repositories/live.repository");
+    });
+
+    it("seed hook : live fikin-2025 seedé une fois, idempotent", async () => {
+      const hooks = await import("@/infrastructure/persistence/sql/seed-hooks");
+      await hooks.seedMigratedAggregates();
+      await hooks.seedMigratedAggregates();
+      const res = await sqlClient.query<{ n: number }>(
+        "SELECT COUNT(*)::int AS n FROM live_events"
+      );
+      expect(res.rows[0].n).toBe(1);
+      const seeded = await live.getLiveEventBySlug("fikin-2025");
+      expect(seeded?.status).toBe("replay");
+      expect(seeded?.replay_url).toBe("https://youtube.com/@cfmasbl");
+      expect(seeded?.chat_moderation).toBe(1);
+      expect(seeded?.id).toBeGreaterThan(100);
+    });
+
+    it("create : id séquence, slug auto-suffixé en cas de collision", async () => {
+      const a = await live.createLiveEvent({
+        title: "Assemblée Générale",
+        description: "Session annuelle",
+      });
+      eventId = a.id;
+      expect(a.id).toBeGreaterThan(100);
+      expect(a.slug).toBe("assemblee-generale");
+      expect(a.status).toBe("scheduled");
+      expect(a.chat_moderation).toBe(0);
+      expect(a.viewer_count).toBe(0);
+      expect(a.started_at).toBeNull();
+      expect(typeof a.created_at).toBe("string");
+
+      const b = await live.createLiveEvent({
+        title: "Assemblée Générale",
+        description: "Doublon de titre",
+        chat_moderation: true,
+      });
+      expect(b.slug).toBe("assemblee-generale-1");
+      expect(b.chat_moderation).toBe(1);
+
+      expect((await live.getLiveEventBySlug("assemblee-generale"))?.id).toBe(a.id);
+      const all = await live.getLiveEvents();
+      expect(all).toHaveLength(3);
+    });
+
+    it("setStatus : live pose started_at et rétrograde l'autre live ; ended/replay posent ended_at + replay_url", async () => {
+      const started = await live.setLiveEventStatus(eventId, "live");
+      expect(started?.status).toBe("live");
+      expect(started?.started_at).toBeTruthy();
+      expect(started?.ended_at).toBeNull();
+      expect((await live.getActiveLiveEvent())?.id).toBe(eventId);
+
+      // Un second event passe live → le premier est rétrogradé "ended".
+      const b = await live.getLiveEventBySlug("assemblee-generale-1");
+      await live.setLiveEventStatus(b!.id, "live");
+      expect((await live.getLiveEventBySlug("assemblee-generale"))?.status).toBe("ended");
+
+      const replay = await live.setLiveEventStatus(b!.id, "replay", "https://yt/replay-b");
+      expect(replay?.status).toBe("replay");
+      expect(replay?.ended_at).toBeTruthy();
+      expect(replay?.replay_url).toBe("https://yt/replay-b");
+
+      // id inconnu : undefined et AUCUN effet de bord sur les autres events.
+      await live.setLiveEventStatus(eventId, "live");
+      expect(await live.setLiveEventStatus(999999, "live")).toBeUndefined();
+      expect((await live.getActiveLiveEvent())?.id).toBe(eventId);
+    });
+
+    it("chat : post approuvé sans modération, pending avec, moderate + pendingCount", async () => {
+      const auto = await live.postChatMessage({
+        live_event_id: eventId,
+        author_name: "Momo",
+        content: "  Bonjour à tous  ",
+      });
+      expect(auto.status).toBe("approved"); // chat_moderation 0
+      expect(auto.content).toBe("Bonjour à tous"); // sanitizé (trim)
+      expect(auto.user_id).toBeNull();
+
+      // Gros mot → pending même sans modération.
+      const bad = await live.postChatMessage({
+        live_event_id: eventId,
+        author_name: "Troll",
+        content: "espèce d'idiot",
+      });
+      expect(bad.status).toBe("pending");
+
+      // Modération activée → tout passe pending.
+      const updated = await live.updateLiveEvent(eventId, { chat_moderation: 1 });
+      expect(updated?.chat_moderation).toBe(1);
+      const modded = await live.postChatMessage({
+        live_event_id: eventId,
+        author_name: "Awa",
+        content: "Message sage",
+      });
+      expect(modded.status).toBe("pending");
+      expect(await live.getPendingChatCount(eventId)).toBe(2);
+
+      // Liste publique : approuvés seulement, ordre chronologique ascendant.
+      let pub = await live.getChatMessages(eventId);
+      expect(pub.map((m) => m.id)).toEqual([auto.id]);
+      const allMsgs = await live.getChatMessages(eventId, false);
+      expect(allMsgs.map((m) => m.id)).toEqual([auto.id, bad.id, modded.id]);
+
+      const { msg, event } = await live.getChatMessageWithEvent(modded.id);
+      expect(msg?.id).toBe(modded.id);
+      expect(event?.id).toBe(eventId);
+
+      await live.moderateChatMessage(modded.id, "approved");
+      await live.moderateChatMessage(bad.id, "rejected");
+      await live.moderateChatMessage(999999, "approved"); // no-op silencieux
+      expect(await live.getPendingChatCount(eventId)).toBe(0);
+      pub = await live.getChatMessages(eventId);
+      expect(pub.map((m) => m.id)).toEqual([auto.id, modded.id]);
+
+      const counters = await live.getLiveAdminCounters();
+      expect(counters.liveEvents).toBe(3);
+      expect(counters.pendingChat).toBe(0);
+    });
+
+    it("chat : erreurs EMPTY_MESSAGE / EVENT_NOT_FOUND / NOT_LIVE", async () => {
+      await expect(
+        live.postChatMessage({ live_event_id: eventId, author_name: "X", content: "   " })
+      ).rejects.toMatchObject({ code: "EMPTY_MESSAGE" });
+      await expect(
+        live.postChatMessage({ live_event_id: 999999, author_name: "X", content: "Salut" })
+      ).rejects.toMatchObject({ code: "EVENT_NOT_FOUND" });
+      const replayEvent = await live.getLiveEventBySlug("assemblee-generale-1");
+      await expect(
+        live.postChatMessage({
+          live_event_id: replayEvent!.id,
+          author_name: "X",
+          content: "Salut",
+        })
+      ).rejects.toMatchObject({ code: "NOT_LIVE" });
+    });
+
+    it("poll : create + 10 votes parallèles distincts → 10 persistés, options cohérentes", async () => {
+      const poll = await live.createLivePoll(eventId, "Quel axe prioriser ?", ["Santé", "Éducation"]);
+      pollId = poll.id;
+      expect(poll.id).toBeGreaterThan(100);
+      expect(poll.active).toBe(1);
+      expect(poll.options).toEqual([
+        { id: "opt-1", text: "Santé", votes: 0 },
+        { id: "opt-2", text: "Éducation", votes: 0 },
+      ]);
+      expect((await live.getPollsForEvent(eventId)).map((p) => p.id)).toEqual([poll.id]);
+
+      await Promise.all(
+        Array.from({ length: 10 }, (_, i) =>
+          live.voteLivePoll(pollId, i % 2 === 0 ? "opt-1" : "opt-2", `voter-${i}`)
+        )
+      );
+      const votes = await live.getPollVotes(pollId);
+      expect(votes).toHaveLength(10);
+      const after = await live.getPollById(pollId);
+      const byId = Object.fromEntries(after!.options.map((o) => [o.id, o.votes]));
+      expect(byId).toEqual({ "opt-1": 5, "opt-2": 5 });
+    });
+
+    it("poll : doublon voter_key → ALREADY_VOTED, option inconnue → INVALID_OPTION, close → POLL_CLOSED", async () => {
+      await expect(
+        live.voteLivePoll(pollId, "opt-1", "voter-0")
+      ).rejects.toMatchObject({ code: "ALREADY_VOTED" });
+      await expect(
+        live.voteLivePoll(pollId, "opt-99", "voter-new")
+      ).rejects.toMatchObject({ code: "INVALID_OPTION" });
+
+      const closed = await live.closeLivePoll(pollId);
+      expect(closed?.active).toBe(0);
+      await expect(
+        live.voteLivePoll(pollId, "opt-1", "voter-new")
+      ).rejects.toMatchObject({ code: "POLL_CLOSED" });
+      // Doublon sur sondage fermé : ALREADY_VOTED prime (parité Store).
+      await expect(
+        live.voteLivePoll(pollId, "opt-1", "voter-0")
+      ).rejects.toMatchObject({ code: "ALREADY_VOTED" });
+      await expect(
+        live.voteLivePoll(999999, "opt-1", "voter-x")
+      ).rejects.toMatchObject({ code: "POLL_CLOSED" });
+
+      // Rien n'a été persisté par les votes refusés.
+      expect(await live.getPollVotes(pollId)).toHaveLength(10);
+      const byId = Object.fromEntries(
+        (await live.getPollById(pollId))!.options.map((o) => [o.id, o.votes])
+      );
+      expect(byId).toEqual({ "opt-1": 5, "opt-2": 5 });
+    });
+
+    it("viewer_count : 10 incréments parallèles = +10, id inconnu no-op", async () => {
+      const before = (await live.getLiveEventBySlug("assemblee-generale"))!.viewer_count;
+      await Promise.all(
+        Array.from({ length: 10 }, () => live.incrementViewerCount(eventId))
+      );
+      await live.incrementViewerCount(999999);
+      const after = (await live.getLiveEventBySlug("assemblee-generale"))!.viewer_count;
+      expect(after).toBe(before + 10);
+    });
+
+    it("updateLiveEventMedia : patch partiel, id inconnu → undefined", async () => {
+      const patched = await live.updateLiveEventMedia(eventId, {
+        thumbnail: "/uploads/live.jpg",
+      });
+      expect(patched?.thumbnail).toBe("/uploads/live.jpg");
+      const alt = await live.updateLiveEventMedia(eventId, { thumbnail_alt: "Direct CFM" });
+      expect(alt?.thumbnail).toBe("/uploads/live.jpg");
+      expect(alt?.thumbnail_alt).toBe("Direct CFM");
+      expect(await live.updateLiveEventMedia(999999, { thumbnail: "x" })).toBeUndefined();
+      expect(await live.updateLiveEvent(999999, { title: "x" })).toBeUndefined();
+    });
+  });
 });

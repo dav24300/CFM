@@ -1,4 +1,5 @@
 import "server-only";
+import { seedDefaultLiveEventIfEmpty } from "@/infrastructure/repositories/sql/live.sql";
 import { seedDefaultPetitionsIfEmpty } from "@/infrastructure/repositories/sql/petitions.sql";
 
 /**
@@ -6,8 +7,9 @@ import { seedDefaultPetitionsIfEmpty } from "@/infrastructure/repositories/sql/p
  * sync Store → saveStoreToPostgres ne peut plus les seeder).
  * Appelé uniquement depuis le chemin claimSeedVersion du postgres-store.adapter
  * (one-shot, sérialisé par verrou advisory). Chaque agrégat migré porteur de
- * seeds ajoute son hook ici (C10 : live ; C11 : events/member_resources).
+ * seeds ajoute son hook ici (C11 : events/member_resources).
  */
 export async function seedMigratedAggregates(): Promise<void> {
   await seedDefaultPetitionsIfEmpty();
+  await seedDefaultLiveEventIfEmpty();
 }

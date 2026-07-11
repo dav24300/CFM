@@ -17,6 +17,10 @@ const MIGRATED_TABLES = new Set<string>([
   "family_links",
   "password_reset_tokens",
   "donations",
+  "live_events",
+  "live_chat_messages",
+  "live_polls",
+  "live_poll_votes",
 ]);
 
 export function isTableMigrated(table: string): boolean {

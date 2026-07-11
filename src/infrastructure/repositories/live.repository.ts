@@ -5,6 +5,8 @@ import {
 } from "@/infrastructure/persistence/store-access";
 import { slugify } from "@/infrastructure/persistence/store-seed";
 import { withStoreMutation } from "@/infrastructure/persistence/admin-mutation";
+import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
+import * as sqlLive from "@/infrastructure/repositories/sql/live.sql";
 import { invalidateLiveCache } from "@/infrastructure/cache/invalidate";
 import { domainError } from "@/domain/errors/domain-error";
 import { containsBadWord, sanitizeChatContent } from "@/infrastructure/live/moderation";
@@ -12,7 +14,17 @@ import { getPushSubscriberCount } from "@/infrastructure/push/web-push.adapter";
 import { compareIsoDesc } from "@/infrastructure/persistence/normalize-pg-row";
 import type { LiveEvent, LiveChatMessage, LivePoll } from "@/domain/entities/v3";
 
+/**
+ * Agrégat live — dual-mode :
+ * - PG (DATABASE_URL) : SQL ciblé (sql/live.sql.ts), transaction de vote +
+ *   contrainte unique live_poll_votes_poll_id_voter_key_key et incrément
+ *   viewer_count atomique — concurrent-safe.
+ * - JSON (dev) : branche Store historique inchangée.
+ * Validation et invalidation de cache restent communes.
+ */
+
 export async function getLiveEvents(): Promise<LiveEvent[]> {
+  if (isPgMode()) return sqlLive.getLiveEvents();
   const store = await getStoreAsync();
   return [...store.live_events].sort((a, b) =>
     compareIsoDesc(a.created_at, b.created_at)
@@ -25,6 +37,7 @@ export async function getActiveLiveEvent(): Promise<LiveEvent | undefined> {
 }
 
 export async function getLiveEventBySlug(slug: string): Promise<LiveEvent | undefined> {
+  if (isPgMode()) return sqlLive.getLiveEventBySlug(slug);
   const store = await getStoreAsync();
   return store.live_events.find((e) => e.slug === slug);
 }
@@ -37,33 +50,37 @@ export async function createLiveEvent(data: {
   chat_moderation?: boolean;
 }): Promise<LiveEvent> {
   let created!: LiveEvent;
-  await withStoreMutation(
-    (store) => {
-      const baseSlug = slugify(data.title);
-      let slug = baseSlug;
-      let n = 1;
-      while (store.live_events.some((e) => e.slug === slug)) {
-        slug = `${baseSlug}-${n++}`;
-      }
-      created = {
-        id: nextId(store),
-        title: data.title,
-        slug,
-        description: data.description,
-        status: "scheduled",
-        youtube_id: data.youtube_id || null,
-        stream_url: data.stream_url || null,
-        replay_url: null,
-        chat_moderation: data.chat_moderation ? 1 : 0,
-        viewer_count: 0,
-        started_at: null,
-        ended_at: null,
-        created_at: new Date().toISOString(),
-      };
-      store.live_events.push(created);
-    },
-    { invalidate: "none" }
-  );
+  if (isPgMode()) {
+    created = await sqlLive.createLiveEvent(data);
+  } else {
+    await withStoreMutation(
+      (store) => {
+        const baseSlug = slugify(data.title);
+        let slug = baseSlug;
+        let n = 1;
+        while (store.live_events.some((e) => e.slug === slug)) {
+          slug = `${baseSlug}-${n++}`;
+        }
+        created = {
+          id: nextId(store),
+          title: data.title,
+          slug,
+          description: data.description,
+          status: "scheduled",
+          youtube_id: data.youtube_id || null,
+          stream_url: data.stream_url || null,
+          replay_url: null,
+          chat_moderation: data.chat_moderation ? 1 : 0,
+          viewer_count: 0,
+          started_at: null,
+          ended_at: null,
+          created_at: new Date().toISOString(),
+        };
+        store.live_events.push(created);
+      },
+      { invalidate: "none" }
+    );
+  }
   invalidateLiveCache();
   return created!;
 }
@@ -74,23 +91,27 @@ export async function setLiveEventStatus(
   replayUrl?: string
 ): Promise<LiveEvent | undefined> {
   let result: LiveEvent | undefined;
-  await updateStoreAsync((store) => {
-    const e = store.live_events.find((x) => x.id === eventId);
-    if (!e) return;
-    e.status = status;
-    const now = new Date().toISOString();
-    if (status === "live") {
-      e.started_at = now;
-      store.live_events.forEach((ev) => {
-        if (ev.id !== eventId && ev.status === "live") ev.status = "ended";
-      });
-    }
-    if (status === "ended" || status === "replay") {
-      e.ended_at = now;
-      if (replayUrl) e.replay_url = replayUrl;
-    }
-    result = e;
-  });
+  if (isPgMode()) {
+    result = await sqlLive.setLiveEventStatus(eventId, status, replayUrl);
+  } else {
+    await updateStoreAsync((store) => {
+      const e = store.live_events.find((x) => x.id === eventId);
+      if (!e) return;
+      e.status = status;
+      const now = new Date().toISOString();
+      if (status === "live") {
+        e.started_at = now;
+        store.live_events.forEach((ev) => {
+          if (ev.id !== eventId && ev.status === "live") ev.status = "ended";
+        });
+      }
+      if (status === "ended" || status === "replay") {
+        e.ended_at = now;
+        if (replayUrl) e.replay_url = replayUrl;
+      }
+      result = e;
+    });
+  }
   invalidateLiveCache();
   return result;
 }
@@ -100,13 +121,17 @@ export async function updateLiveEventMedia(
   patch: { thumbnail?: string | null; thumbnail_alt?: string | null }
 ): Promise<LiveEvent | undefined> {
   let result: LiveEvent | undefined;
-  await updateStoreAsync((store) => {
-    const e = store.live_events.find((x) => x.id === eventId);
-    if (!e) return;
-    if (patch.thumbnail !== undefined) e.thumbnail = patch.thumbnail;
-    if (patch.thumbnail_alt !== undefined) e.thumbnail_alt = patch.thumbnail_alt;
-    result = e;
-  });
+  if (isPgMode()) {
+    result = await sqlLive.updateLiveEventMedia(eventId, patch);
+  } else {
+    await updateStoreAsync((store) => {
+      const e = store.live_events.find((x) => x.id === eventId);
+      if (!e) return;
+      if (patch.thumbnail !== undefined) e.thumbnail = patch.thumbnail;
+      if (patch.thumbnail_alt !== undefined) e.thumbnail_alt = patch.thumbnail_alt;
+      result = e;
+    });
+  }
   if (result) invalidateLiveCache();
   return result;
 }
@@ -123,17 +148,21 @@ export async function updateLiveEvent(
   }
 ): Promise<LiveEvent | undefined> {
   let result: LiveEvent | undefined;
-  await updateStoreAsync((store) => {
-    const e = store.live_events.find((x) => x.id === eventId);
-    if (!e) return;
-    if (patch.title !== undefined) e.title = patch.title;
-    if (patch.description !== undefined) e.description = patch.description;
-    if (patch.youtube_id !== undefined) e.youtube_id = patch.youtube_id;
-    if (patch.stream_url !== undefined) e.stream_url = patch.stream_url;
-    if (patch.replay_url !== undefined) e.replay_url = patch.replay_url;
-    if (patch.chat_moderation !== undefined) e.chat_moderation = patch.chat_moderation;
-    result = e;
-  });
+  if (isPgMode()) {
+    result = await sqlLive.updateLiveEvent(eventId, patch);
+  } else {
+    await updateStoreAsync((store) => {
+      const e = store.live_events.find((x) => x.id === eventId);
+      if (!e) return;
+      if (patch.title !== undefined) e.title = patch.title;
+      if (patch.description !== undefined) e.description = patch.description;
+      if (patch.youtube_id !== undefined) e.youtube_id = patch.youtube_id;
+      if (patch.stream_url !== undefined) e.stream_url = patch.stream_url;
+      if (patch.replay_url !== undefined) e.replay_url = patch.replay_url;
+      if (patch.chat_moderation !== undefined) e.chat_moderation = patch.chat_moderation;
+      result = e;
+    });
+  }
   if (result) invalidateLiveCache();
   return result;
 }
@@ -142,6 +171,7 @@ export async function getChatMessages(
   eventId: number,
   publicOnly = true
 ): Promise<LiveChatMessage[]> {
+  if (isPgMode()) return sqlLive.getChatMessages(eventId, publicOnly);
   const store = await getStoreAsync();
   const msgs = store.live_chat_messages.filter((m) => m.live_event_id === eventId);
   const filtered = publicOnly ? msgs.filter((m) => m.status === "approved") : msgs;
@@ -154,6 +184,8 @@ export async function postChatMessage(data: {
   content: string;
   user_id?: number;
 }): Promise<LiveChatMessage> {
+  if (isPgMode()) return sqlLive.postChatMessage(data);
+
   const content = sanitizeChatContent(data.content);
   if (!content) throw domainError("EMPTY_MESSAGE");
 
@@ -182,6 +214,7 @@ export async function moderateChatMessage(
   messageId: number,
   status: "approved" | "rejected"
 ): Promise<void> {
+  if (isPgMode()) return sqlLive.moderateChatMessage(messageId, status);
   await updateStoreAsync((store) => {
     const m = store.live_chat_messages.find((x) => x.id === messageId);
     if (m) m.status = status;
@@ -193,6 +226,7 @@ export async function getChatMessageWithEvent(messageId: number): Promise<{
   msg: LiveChatMessage | undefined;
   event: LiveEvent | undefined;
 }> {
+  if (isPgMode()) return sqlLive.getChatMessageWithEvent(messageId);
   const store = await getStoreAsync();
   const msg = store.live_chat_messages.find((m) => m.id === messageId);
   const event = msg
@@ -206,6 +240,7 @@ export async function getLiveAdminCounters(): Promise<{
   liveEvents: number;
   pendingChat: number;
 }> {
+  if (isPgMode()) return sqlLive.getLiveAdminCounters();
   const store = await getStoreAsync();
   return {
     liveEvents: (store.live_events || []).length,
@@ -221,6 +256,7 @@ export async function countPushSubscriptions(): Promise<number> {
 }
 
 export async function getPollsForEvent(eventId: number): Promise<LivePoll[]> {
+  if (isPgMode()) return sqlLive.getPollsForEvent(eventId);
   const store = await getStoreAsync();
   return store.live_polls.filter((p) => p.live_event_id === eventId);
 }
@@ -230,6 +266,7 @@ export async function createLivePoll(
   question: string,
   options: string[]
 ): Promise<LivePoll> {
+  if (isPgMode()) return sqlLive.createLivePoll(eventId, question, options);
   let created!: LivePoll;
   await updateStoreAsync((store) => {
     created = {
@@ -254,6 +291,7 @@ export async function voteLivePoll(
   optionId: string,
   voterKey: string
 ): Promise<LivePoll | undefined> {
+  if (isPgMode()) return sqlLive.voteLivePoll(pollId, optionId, voterKey);
   let poll: LivePoll | undefined;
   await updateStoreAsync((store) => {
     const existing = store.live_poll_votes.find(
@@ -280,6 +318,7 @@ export async function voteLivePoll(
 }
 
 export async function incrementViewerCount(eventId: number): Promise<void> {
+  if (isPgMode()) return sqlLive.incrementViewerCount(eventId);
   await updateStoreAsync((store) => {
     const e = store.live_events.find((x) => x.id === eventId);
     if (e) e.viewer_count += 1;
@@ -287,6 +326,7 @@ export async function incrementViewerCount(eventId: number): Promise<void> {
 }
 
 export async function getPendingChatCount(eventId: number): Promise<number> {
+  if (isPgMode()) return sqlLive.getPendingChatCount(eventId);
   const store = await getStoreAsync();
   return store.live_chat_messages.filter(
     (m) => m.live_event_id === eventId && m.status === "pending"
@@ -294,6 +334,7 @@ export async function getPendingChatCount(eventId: number): Promise<number> {
 }
 
 export async function closeLivePoll(pollId: number): Promise<LivePoll | undefined> {
+  if (isPgMode()) return sqlLive.closeLivePoll(pollId);
   let poll: LivePoll | undefined;
   await updateStoreAsync((store) => {
     poll = store.live_polls.find((p) => p.id === pollId);
@@ -303,11 +344,13 @@ export async function closeLivePoll(pollId: number): Promise<LivePoll | undefine
 }
 
 export async function getPollById(pollId: number): Promise<LivePoll | undefined> {
+  if (isPgMode()) return sqlLive.getPollById(pollId);
   const store = await getStoreAsync();
   return store.live_polls.find((p) => p.id === pollId);
 }
 
 export async function getPollVotes(pollId: number) {
+  if (isPgMode()) return sqlLive.getPollVotes(pollId);
   const store = await getStoreAsync();
   return store.live_poll_votes.filter((v) => v.poll_id === pollId);
 }
