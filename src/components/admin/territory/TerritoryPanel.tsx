@@ -92,7 +92,7 @@ export function TerritoryPanel({ data, onReload }: Props) {
         </div>
       </div>
 
-      <section className="rounded-admin border border-admin-border bg-white p-4 shadow-sm">
+      <section className="rounded-admin border border-admin-border bg-admin-surface p-4 shadow-sm">
         <h3 className="mb-3 text-sm font-semibold uppercase text-admin-muted">
           Couverture RDC — {coveredProvinces.size}/{PROVINCES_RDC.length} provinces
         </h3>

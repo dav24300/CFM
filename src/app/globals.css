@@ -7,7 +7,7 @@
    Public/Portail (bleu, coins nets) & Admin (teal, 8px)
    ===================================================================== */
 :root {
-  /* ---- Public & Portail ---- */
+  /* ---- Public & Portail (hex figés) ---- */
   --site-ink: #14171c;
   --site-muted: #4a4d54;
   --site-muted-2: #6b6b63;
@@ -16,30 +16,111 @@
   --site-primary: #14418a;
   --site-primary-dark: #0f367a;
   --site-deep: #0b1a38;
+  --site-navy: #12325f;
   --site-light: #7aa7f5;
   --site-pale: #eaf0fb;
   --site-live: #e23b3b;
   --site-success: #1f8a5b;
+  --site-hero-dark: #0f1622;
+  --site-hero-eyebrow: #9fbdf0;
+  --site-danger: #c0362c;
+  --site-danger-bg: #fbeae8;
+  --site-warn-fg: #b7791f;
+  --site-warn-bg: #fef3e2;
+  --site-ok-fg: #127d73;
+  --site-ok-bg: #e3f3f0;
+  --site-info-fg: #2563aa;
+  --site-info-bg: #e7effa;
 
-  /* ---- Admin ---- */
-  --admin-bg: #f6f7f9;
-  --admin-sidebar: #16181d;
-  --admin-sidebar-active: #22252c;
-  --admin-ink: #1c1c1a;
-  --admin-muted: #6b7076;
-  --admin-muted-2: #8b9099;
-  --admin-border: #e6e8ec;
-  --admin-accent: #127d73;
-  --admin-accent-dark: #0e6b62;
-  --admin-deep: #12325f;
-  --admin-warn-fg: #b7791f;
-  --admin-warn-bg: #fef3e2;
-  --admin-ok-fg: #127d73;
-  --admin-ok-bg: #e3f3f0;
-  --admin-info-fg: #2563aa;
-  --admin-info-bg: #e7effa;
-  --admin-danger-fg: #c0362c;
-  --admin-danger-bg: #fbeae8;
+  /* ---- Admin — canaux RGB (espaces) pour opacités Tailwind + thème sombre ---- */
+  --admin-bg: 246 247 249;
+  --admin-surface: 255 255 255;
+  --admin-sidebar: 22 24 29;
+  --admin-sidebar-active: 34 37 44;
+  --admin-ink: 28 28 26;
+  --admin-muted: 107 112 118;
+  --admin-muted-2: 139 144 153;
+  --admin-border: 230 232 236;
+  --admin-accent: 18 125 115;
+  --admin-accent-dark: 14 107 98;
+  --admin-deep: 18 50 95;
+  --admin-warn-fg: 183 121 31;
+  --admin-warn-bg: 254 243 226;
+  --admin-ok-fg: 18 125 115;
+  --admin-ok-bg: 227 243 240;
+  --admin-info-fg: 37 99 170;
+  --admin-info-bg: 231 239 250;
+  --admin-danger-fg: 192 54 44;
+  --admin-danger-bg: 251 234 232;
+}
+
+/* =====================================================================
+   Control tokens — indirection consommée par les primitives (ui/primitives).
+   Résolus par le scope de thème ambiant : famille site par défaut,
+   famille admin sous .theme-admin, sombre sous .theme-admin.dark.
+   Les primitives ne referencent jamais les familles site ou admin en dur.
+   ===================================================================== */
+:root,
+.theme-site {
+  --control-accent: var(--site-primary);
+  --control-accent-hover: var(--site-primary-dark);
+  --control-accent-fg: #ffffff;
+  --control-fg: var(--site-ink);
+  --control-bg: #ffffff;
+  --control-surface: var(--site-surface);
+  --control-muted: var(--site-muted);
+  --control-border: var(--site-hairline);
+  --control-border-strong: var(--site-primary);
+  --control-radius: 0px;
+  --control-ring: rgba(20, 65, 138, 0.3);
+  --control-ring-offset: #ffffff;
+  --control-danger: var(--site-danger);
+  --control-danger-ring: rgba(192, 54, 44, 0.3);
+  --control-success: var(--site-success);
+}
+
+.theme-admin {
+  --control-accent: rgb(var(--admin-accent));
+  --control-accent-hover: rgb(var(--admin-accent-dark));
+  --control-accent-fg: #ffffff;
+  --control-fg: rgb(var(--admin-ink));
+  --control-bg: #ffffff;
+  --control-surface: rgb(var(--admin-bg));
+  --control-muted: rgb(var(--admin-muted));
+  --control-border: rgb(var(--admin-border));
+  --control-border-strong: rgb(var(--admin-accent));
+  --control-radius: 8px;
+  --control-ring: rgba(18, 125, 115, 0.3);
+  --control-ring-offset: #ffffff;
+  --control-danger: rgb(var(--admin-danger-fg));
+  --control-danger-ring: rgba(192, 54, 44, 0.3);
+  --control-success: rgb(var(--admin-ok-fg));
+}
+
+/* Thème sombre — ADMIN uniquement (classe .dark posée sur le wrapper .theme-admin) */
+.theme-admin.dark {
+  --admin-bg: 20 22 27;
+  --admin-surface: 27 30 36;
+  --admin-sidebar: 12 14 18;
+  --admin-sidebar-active: 30 33 40;
+  --admin-ink: 231 233 238;
+  --admin-muted: 154 168 186;
+  --admin-muted-2: 122 133 148;
+  --admin-border: 51 56 66;
+  --admin-accent: 22 152 140;
+  --admin-accent-dark: 18 125 115;
+  --admin-deep: 30 54 92;
+  --admin-warn-fg: 224 162 78;
+  --admin-warn-bg: 42 33 18;
+  --admin-ok-fg: 60 194 148;
+  --admin-ok-bg: 18 36 30;
+  --admin-info-fg: 130 178 226;
+  --admin-info-bg: 20 32 44;
+  --admin-danger-fg: 240 119 110;
+  --admin-danger-bg: 42 21 19;
+  /* control tokens en couleur pleine (non dérivés d'un canal) */
+  --control-bg: #1b1e24;
+  --control-ring-offset: #14161b;
 }
 
 @layer base {
@@ -149,22 +230,22 @@
     @apply mb-1 block text-sm font-medium text-site-ink;
   }
 
-  /* ---- Badges de statut admin ---- */
+  /* ---- Badges de statut admin (tokens en canaux → rgb()) ---- */
   .badge-warn {
-    color: var(--admin-warn-fg);
-    background: var(--admin-warn-bg);
+    color: rgb(var(--admin-warn-fg));
+    background: rgb(var(--admin-warn-bg));
   }
   .badge-ok {
-    color: var(--admin-ok-fg);
-    background: var(--admin-ok-bg);
+    color: rgb(var(--admin-ok-fg));
+    background: rgb(var(--admin-ok-bg));
   }
   .badge-info {
-    color: var(--admin-info-fg);
-    background: var(--admin-info-bg);
+    color: rgb(var(--admin-info-fg));
+    background: rgb(var(--admin-info-bg));
   }
   .badge-danger {
-    color: var(--admin-danger-fg);
-    background: var(--admin-danger-bg);
+    color: rgb(var(--admin-danger-fg));
+    background: rgb(var(--admin-danger-bg));
   }
 
   .page-enter {

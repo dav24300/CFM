@@ -67,7 +67,7 @@ export function PortalHomeHeader({
 
       {role === "coordinateur" && (
         <>
-          <div className="mb-4 flex items-center gap-2.5 bg-[#12325f] px-4 py-3 text-[13px] font-medium leading-[1.5] text-white">
+          <div className="mb-4 flex items-center gap-2.5 bg-site-navy px-4 py-3 text-[13px] font-medium leading-[1.5] text-white">
             <Activity className="h-4 w-4 shrink-0 text-site-light" aria-hidden />
             Vue coordinateur —{" "}
             <Link href="/portail/coordination" className="text-site-light hover:underline">

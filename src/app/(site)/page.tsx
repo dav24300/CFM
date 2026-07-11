@@ -187,7 +187,7 @@ export default async function HomePage() {
           <div className="grid items-center gap-14 lg:grid-cols-2">
             <Link
               href={liveHref}
-              className="group relative block aspect-video overflow-hidden border border-site-hairline bg-[#0f1622]"
+              className="group relative block aspect-video overflow-hidden border border-site-hairline bg-site-hero-dark"
               data-cta="cta_live"
             >
               <Image

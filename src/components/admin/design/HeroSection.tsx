@@ -84,7 +84,7 @@ export function HeroSection({ hero, onChange, onSaved }: Props) {
 
         <div className="grid gap-4 sm:grid-cols-2">
           {FIELDS.map(({ key, label, accept, isVideo }) => (
-            <div key={key} className="rounded-xl border bg-white p-4 shadow-sm">
+            <div key={key} className="rounded-xl border bg-admin-surface p-4 shadow-sm">
               <div className="flex items-center justify-between gap-2">
                 <h4 className="text-sm font-semibold text-admin-ink">{label}</h4>
                 <span className="rounded bg-green-50 px-2 py-0.5 text-[10px] text-green-800">
@@ -99,7 +99,7 @@ export function HeroSection({ hero, onChange, onSaved }: Props) {
               {hero[key] && isVideo && (
                 <video src={hero[key]} controls className="mt-2 w-full rounded-lg" />
               )}
-              <p className="mt-1 truncate text-xs text-gray-500">{hero[key] || "—"}</p>
+              <p className="mt-1 truncate text-xs text-admin-muted">{hero[key] || "—"}</p>
               <AdminFileUpload
                 label="Remplacer"
                 accept={accept || "image/jpeg,image/png,image/webp,image/svg+xml,image/heic,image/heif"}

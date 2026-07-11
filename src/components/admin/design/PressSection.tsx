@@ -9,12 +9,12 @@ type Props = {
 
 export function PressSection({ pressKitUrl, onSaved }: Props) {
   return (
-    <div className="max-w-lg space-y-4 rounded-xl border bg-white p-6">
+    <div className="max-w-lg space-y-4 rounded-xl border bg-admin-surface p-6">
       <h3 className="font-semibold text-admin-ink">Dossier presse PDF</h3>
       <p className="text-sm text-admin-muted">
         Diffusé sur <code className="text-xs">/presse</code> — téléchargement public.
       </p>
-      <p className="truncate text-xs text-gray-500">{pressKitUrl || "Aucun fichier"}</p>
+      <p className="truncate text-xs text-admin-muted">{pressKitUrl || "Aucun fichier"}</p>
       {pressKitUrl && (
         <a
           href={pressKitUrl}

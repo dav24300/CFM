@@ -103,7 +103,7 @@ export function AdminSidebar({ active, onChange, stats, open = false, onClose }:
                 "flex w-full items-center gap-3 rounded-admin-ctrl border-l-2 px-3 py-2.5 text-left text-sm font-medium transition-colors",
                 isActive
                   ? "border-admin-accent bg-admin-sidebar-active text-white"
-                  : "border-transparent text-white/55 hover:bg-white/[0.06] hover:text-white"
+                  : "border-transparent text-white/55 hover:bg-admin-surface/[0.06] hover:text-white"
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />

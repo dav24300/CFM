@@ -88,7 +88,7 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className="font-sans bg-white text-site-ink antialiased">
+      <body className="theme-site font-sans bg-white text-site-ink antialiased">
 
         <PWARegister />
         {children}

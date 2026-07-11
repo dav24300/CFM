@@ -68,7 +68,7 @@ export function EventRsvp({
               : "Je participe"}
       </button>
       {error && (
-        <span className="text-center text-[11px] text-[#c0362c]">
+        <span className="text-center text-[11px] text-site-danger">
           Une erreur est survenue. Réessayez.
         </span>
       )}

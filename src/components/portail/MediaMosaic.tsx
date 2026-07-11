@@ -65,7 +65,7 @@ export function MediaMosaic({ images }: Props) {
               </svg>
             </span>
           </span>
-          <span className="absolute left-3.5 top-3.5 bg-[#e23b3b] px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.04em] text-white">
+          <span className="absolute left-3.5 top-3.5 bg-site-live px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.04em] text-white">
             YouTube · À la une
           </span>
           <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-5 pb-[18px] pt-11">

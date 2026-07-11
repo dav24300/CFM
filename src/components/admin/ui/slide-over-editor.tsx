@@ -109,7 +109,7 @@ export function SlideOverEditor({
         className="relative flex h-full w-[min(640px,96vw)] flex-col bg-admin-bg shadow-admin-drawer"
       >
         {/* En-tête */}
-        <div className="flex items-center justify-between border-b border-admin-border bg-white px-6 py-4">
+        <div className="flex items-center justify-between border-b border-admin-border bg-admin-surface px-6 py-4">
           <h2 className="font-display text-lg font-semibold text-admin-ink">{title}</h2>
           <button
             type="button"
@@ -124,7 +124,7 @@ export function SlideOverEditor({
         {/* Corps */}
         <div className="flex-1 overflow-y-auto p-6">
           {preview && (
-            <div className="mb-6 rounded-admin border border-admin-border bg-white p-4">
+            <div className="mb-6 rounded-admin border border-admin-border bg-admin-surface p-4">
               <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-admin-muted">
                 Aperçu
               </div>
@@ -147,7 +147,7 @@ export function SlideOverEditor({
         </div>
 
         {/* Pied */}
-        <div className="flex items-center justify-between gap-2 border-t border-admin-border bg-white px-6 py-4">
+        <div className="flex items-center justify-between gap-2 border-t border-admin-border bg-admin-surface px-6 py-4">
           <div>
             {onDelete && (
               <Button type="button" variant="destructive" size="sm" onClick={onDelete}>
@@ -201,12 +201,12 @@ function FieldControl({
     </label>
   );
   const inputCls =
-    "w-full rounded-admin-ctrl border border-admin-border bg-white px-3 py-2 text-sm text-admin-ink focus:border-admin-accent focus:outline-none focus:ring-2 focus:ring-admin-accent/25";
+    "w-full rounded-admin-ctrl border border-admin-border bg-admin-surface px-3 py-2 text-sm text-admin-ink focus:border-admin-accent focus:outline-none focus:ring-2 focus:ring-admin-accent/25";
 
   if (f.type === "toggle") {
     const on = Boolean(value);
     return (
-      <div className="flex items-center justify-between rounded-admin-ctrl border border-admin-border bg-white px-3 py-2.5">
+      <div className="flex items-center justify-between rounded-admin-ctrl border border-admin-border bg-admin-surface px-3 py-2.5">
         <span className="text-sm font-medium text-admin-ink">{f.label}</span>
         <button
           type="button"
@@ -220,7 +220,7 @@ function FieldControl({
         >
           <span
             className={cn(
-              "absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform",
+              "absolute top-0.5 h-4 w-4 rounded-full bg-admin-surface transition-transform",
               on ? "translate-x-4" : "translate-x-0.5"
             )}
           />

@@ -23,7 +23,7 @@ function KpiCard({ label, value, alert }: { label: string; value: number; alert?
   return (
     <div
       className={`rounded-xl border p-4 shadow-sm ${
-        alert ? "border-red-200 bg-red-50" : "border-gray-200 bg-white"
+        alert ? "border-red-200 bg-red-50" : "border-admin-border bg-admin-surface"
       }`}
     >
       <p className="text-xs font-medium uppercase text-admin-muted">{label}</p>
@@ -42,7 +42,7 @@ function ActivityChart({ series }: { series: ActivitySeries }) {
   const max = Math.max(...totals, 1);
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded-xl border border-admin-border bg-admin-surface p-4 shadow-sm">
       <h3 className="mb-4 text-sm font-semibold uppercase text-admin-muted">Activité — 7 derniers jours</h3>
       <div className="flex h-32 items-end gap-2">
         {days.map((label, i) => (
@@ -143,12 +143,12 @@ export function AdminOverview({ stats }: Props) {
       </section>
 
       {audit.length > 0 && (
-        <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+        <section className="rounded-xl border border-admin-border bg-admin-surface p-4 shadow-sm">
           <h3 className="mb-3 text-sm font-semibold uppercase text-admin-muted">Journal récent</h3>
           <ul className="space-y-2 text-sm">
             {audit.map((entry, i) => (
               <li key={i} className="flex flex-wrap gap-2 text-admin-muted">
-                <span className="text-xs text-gray-400">{entry.timestamp?.slice(0, 16)}</span>
+                <span className="text-xs text-admin-muted-2">{entry.timestamp?.slice(0, 16)}</span>
                 <span className="font-medium text-admin-ink">{entry.action}</span>
                 <span>{entry.endpoint}</span>
               </li>

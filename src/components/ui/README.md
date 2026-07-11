@@ -2,6 +2,10 @@
 
 Architecture en 3 couches pour une UI production-ready, accessible et réutilisable.
 
+> **Design system & tokens** : voir [`docs/DESIGN-SYSTEM.md`](../../../docs/DESIGN-SYSTEM.md) (familles `site`/`admin`, control tokens `--control-*`, thème sombre admin). Aperçu vivant : `/admin/style-guide`.
+>
+> **Primitive thématisable** : une primitive consomme les `--control-*` (`bg-[var(--control-accent)]`, `rounded-[var(--control-radius)]`, `focus-visible:ring-[var(--control-ring)]`…), **jamais** `site-primary`/`gray-300`/`rounded-lg` en dur — c'est ce qui lui permet de rendre en bleu (site) ou teal (admin) selon le scope ambiant.
+
 ## Hiérarchie
 
 ```
@@ -10,7 +14,7 @@ primitives/   → Button, Input, Textarea, Label, Badge, Alert, Spinner, Skeleto
 ui/*.tsx      → Composants média & layout (HeroMedia, MediaCard, …)
 ```
 
-**Règle** : les pages importent depuis `@/components/ui`. Ne pas importer Radix directement hors `primitives/`.
+**Règle** : importer les primitives par leur chemin (`@/components/ui/primitives/button`) ou via le barrel `@/components/ui`. Ne pas importer Radix directement hors `primitives/`.
 
 ## Primitives
 

@@ -1,5 +1,10 @@
 # Plan de conception web — CFM ASBL
 
+> ⚠️ **OBSOLÈTE (design system)** — Ce document de *planification* décrit l'ancienne palette
+> (`cfm-navy/gold/cream` + Playfair/Nunito) remplacée par la refonte. Pour le design system
+> réel (familles `site`/`admin`, tokens, thème sombre admin), voir **[`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md)**
+> et l'aperçu vivant `/admin/style-guide`. Le reste ci-dessous est conservé pour l'historique.
+
 > **Cri de Familles Militaires** — Refonte visuelle épurée, riche en médias et animations modernes  
 > Document de référence design — **aucune implémentation code** (planification uniquement)  
 > *Mise à jour : juillet 2026*

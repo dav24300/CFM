@@ -124,7 +124,7 @@ export default async function AxisDetailPage({ params }: Props) {
             <span className="flex h-[52px] w-[52px] items-center justify-center bg-site-primary text-white">
               <Icon className="h-[26px] w-[26px]" aria-hidden />
             </span>
-            <span className="text-xs font-semibold uppercase tracking-[0.22em] text-[#9fbdf0]">
+            <span className="text-xs font-semibold uppercase tracking-[0.22em] text-site-hero-eyebrow">
               Axe {axisNo} · {axe.title}
             </span>
           </div>
@@ -255,7 +255,7 @@ export default async function AxisDetailPage({ params }: Props) {
           <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr]">
             {/* Carte action */}
             <article className="border border-site-hairline">
-              <div className="relative aspect-video bg-[#0f1622]">
+              <div className="relative aspect-video bg-site-hero-dark">
                 <div
                   className="absolute inset-0"
                   style={{
@@ -284,7 +284,7 @@ export default async function AxisDetailPage({ params }: Props) {
 
             {/* Carte pétition */}
             <div className="flex flex-col justify-center bg-site-primary p-[34px] text-white">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9fbdf0]">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-site-hero-eyebrow">
                 Pétition liée
               </p>
               <h3 className="mb-2.5 mt-3 font-serif text-2xl font-medium leading-[1.2] text-white">

@@ -20,14 +20,14 @@ export default async function AdminLoginPage({ searchParams }: Props) {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
+      <div className="w-full max-w-md rounded-xl bg-admin-surface p-8 shadow-lg">
         <div className="flex items-center justify-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-admin-deep text-admin-accent">
             <Shield className="h-6 w-6" />
           </div>
           <div>
             <h1 className="font-display text-xl font-bold text-admin-ink">{SITE.sigle} Admin</h1>
-            <p className="text-sm text-gray-500">Tableau de bord bénévole</p>
+            <p className="text-sm text-admin-muted">Tableau de bord bénévole</p>
           </div>
         </div>
 

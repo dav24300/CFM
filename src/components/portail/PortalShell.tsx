@@ -122,7 +122,7 @@ export function PortalShell({ name, initials, initialRole, children }: Props) {
           href="/portail/profil"
           className="flex items-center gap-3 border-b border-white/10 px-[22px] py-[18px] hover:bg-white/[0.04]"
         >
-          <span className="flex h-[42px] w-[42px] flex-none items-center justify-center bg-[#12325f] font-serif text-[15px] font-semibold text-white">
+          <span className="flex h-[42px] w-[42px] flex-none items-center justify-center bg-site-navy font-serif text-[15px] font-semibold text-white">
             {initials}
           </span>
           <span className="min-w-0 flex-1">
@@ -146,7 +146,7 @@ export function PortalShell({ name, initials, initialRole, children }: Props) {
                   "flex items-center gap-3 border-l-[3px] px-[22px] py-3 transition-colors",
                   n.separated && "mt-1.5 border-t border-white/[0.08] pt-[15px]",
                   on
-                    ? "border-l-site-light bg-[#12325f] text-white"
+                    ? "border-l-site-light bg-site-navy text-white"
                     : "border-l-transparent text-white/80 hover:bg-white/[0.04]"
                 )}
               >
@@ -169,7 +169,7 @@ export function PortalShell({ name, initials, initialRole, children }: Props) {
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as PortalRole)}
-            className="w-full border border-white/15 bg-[#12325f] px-2.5 py-2 text-[13px] font-medium text-white"
+            className="w-full border border-white/15 bg-site-navy px-2.5 py-2 text-[13px] font-medium text-white"
           >
             <option value="famille">Famille militaire</option>
             <option value="benevole">Bénévole</option>

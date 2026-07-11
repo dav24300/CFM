@@ -228,7 +228,7 @@ export function CommunityPanel({ data, onReload }: Props) {
                   <a
                     href={`/api/admin/export/petitions/${id}`}
                     download
-                    className="inline-flex h-8 items-center rounded-admin-ctrl border border-admin-border bg-white px-3 text-xs font-medium hover:bg-admin-bg"
+                    className="inline-flex h-8 items-center rounded-admin-ctrl border border-admin-border bg-admin-surface px-3 text-xs font-medium hover:bg-admin-bg"
                   >
                     Signatures CSV
                   </a>

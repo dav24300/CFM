@@ -95,7 +95,7 @@ export function InteriorHero({
   return (
     <section
       ref={scopeRef}
-      className="relative flex items-end overflow-hidden bg-[#0f1622]"
+      className="relative flex items-end overflow-hidden bg-site-hero-dark"
       style={{ minHeight }}
     >
       {/* Couche média + ken-burns */}
@@ -177,7 +177,7 @@ export function InteriorHero({
 
         {kicker && (
           <p
-            className="mb-3.5 text-xs font-semibold uppercase tracking-[0.22em] text-[#9fbdf0]"
+            className="mb-3.5 text-xs font-semibold uppercase tracking-[0.22em] text-site-hero-eyebrow"
             style={reveal(0.2)}
           >
             {kicker}
