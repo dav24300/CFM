@@ -29,6 +29,14 @@ export function assertProductionConfig(): void {
       throw new Error("[CFM] SESSION_SECRET ne doit pas utiliser la valeur par défaut en production");
     }
   }
+
+  if (process.env.ADMIN_PASSWORD === "admin123") {
+    if (isBuildTime) {
+      console.warn("[CFM] ADMIN_PASSWORD par défaut ignoré pendant build");
+    } else {
+      throw new Error("[CFM] ADMIN_PASSWORD ne doit pas utiliser la valeur par défaut en production");
+    }
+  }
 }
 
 export function isProduction(): boolean {

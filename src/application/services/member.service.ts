@@ -100,10 +100,30 @@ export async function resetPassword(token: string, newPassword: string): Promise
   await resetPasswordWithToken(token, newPassword);
 }
 
+/**
+ * Résumé sûr d'un membre lié, exposable à un tiers. N'inclut JAMAIS
+ * password_hash, email ni phone (cf. fuite de PII via /api/member/family).
+ */
+export type FamilyMemberSummary = Pick<
+  User,
+  "id" | "first_name" | "last_name" | "membership_type" | "status"
+>;
+
 export type FamilyLinkWithUsers = FamilyLink & {
-  parent?: User;
-  child?: User;
+  parent?: FamilyMemberSummary;
+  child?: FamilyMemberSummary;
 };
+
+function toFamilyMemberSummary(user: User | undefined): FamilyMemberSummary | undefined {
+  if (!user) return undefined;
+  return {
+    id: user.id,
+    first_name: user.first_name,
+    last_name: user.last_name,
+    membership_type: user.membership_type,
+    status: user.status,
+  };
+}
 
 export async function getFamilyLinks(): Promise<FamilyLinkWithUsers[]> {
   const user = await getCurrentMember();
@@ -112,8 +132,8 @@ export async function getFamilyLinks(): Promise<FamilyLinkWithUsers[]> {
   return Promise.all(
     links.map(async (link) => ({
       ...link,
-      parent: await getUserById(link.parent_user_id),
-      child: await getUserById(link.child_user_id),
+      parent: toFamilyMemberSummary(await getUserById(link.parent_user_id)),
+      child: toFamilyMemberSummary(await getUserById(link.child_user_id)),
     }))
   );
 }

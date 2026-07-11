@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { createHash, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { signSessionPayload, verifySessionSignature } from "@/infrastructure/auth/session-crypto";
 
@@ -40,11 +41,19 @@ export async function isAuthenticated(): Promise<boolean> {
   return verifySessionSignature(SESSION_PAYLOAD, token);
 }
 
-/** Accepte mot de passe plain-text ou hash bcrypt ($2…) dans ADMIN_PASSWORD */
+/**
+ * Vérifie le mot de passe admin. Accepte un hash bcrypt ($2…) — recommandé — ou
+ * un secret en clair (comparé à temps constant). Fail-closed : si ADMIN_PASSWORD
+ * n'est pas défini, aucune connexion n'est possible (plus de fallback "admin123").
+ */
 export function verifyPassword(password: string): boolean {
-  const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) return false;
   if (adminPassword.startsWith("$2")) {
     return bcrypt.compareSync(password, adminPassword);
   }
-  return password === adminPassword;
+  // Comparaison à temps constant, indépendante de la longueur (hash SHA-256).
+  const a = createHash("sha256").update(password).digest();
+  const b = createHash("sha256").update(adminPassword).digest();
+  return timingSafeEqual(a, b);
 }
