@@ -16,6 +16,8 @@ export async function GET() {
   }
 
   const base = await getAdminData();
+  const seenAtRaw = String((base as { site_settings?: Record<string, string> }).site_settings?.petition_signatures_seen_at || "");
+  const seenAt = Date.parse(seenAtRaw);
   const users = (await getAllUsers()).map((u) => {
     const { password_hash: _, ...pub } = u;
     return pub;
@@ -34,6 +36,24 @@ export async function GET() {
       signatures: (await getPetitionSignatures(p.id)).length,
     }))
   );
+  const petitionSignatures = (
+    await Promise.all(
+      (await getAllPetitions()).map(async (petition) =>
+        (await getPetitionSignatures(petition.id)).map((signature) => ({
+          ...signature,
+          petition_title: petition.title,
+          petition_slug: petition.slug,
+          is_new: Number.isFinite(Date.parse(signature.signed_at))
+            ? (!Number.isFinite(seenAt) || Date.parse(signature.signed_at) > seenAt)
+            : true,
+        }))
+      )
+    )
+  )
+    .flat()
+    .sort(
+      (a, b) => new Date(b.signed_at).getTime() - new Date(a.signed_at).getTime()
+    );
 
   return jsonData({
     ...base,
@@ -41,5 +61,6 @@ export async function GET() {
     family_links: familyLinks,
     donations: await getAllDonations(),
     petitions,
+    petition_signatures: petitionSignatures,
   });
 }

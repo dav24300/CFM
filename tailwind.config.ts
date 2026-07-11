@@ -1,5 +1,11 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * CFM ASBL — deux design systems.
+ * `site-*`  : public + portail (bleu institutionnel, coins nets, Newsreader/Archivo).
+ * `admin-*` : console (teal, coins 8px, Space Grotesk/IBM Plex).
+ * Remplace l'ancien pairing cfm-navy/gold/warm/cream/earth + Playfair/Nunito.
+ */
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,17 +15,49 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        cfm: {
-          navy: "#1a2f4a",
-          gold: "#c9a227",
-          warm: "#d4845c",
-          cream: "#faf7f2",
-          earth: "#5c4a3a",
+        // ---- Public & Portail (institutionnel, éditorial) ----
+        site: {
+          ink: "#14171c",
+          muted: "#4a4d54",
+          "muted-2": "#6b6b63",
+          hairline: "#e6e6e2",
+          surface: "#f6f8fc",
+          primary: "#14418a",
+          "primary-dark": "#0f367a",
+          deep: "#0b1a38",
+          light: "#7aa7f5",
+          pale: "#eaf0fb",
+          live: "#e23b3b",
+          success: "#1f8a5b",
+        },
+        // ---- Admin (console de travail, teal) ----
+        admin: {
+          bg: "#f6f7f9",
+          sidebar: "#16181d",
+          "sidebar-active": "#22252c",
+          ink: "#1c1c1a",
+          muted: "#6b7076",
+          "muted-2": "#8b9099",
+          border: "#e6e8ec",
+          accent: "#127d73",
+          "accent-dark": "#0e6b62",
+          deep: "#12325f",
+          "warn-fg": "#b7791f",
+          "warn-bg": "#fef3e2",
+          "ok-fg": "#127d73",
+          "ok-bg": "#e3f3f0",
+          "info-fg": "#2563aa",
+          "info-bg": "#e7effa",
+          "danger-fg": "#c0362c",
+          "danger-bg": "#fbeae8",
         },
       },
       fontFamily: {
-        sans: ["var(--font-nunito)", "system-ui", "sans-serif"],
-        display: ["var(--font-playfair)", "Georgia", "serif"],
+        serif: ["var(--font-newsreader)", "Georgia", "serif"],
+        sans: ["var(--font-archivo)", "system-ui", "sans-serif"],
+        display: ["var(--font-space-grotesk)", "system-ui", "sans-serif"],
+        ui: ["var(--font-plex-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-plex-mono)", "ui-monospace", "monospace"],
       },
       animation: {
         "live-pulse": "live-pulse 2s ease-in-out infinite",
@@ -27,8 +65,8 @@ const config: Config = {
       },
       keyframes: {
         "live-pulse": {
-          "0%, 100%": { opacity: "1", boxShadow: "0 0 0 0 rgba(239, 68, 68, 0.4)" },
-          "50%": { opacity: "0.85", boxShadow: "0 0 0 8px rgba(239, 68, 68, 0)" },
+          "0%, 100%": { opacity: "1", boxShadow: "0 0 0 0 rgba(226, 59, 59, 0.4)" },
+          "50%": { opacity: "0.85", boxShadow: "0 0 0 8px rgba(226, 59, 59, 0)" },
         },
         "fade-in": {
           from: { opacity: "0", transform: "translateY(16px)" },
@@ -36,19 +74,16 @@ const config: Config = {
         },
       },
       boxShadow: {
-        cfm: "0 4px 24px rgba(26, 47, 74, 0.08)",
-        "cfm-lg": "0 8px 40px rgba(26, 47, 74, 0.12)",
+        "site-hover": "0 18px 40px rgba(20, 40, 90, 0.13)",
+        "admin-drawer": "-16px 0 48px rgba(12, 14, 18, 0.14)",
       },
       borderRadius: {
-        card: "0.75rem",
-        media: "1rem",
+        admin: "8px",
+        "admin-ctrl": "7px",
       },
-      spacing: {
-        section: "6rem",
-        "section-md": "8rem",
-      },
-      ringColor: {
-        focus: "#c9a227",
+      maxWidth: {
+        site: "1240px",
+        portal: "1140px",
       },
     },
   },

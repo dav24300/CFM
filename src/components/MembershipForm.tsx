@@ -9,11 +9,15 @@ import { Button } from "@/components/ui/primitives/button";
 import { Alert } from "@/components/ui/primitives/alert";
 import { FormField } from "@/components/ui/patterns/form-field";
 import { FormSelect } from "@/components/ui/patterns/form-select";
+import { FormSuccessPanel } from "@/components/ux/FormSuccessPanel";
+import { MemberAccountPromo } from "@/components/ux/MemberAccountPromo";
 import { useAsyncAction } from "@/lib/hooks/use-async-action";
+import { useTranslations } from "@/lib/i18n-client";
 
 export function MembershipForm() {
+  const { t } = useTranslations();
+  const fs = t.ux.formSuccess;
   const [type, setType] = useState("famille");
-  const [successMessage, setSuccessMessage] = useState("");
   const { isLoading, isSuccess, isError, error, run } = useAsyncAction();
   const [form, setForm] = useState({
     first_name: "",
@@ -41,9 +45,6 @@ export function MembershipForm() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Erreur");
-        setSuccessMessage(
-          "Votre demande d'adhésion a été enregistrée. Nous vous contacterons sous peu."
-        );
         setForm({
           first_name: "",
           last_name: "",
@@ -74,9 +75,9 @@ export function MembershipForm() {
           onChange={(e) => setType(e.target.value)}
           required
         >
-          {MEMBERSHIP_TYPES.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.label}
+          {MEMBERSHIP_TYPES.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.label}
             </option>
           ))}
         </NativeSelect>
@@ -171,11 +172,21 @@ export function MembershipForm() {
         <Textarea rows={3} value={form.message} onChange={(e) => update("message", e.target.value)} />
       </FormField>
 
-      <Button type="submit" loading={isLoading} className="w-full">
+      <Button type="submit" loading={isLoading} className="w-full" data-cta="cta_adhesion">
         Soumettre ma demande
       </Button>
 
-      {isSuccess && successMessage && <Alert variant="success">{successMessage}</Alert>}
+      {isSuccess && (
+        <>
+          <FormSuccessPanel
+            acknowledgment={fs.membershipAck}
+            delay={fs.membershipDelay}
+            nextLabel={fs.membershipNext}
+            nextHref="/membre/inscription"
+          />
+          <MemberAccountPromo labels={t.ux.memberPromo} />
+        </>
+      )}
       {isError && error && <Alert variant="error">{error}</Alert>}
     </form>
   );

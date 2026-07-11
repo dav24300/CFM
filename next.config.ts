@@ -6,7 +6,7 @@ const cspDirectives = [
   "default-src 'self' https: data: blob:",
   "frame-src 'self' https:",
   "img-src 'self' https: data: blob:",
-  "connect-src 'self' https:",
+  "connect-src 'self' https: wss:",
   isProd
     ? "script-src 'self' 'unsafe-inline' https:"
     : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
@@ -32,7 +32,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // `standalone` sert au self-hosting (Docker/VPS) ; sur Vercel il casse le packaging
+  // des fonctions serverless — on le désactive quand VERCEL est présent.
+  ...(process.env.VERCEL ? {} : { output: "standalone" as const }),
   serverExternalPackages: ["pg", "bcryptjs", "nodemailer", "web-push", "sharp"],
   images: {
     dangerouslyAllowSVG: true,

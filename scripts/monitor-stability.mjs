@@ -31,13 +31,23 @@ async function tick() {
 console.log(`\n📡 Monitor ${BASE} — ${HOURS}h (intervalle 5 min)\n`);
 
 let consecutiveOk = 0;
+let maxConsecutiveOk = 0;
+let failedCycles = 0;
+
 while (Date.now() < END) {
   const ok = await tick();
-  if (ok) consecutiveOk++;
-  else consecutiveOk = 0;
+  if (ok) {
+    consecutiveOk++;
+    maxConsecutiveOk = Math.max(maxConsecutiveOk, consecutiveOk);
+  } else {
+    consecutiveOk = 0;
+    failedCycles++;
+  }
   if (Date.now() + INTERVAL_MS > END) break;
   await new Promise((r) => setTimeout(r, INTERVAL_MS));
 }
 
-console.log(`\n--- Fin monitor: ${consecutiveOk} cycles OK consecutifs ---\n`);
-process.exit(0);
+console.log(
+  `\n--- Fin monitor: ${maxConsecutiveOk} cycles OK consecutifs max, ${failedCycles} cycle(s) en echec ---\n`
+);
+process.exit(failedCycles > 0 ? 1 : 0);

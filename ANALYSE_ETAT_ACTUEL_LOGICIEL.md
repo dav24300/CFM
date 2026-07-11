@@ -629,46 +629,91 @@ Le logiciel atteint **92 %** de stabilisation : techniquement valide en local (C
 
 Guide ops: `docs/STRICT-100-OPS.md`
 
-### Actions executees
+### Actions executees / etat constate
 
 | Ecart | Action | Resultat |
 |-------|--------|----------|
 | 1. Preprod miroir | Smoke **21/21** sur `https://cfm-asbl.vercel.app` | OK |
-| 1. Preprod 48 h | Script `monitor-stability.mjs` (cycle demo) | Partiel — lancer 48 h en ops |
-| 2. Upstash Redis | Verification health prod | `redis: skipped` — **cles UPSTASH_* a configurer Vercel** |
-| 3. PayDunya | Tests unitaires HMAC (4/4) + script live | OK logique ; **401 prod** apres cles Vercel |
-| 4. Backup PostgreSQL | `backup-restore-pg-test.mjs` — 27 tables, 266 lignes | OK |
-| 5. Production 72 h | Health + pages critiques prod OK | Partiel — monitor 72 h a lancer post-deploy |
-| 6. CSP durcie | `unsafe-eval` retire en production (`next.config.ts`) | OK code — **deploy Vercel requis** |
+| 1. Preprod 48 h | Script `monitor-stability.mjs` | **En cours** — monitoring 48h demarre |
+| 2. Upstash Redis | Verification health prod (`/api/health`) | Toujours **skipped** — cles `UPSTASH_*` absentes sur Vercel |
+| 3. PayDunya | Tests unitaires HMAC (4/4) + script live | OK (skip en l'absence de cles prod injectees) |
+| 4. Backup PostgreSQL | `backup-restore-pg-test.mjs` | **Echec** (check strict #4 non valide) |
+| 5. Production 72 h | Health + pages critiques prod OK | Non demarre (72h monitoring non execute via outil) |
+| 6. CSP durcie | Verification header prod | **OK** — `unsafe-eval` absent apres redeploy |
 
 ### Validation stricte orchestrée
 
 ```bash
 node scripts/validate-strict-100.mjs https://cfm-asbl.vercel.app
-# Resultat: 6/8 (Redis + CSP deploy en attente)
+# Resultat: 6/8 (Redis + Backup PostgreSQL en echec)
 ```
+
+Constat complete aujourd'hui en production :
+
+- `https://cfm-asbl.vercel.app/api/health` retourne `status: ok`, `database: ok`, `redis: skipped`.
+- Les pages critiques (`/`, `/contact`, `/admin`, `/api/health`) repondent sans erreur 5xx.
+- La CSP publiee en production **ne contient plus `unsafe-eval`** apres redeploy.
+- Les ecarts stricts restants sont : `2. Redis Upstash (skipped)` et `4. Backup PostgreSQL (non valide)`.
 
 ### Tableau de score — objectif 100 % strict
 
 | Phase | Score 92 % | Score strict actuel | Bloquant restant |
 |:-----:|:----------:|:-------------------:|------------------|
-| 4 — Securite | 92 % | **96 %** | UPSTASH_* + PayDunya cles prod |
+| 4 — Securite | 92 % | **94 %** | UPSTASH_* (Redis) |
 | 5 — Donnees | 88 % | **100 %** | — |
-| 6 — Preprod | 78 % | **92 %** | Monitoring 48 h continu |
-| 8 — Gate | 90 % | **94 %** | Deploy CSP + Redis |
-| 9 — Cloture | 70 % | **88 %** | Tag + suivi 72 h |
+| 6 — Preprod | 78 % | **90 %** | Monitoring 48 h en cours |
+| 8 — Gate | 90 % | **90 %** | Deploy CSP + Redis + revalidation `8/8` |
+| 9 — Cloture | 70 % | **86 %** | Suivi 72 h et cloture ops finale |
 
 ### Score global strict
 
-| Indicateur | 92 % | Strict actuel |
-|------------|:----:|:-------------:|
-| **Score moyen pondere** | 92 % | **96 %** |
-| **Phases >= 90 %** | 7/10 | **9/10** |
-| **validate-strict-100** | — | **6/8** |
-| **Decision** | GO conditionnel | **GO production** (2 actions ops) |
+| Indicateur | Strict actuel |
+|------------|:-------------:|
+| **validate-strict-100** | **6/8** |
+| **Decision** | **NO-GO strict** (Redis Upstash + Backup PostgreSQL en echec) |
+
+### Resume de l'etat actuel du site
+
+Le site en production est **fonctionnel et publiquement exploitable** sur `https://cfm-asbl.vercel.app` : la base repond, les pages critiques sont accessibles, le build et les smokes sont valides, et la majeure partie du perimetre stabilise est en place.
+
+En revanche, le niveau **100 % strict** n'est **pas atteint a date**. A date du redeploy :
+- Redis Upstash reste **skipped** (UPSTASH_* non injectes sur Vercel).
+- Les clés PayDunya prod ne sont pas injectées sur Vercel (mais le check live peut etre en mode skip si non configure).
+- La CSP durcie est **bien visible** (unsafe-eval absent).
+- Le check strict #4 **Backup PostgreSQL** est en echec.
+- Le monitoring **48h est en cours** ; le monitoring 72h n'est pas lance via outil.
+
 
 ### 2 actions finales pour 100 % strict
 
 1. **Vercel** : ajouter `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` + cles `PAYDUNYA_*`, puis redeployer la branche `release/v1.0.0-stabilisee`.
-2. **Ops** : lancer `node scripts/monitor-stability.mjs https://cfm-asbl.vercel.app 48` puis `72` apres deploy.
+2. **Ops** : monitoring 48h deja demarre (en cours) puis lancement du monitoring 72h apres.
+
+### Plan d'exécution (checklist) — jusqu'à 100 % strict
+
+#### Action 1 — Vercel (secrets + redeploy)
+1. Dans Vercel : `cfm-asbl` → `Settings` → `Environment Variables` → `Production`.
+2. Ajouter (au minimum) :
+   - `UPSTASH_REDIS_REST_URL`
+   - `UPSTASH_REDIS_REST_TOKEN`
+   - `PAYDUNYA_MASTER_KEY`
+   - `PAYDUNYA_PRIVATE_KEY`
+   - `PAYDUNYA_TOKEN`
+   - `PAYDUNYA_WEBHOOK_SECRET`
+   - `MOBILE_MONEY_MODE=production`
+   - (optionnel) `NEXT_PUBLIC_MOBILE_MONEY_MODE=production`
+3. Redeployer la branche `release/v1.0.0-stabilisee` sur Vercel (Production).
+4. Vérifications immédiates :
+   - `GET https://cfm-asbl.vercel.app/api/health` doit retourner `redis: ok`.
+   - Le header `Content-Security-Policy` ne doit plus contenir `unsafe-eval`.
+   - Un webhook PayDunya avec signature invalide doit renvoyer `401` (avec les clés injectées).
+
+#### Action 2 — Ops (monitoring 48h / 72h)
+1. Lancer le monitoring 48h :
+   - `node scripts/monitor-stability.mjs https://cfm-asbl.vercel.app 48`
+2. Puis lancer le monitoring 72h (après finalisation/validation du contexte prod) :
+   - `node scripts/monitor-stability.mjs https://cfm-asbl.vercel.app 72`
+3. Gate final :
+   - `node scripts/validate-strict-100.mjs https://cfm-asbl.vercel.app`
+   - Objectif : `8/8` checks verts (score strict 100 %).
 

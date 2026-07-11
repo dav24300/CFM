@@ -5,6 +5,7 @@ import { jsonData, jsonError, jsonUnauthorized } from "@/lib/api-response";
 export async function POST(request: NextRequest) {
   try {
     const masterKey = process.env.PAYDUNYA_MASTER_KEY;
+    const isProd = process.env.MOBILE_MONEY_MODE === "production";
     const receivedHash =
       request.headers.get("PAYDUNYA-SIGNATURE") ||
       request.headers.get("paydunya-signature") ||
@@ -20,13 +21,21 @@ export async function POST(request: NextRequest) {
       };
     };
 
-    if (masterKey && receivedHash) {
-      const { verifyPayDunyaWebhookHash } = await import(
-        "@/infrastructure/payment/paydunya.adapter"
-      );
-      if (!verifyPayDunyaWebhookHash(receivedHash, masterKey, rawBody)) {
-        return jsonUnauthorized("Signature invalide");
+    if (masterKey) {
+      if (!receivedHash) {
+        if (isProd) {
+          return jsonUnauthorized("Signature manquante");
+        }
+      } else {
+        const { verifyPayDunyaWebhookHash } = await import(
+          "@/infrastructure/payment/paydunya.adapter"
+        );
+        if (!verifyPayDunyaWebhookHash(receivedHash, masterKey, rawBody)) {
+          return jsonUnauthorized("Signature invalide");
+        }
       }
+    } else if (isProd) {
+      return jsonError("Configuration paiement manquante", 500);
     }
 
     const { data } = body;

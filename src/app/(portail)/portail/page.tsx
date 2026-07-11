@@ -5,6 +5,7 @@ import { Shield, Check, ThumbsUp, MessageCircle, Play } from "lucide-react";
 import { getCurrentMember } from "@/infrastructure/auth/member-auth";
 import { getPublishedNews, getActiveCampaigns } from "@/lib/db";
 import { getResolvedNewsCover } from "@/lib/media.server";
+import { getCoordinationStats } from "@/infrastructure/repositories/coordination.repository";
 import { PortalHomeHeader } from "@/components/portail/PortalHomeHeader";
 import { AlertToggles } from "@/components/portail/AlertToggles";
 
@@ -19,10 +20,20 @@ export default async function PortailAccueilPage() {
   const newsCovers = await Promise.all(news.map((n) => getResolvedNewsCover(n.cover_image)));
   const campaignCovers = await Promise.all(campaigns.map((c) => getResolvedNewsCover(c.image_url)));
 
+  const coordStats = await getCoordinationStats(user?.province ?? undefined);
+
   return (
     <div className="px-6 py-7">
       <div className="mx-auto max-w-portal">
-        <PortalHomeHeader firstName={firstName} />
+        <PortalHomeHeader
+          firstName={firstName}
+          coordStats={{
+            familiesFollowed: coordStats.familiesFollowed,
+            requestsToTreat: coordStats.requestsToTreat,
+            upcomingEvents: coordStats.upcomingEvents,
+            province: coordStats.province,
+          }}
+        />
 
         <div className="grid items-start gap-[22px] lg:grid-cols-[1fr_340px]">
           {/* Colonne feed */}

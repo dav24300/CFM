@@ -45,7 +45,8 @@ node scripts/monitor-stability.mjs https://cfm-asbl.vercel.app 72
 ## 5. Validation complete
 
 ```bash
-node scripts/validate-strict-100.mjs https://cfm-asbl.vercel.app
+# Backup prod (pooler Supabase) — requis pour check #4
+CFM_BACKUP_DATABASE_URL="postgresql://..." node scripts/validate-strict-100.mjs https://cfm-asbl.vercel.app
 ```
 
 Objectif : **8/8** checks verts.

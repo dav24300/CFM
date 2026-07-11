@@ -6,14 +6,17 @@ import { Textarea } from "@/components/ui/primitives/textarea";
 import { Button } from "@/components/ui/primitives/button";
 import { Alert } from "@/components/ui/primitives/alert";
 import { FormField } from "@/components/ui/patterns/form-field";
+import { FormSuccessPanel } from "@/components/ux/FormSuccessPanel";
 import { useAsyncAction } from "@/lib/hooks/use-async-action";
+import { useTranslations } from "@/lib/i18n-client";
 
 type Props = {
   defaultType?: string;
 };
 
 export function ContactForm({ defaultType = "contact" }: Props) {
-  const [successMessage, setSuccessMessage] = useState("");
+  const { t } = useTranslations();
+  const fs = t.ux.formSuccess;
   const { isLoading, isSuccess, isError, error, run } = useAsyncAction();
   const [form, setForm] = useState({
     name: "",
@@ -34,7 +37,6 @@ export function ContactForm({ defaultType = "contact" }: Props) {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Erreur");
-        setSuccessMessage("Message envoyé avec succès.");
         setForm({ name: "", email: "", subject: "", message: "", type: defaultType });
       });
     } catch {
@@ -79,11 +81,20 @@ export function ContactForm({ defaultType = "contact" }: Props) {
         />
       </FormField>
 
+      <input type="hidden" name="type" value={form.type} />
+
       <Button type="submit" loading={isLoading} className="w-full">
         Envoyer
       </Button>
 
-      {isSuccess && successMessage && <Alert variant="success">{successMessage}</Alert>}
+      {isSuccess && (
+        <FormSuccessPanel
+          acknowledgment={fs.contactAck}
+          delay={fs.contactDelay}
+          nextLabel={fs.contactNext}
+          nextHref="/actions"
+        />
+      )}
       {isError && error && <Alert variant="error">{error}</Alert>}
     </form>
   );

@@ -24,7 +24,17 @@ describe("PayDunya webhook signature", () => {
     expect(verifyPayDunyaWebhookHash(expected, masterKey, rawBody)).toBe(true);
   });
 
-  it("accepts legacy master key match", () => {
+  it("accepts legacy master key match in demo mode", () => {
+    const prev = process.env.MOBILE_MONEY_MODE;
+    process.env.MOBILE_MONEY_MODE = "demo";
     expect(verifyPayDunyaWebhookHash(masterKey, masterKey)).toBe(true);
+    process.env.MOBILE_MONEY_MODE = prev;
+  });
+
+  it("rejects legacy master key match in production mode", () => {
+    const prev = process.env.MOBILE_MONEY_MODE;
+    process.env.MOBILE_MONEY_MODE = "production";
+    expect(verifyPayDunyaWebhookHash(masterKey, masterKey, rawBody)).toBe(false);
+    process.env.MOBILE_MONEY_MODE = prev;
   });
 });

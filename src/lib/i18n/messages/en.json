@@ -14,7 +14,7 @@
     "live": "Live"
   },
   "member": {
-    "login": "Login",
+    "login": "Sign in",
     "register": "Register",
     "dashboard": "My account",
     "logout": "Logout",
@@ -34,7 +34,7 @@
     "signTitle": "Sign",
     "name": "Full name",
     "email": "Email",
-    "submit": "Sign petition",
+    "submit": "Sign a petition",
     "success": "Thank you! Your signature has been recorded."
   },
   "donate": {
@@ -51,7 +51,8 @@
   "pages": {
     "home": {
       "heroCtaHelp": "Request help",
-      "heroCtaEngage": "Get involved",
+      "heroCtaLive": "Join live",
+      "heroCtaEngage": "Join us",
       "heroCtaAbout": "Our story",
       "heroQuote": "Behind every soldier stands a family whose only inheritance is the blood shed under the flag — the sign of the greatest love, the supreme sacrifice.",
       "missionTitle": "Our mission",

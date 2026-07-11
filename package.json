@@ -6,8 +6,6 @@
     "dev": "next dev",
     "build": "next build",
     "postbuild": "node scripts/postbuild-standalone.mjs",
-    "build:netlify": "node scripts/prepare-netlify.mjs && next build",
-    "predeploy:netlify": "node scripts/predeploy-netlify.mjs",
     "start": "node scripts/start-standalone.mjs",
     "import-media": "node scripts/import-cfm-images.mjs",
     "lint": "next lint",

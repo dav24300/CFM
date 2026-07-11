@@ -10,9 +10,33 @@ const CTA: Record<string, { href: string; label: string }> = {
   coordinateur: { href: "/portail/coordination", label: "Diffuser une annonce" },
 };
 
-export function PortalHomeHeader({ firstName }: { firstName: string }) {
+type CoordStats = {
+  familiesFollowed: number;
+  requestsToTreat: number;
+  upcomingEvents: number;
+  province: string | null;
+};
+
+export function PortalHomeHeader({
+  firstName,
+  coordStats,
+}: {
+  firstName: string;
+  coordStats?: CoordStats;
+}) {
   const role = usePortalRole();
   const cta = CTA[role];
+
+  const provinceLabel = coordStats?.province ? ` · ${coordStats.province}` : "";
+  const coordTiles = [
+    {
+      v: String(coordStats?.familiesFollowed ?? 0),
+      l: `Familles suivies${provinceLabel}`,
+      warn: false,
+    },
+    { v: String(coordStats?.requestsToTreat ?? 0), l: "Demandes à traiter", warn: (coordStats?.requestsToTreat ?? 0) > 0 },
+    { v: String(coordStats?.upcomingEvents ?? 0), l: "Événements à venir", warn: false },
+  ];
 
   return (
     <>
@@ -51,11 +75,7 @@ export function PortalHomeHeader({ firstName }: { firstName: string }) {
             </Link>
           </div>
           <div className="mb-4 grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-3.5">
-            {[
-              { v: "128", l: "Familles suivies · Nord-Kivu", warn: false },
-              { v: "7", l: "Demandes à traiter", warn: true },
-              { v: "3", l: "Événements à venir", warn: false },
-            ].map((k) => (
+            {coordTiles.map((k) => (
               <div key={k.l} className="border border-site-hairline bg-white p-[18px]">
                 <div
                   className={`font-serif text-[26px] font-medium leading-none ${

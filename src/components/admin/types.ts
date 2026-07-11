@@ -29,6 +29,8 @@ export type AdminStats = {
   pending_users?: number;
   donations?: number;
   petitions?: number;
+  petition_signatures?: number;
+  new_petition_signatures?: number;
   family_links?: number;
   pending_family_links?: number;
   live_events?: number;
@@ -50,4 +52,5 @@ export type AdminData = {
   family_links?: Record<string, unknown>[];
   donations?: Record<string, unknown>[];
   petitions?: Record<string, unknown>[];
+  petition_signatures?: Record<string, unknown>[];
 };

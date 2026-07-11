@@ -87,8 +87,11 @@ describe("postgresStoreAdapter", () => {
       });
     });
 
-    expect(mockSave).toHaveBeenCalledTimes(1);
-    expect(mockSave.mock.calls[0][0].news).toHaveLength(1);
+    // Le premier read() peut déclencher un save de seeding (migrateV4 sur collections
+    // portail vides) ; la sauvegarde du write() est donc le DERNIER appel.
+    expect(mockSave).toHaveBeenCalled();
+    const lastSave = mockSave.mock.calls.at(-1)![0] as Store;
+    expect(lastSave.news).toHaveLength(1);
     expect(mockSetCache).toHaveBeenCalled();
   });
 

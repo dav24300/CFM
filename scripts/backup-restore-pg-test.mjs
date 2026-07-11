@@ -35,7 +35,20 @@ const dumpFile = path.join(backupDir, `cfm-db-${stamp}.json`);
 
 console.log("\n📦 Backup PostgreSQL (Node)…\n");
 
-const pool = new pg.Pool({ connectionString: DATABASE_URL });
+const pool = new pg.Pool({
+  connectionString: DATABASE_URL,
+  connectionTimeoutMillis: 5000,
+});
+
+function formatError(e) {
+  if (!(e instanceof Error)) return String(e);
+  const parts = [
+    e.message,
+    "code" in e ? String(e.code) : "",
+    ...(Array.isArray(e.errors) ? e.errors.map((err) => err?.message).filter(Boolean) : []),
+  ].filter(Boolean);
+  return parts.join(" | ") || "erreur inconnue";
+}
 
 try {
   const tablesRes = await pool.query(`
@@ -81,7 +94,7 @@ try {
 
   console.log("\n--- Backup/restore validation: OK (export Node) ---\n");
 } catch (e) {
-  console.error("❌", e.message);
+  console.error(`❌ Backup echoue: ${formatError(e)}`);
   process.exit(1);
 } finally {
   await pool.end();
