@@ -9,7 +9,8 @@ const SESSION_NAMESPACE = "member";
 
 export async function createMemberSession(userId: number): Promise<void> {
   const idStr = userId.toString();
-  const token = `${idStr}.${signSessionPayload(idStr, SESSION_NAMESPACE)}`;
+  const issuedAt = Math.floor(Date.now() / 1000);
+  const token = `${idStr}.${issuedAt}.${signSessionPayload(`${idStr}:${issuedAt}`, SESSION_NAMESPACE)}`;
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
@@ -30,9 +31,14 @@ export async function getMemberSessionUserId(): Promise<number | null> {
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
 
-  const [idStr, sig] = token.split(".");
-  if (!idStr || !sig) return null;
-  if (!verifySessionSignature(idStr, sig, SESSION_NAMESPACE)) return null;
+  const [idStr, issuedAtStr, sig] = token.split(".");
+  if (!idStr || !issuedAtStr || !sig) return null;
+  if (!verifySessionSignature(`${idStr}:${issuedAtStr}`, sig, SESSION_NAMESPACE)) return null;
+
+  const issuedAt = parseInt(issuedAtStr, 10);
+  if (Number.isNaN(issuedAt)) return null;
+  // Expiration serveur (7 jours) : rend le maxAge réellement contraignant.
+  if (Math.floor(Date.now() / 1000) - issuedAt > SESSION_MAX_AGE) return null;
 
   const id = parseInt(idStr, 10);
   return Number.isNaN(id) ? null : id;

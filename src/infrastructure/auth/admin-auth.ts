@@ -10,7 +10,9 @@ const SESSION_PAYLOAD = "authenticated";
 export const ADMIN_SESSION_COOKIE_NAME = COOKIE_NAME;
 
 export function createSessionToken(): string {
-  return signSessionPayload(SESSION_PAYLOAD);
+  // Horodatage d'émission signé : rend le jeton expirable côté serveur.
+  const issuedAt = Math.floor(Date.now() / 1000);
+  return `${issuedAt}.${signSessionPayload(`${SESSION_PAYLOAD}:${issuedAt}`)}`;
 }
 
 export function getAdminSessionCookieOptions() {
@@ -38,7 +40,14 @@ export async function isAuthenticated(): Promise<boolean> {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return false;
-  return verifySessionSignature(SESSION_PAYLOAD, token);
+  const [issuedAtStr, sig] = token.split(".");
+  if (!issuedAtStr || !sig) return false;
+  if (!verifySessionSignature(`${SESSION_PAYLOAD}:${issuedAtStr}`, sig)) return false;
+  const issuedAt = parseInt(issuedAtStr, 10);
+  if (Number.isNaN(issuedAt)) return false;
+  // Expiration serveur : un cookie exfiltré ne reste pas valable indéfiniment.
+  if (Math.floor(Date.now() / 1000) - issuedAt > SESSION_MAX_AGE) return false;
+  return true;
 }
 
 /**

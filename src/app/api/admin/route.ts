@@ -26,9 +26,19 @@ import { logAdminAction } from "@/lib/admin-audit";
 import {
   jsonData,
   jsonError,
+  jsonForbidden,
   jsonSuccess,
   jsonUnauthorized,
 } from "@/lib/api-response";
+
+// Actions à fort impact réservées à l'admin fondateur (jamais au rôle volunteer).
+const ADMIN_ONLY_ACTIONS = new Set([
+  "activate_user",
+  "suspend_user",
+  "delete",
+  "approve_family_link",
+  "reject_family_link",
+]);
 
 export async function GET() {
   if (!(await getAdminAccess())) {
@@ -54,6 +64,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { table, action, data, id } = body;
     const auditTarget = table || "unknown";
+
+    if (ADMIN_ONLY_ACTIONS.has(action) && access !== "admin") {
+      await logAdminAction({
+        actorType: access,
+        endpoint: "/api/admin",
+        action: `${action}:forbidden`,
+        target: String(id ?? auditTarget),
+        status: "denied",
+        ip: request.headers.get("x-forwarded-for") || null,
+      });
+      return jsonForbidden();
+    }
 
     if (action === "create" && table) {
       const contentTables = [

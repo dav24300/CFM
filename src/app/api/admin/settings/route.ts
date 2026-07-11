@@ -2,19 +2,19 @@ import { NextRequest } from "next/server";
 import { getStoreAsync } from "@/lib/store";
 import { updateStoreAsync } from "@/infrastructure/persistence/store-access";
 import { invalidateSettingsPatch } from "@/infrastructure/persistence/admin-mutation";
-import { requireAdminAccess } from "@/lib/admin-rest";
+import { requireAdminRole } from "@/lib/admin-rest";
 import { jsonData, jsonError, jsonSuccess } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
 
 export async function GET() {
-  const auth = await requireAdminAccess();
+  const auth = await requireAdminRole();
   if (!auth.ok) return auth.response;
   const store = await getStoreAsync();
   return jsonData({ settings: store.site_settings });
 }
 
 export async function PATCH(request: NextRequest) {
-  const auth = await requireAdminAccess();
+  const auth = await requireAdminRole();
   if (!auth.ok) return auth.response;
 
   const body = await request.json();

@@ -7,6 +7,7 @@ import {
 } from "@/infrastructure/persistence/store-access";
 import { domainError } from "@/domain/errors/domain-error";
 import type { PasswordResetToken } from "@/domain/entities/v2";
+import { csvCell } from "@/lib/csv";
 
 const TOKEN_BYTES = 32;
 const EXPIRY_HOURS = 1;
@@ -70,12 +71,7 @@ export function petitionSignaturesToCsv(
 ): string {
   const header = "Nom,Email,Date de signature\n";
   const rows = signatures
-    .map((s) => {
-      const name = `"${s.name.replace(/"/g, '""')}"`;
-      const email = s.email;
-      const date = s.signed_at;
-      return `${name},${email},${date}`;
-    })
+    .map((s) => [csvCell(s.name), csvCell(s.email), csvCell(s.signed_at)].join(","))
     .join("\n");
   return `\uFEFF${header}${rows}`;
 }

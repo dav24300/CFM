@@ -36,7 +36,15 @@ export async function checkRateLimitDistributed(
 }
 
 export function getClientIp(request: Request): string {
+  // x-real-ip est fixé par Vercel (non falsifiable par le client) : source primaire.
+  const real = request.headers.get("x-real-ip");
+  if (real) return real.trim();
+  // Repli x-forwarded-for : prendre le DERNIER hop (ajouté par la plateforme),
+  // jamais le premier qui est contrôlé par le client (contournement du rate-limit).
   const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0]?.trim() || "unknown";
-  return request.headers.get("x-real-ip") || "unknown";
+  if (forwarded) {
+    const parts = forwarded.split(",").map((s) => s.trim()).filter(Boolean);
+    return parts[parts.length - 1] || "unknown";
+  }
+  return "unknown";
 }

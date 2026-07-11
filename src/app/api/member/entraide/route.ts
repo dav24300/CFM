@@ -5,10 +5,17 @@ import {
   claimHelpRequest,
 } from "@/infrastructure/repositories/entraide.repository";
 
+function canHandleMissions(role: string | null | undefined): boolean {
+  return role === "volunteer" || role === "coordinator";
+}
+
 export async function GET() {
   const member = await getCurrentMember();
   if (!member) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  if (!canHandleMissions(member.role)) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
   const missions = await getOpenHelpRequests();
   return NextResponse.json({ missions });
@@ -18,6 +25,9 @@ export async function POST(request: NextRequest) {
   const member = await getCurrentMember();
   if (!member) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  if (!canHandleMissions(member.role)) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
   let body: unknown;
