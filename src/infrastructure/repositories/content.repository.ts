@@ -17,6 +17,9 @@ import type {
 } from "@/domain/entities/content";
 import { decryptHelpRequest } from "@/infrastructure/encryption/aes.adapter";
 import { compareIsoDesc, toDateString } from "@/infrastructure/persistence/normalize-pg-row";
+import type { Store } from "@/domain/entities/store";
+import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
+import * as sqlNewsletter from "@/infrastructure/repositories/sql/newsletter.sql";
 import { getPetitionAdminCounters } from "@/infrastructure/repositories/petitions.repository";
 import { getUserAdminCounters } from "@/infrastructure/repositories/users.repository";
 import { getFamilyLinkCounters } from "@/infrastructure/repositories/family-links.repository";
@@ -79,6 +82,7 @@ export const getActions = getActionsAsync;
 export const getPublishedPressReleases = getPublishedPressReleasesAsync;
 
 export async function addNewsletter(email: string): Promise<void> {
+  if (isPgMode()) return sqlNewsletter.addSubscriber(email);
   await updateStoreAsync((store) => {
     const exists = store.newsletter.some(
       (n) => n.email.toLowerCase() === email.toLowerCase()
@@ -93,6 +97,7 @@ export async function addNewsletter(email: string): Promise<void> {
 }
 
 export async function deleteNewsletterSubscriber(id: number): Promise<boolean> {
+  if (isPgMode()) return sqlNewsletter.deleteSubscriber(id);
   let found = false;
   await updateStoreAsync((store) => {
     const before = store.newsletter.length;
@@ -100,6 +105,19 @@ export async function deleteNewsletterSubscriber(id: number): Promise<boolean> {
     found = store.newsletter.length < before;
   });
   return found;
+}
+
+/** Abonnés newsletter, plus récents d'abord (id DESC). */
+export async function listNewsletterSubscribers(): Promise<Store["newsletter"]> {
+  if (isPgMode()) return sqlNewsletter.listSubscribersDesc();
+  const store = await getStoreAsync();
+  return [...store.newsletter].reverse();
+}
+
+async function countNewsletterSubscribers(): Promise<number> {
+  if (isPgMode()) return sqlNewsletter.countSubscribers();
+  const store = await getStoreAsync();
+  return store.newsletter.length;
 }
 
 export async function addMembership(data: {
@@ -207,7 +225,7 @@ export async function getAdminStats() {
     campaigns: store.campaigns.length,
     memberships: store.memberships.length,
     help_requests: store.help_requests.length,
-    newsletter: store.newsletter.length,
+    newsletter: await countNewsletterSubscribers(),
     contacts: store.contact_messages.length,
     pending_memberships: store.memberships.filter((m) => m.status === "pending").length,
     new_help: store.help_requests.filter((h) => h.status === "new").length,
@@ -229,7 +247,7 @@ export async function getAdminData() {
   return {
     memberships: [...store.memberships].reverse(),
     help_requests: [...store.help_requests].reverse().map((h) => decryptHelpRequest(h)),
-    newsletter: [...store.newsletter].reverse(),
+    newsletter: await listNewsletterSubscribers(),
     contacts: [...store.contact_messages].reverse(),
     news: [...store.news].reverse(),
     studies: [...store.studies].reverse(),
