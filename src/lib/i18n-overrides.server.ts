@@ -1,12 +1,11 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
-import { getStoreAsync } from "@/infrastructure/persistence/store-access";
+import { getSiteSetting } from "@/infrastructure/repositories/settings.repository";
 import type { Locale } from "@/lib/i18n";
 import { CACHE_TAGS } from "@/infrastructure/cache/cache-tags";
 
 async function loadI18nOverrides(): Promise<Record<string, Record<string, string>>> {
-  const store = await getStoreAsync();
-  const raw = store.site_settings.i18n_overrides;
+  const raw = await getSiteSetting("i18n_overrides");
   if (!raw) return {};
   try {
     return JSON.parse(raw) as Record<string, Record<string, string>>;

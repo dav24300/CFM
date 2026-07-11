@@ -81,6 +81,40 @@ export async function getPublishedPressReleasesAsync(): Promise<PressRelease[]> 
     .sort((a, b) => compareIsoDesc(a.created_at, b.created_at));
 }
 
+// ── Listes complètes (brouillons inclus), ordre id ASC ─────────────────────
+// Utilisées par media.repository (détection d'usages / scan des visuels
+// manquants) : parité avec l'itération directe du Store (ordre d'insertion).
+
+export async function listAllNews(): Promise<News[]> {
+  if (isPgMode()) return (await sqlContent.listNewsDesc()).reverse();
+  const store = await getStoreAsync();
+  return [...store.news];
+}
+
+export async function listAllStudies(): Promise<Study[]> {
+  if (isPgMode()) return (await sqlContent.listStudiesDesc()).reverse();
+  const store = await getStoreAsync();
+  return [...store.studies];
+}
+
+export async function listAllCampaigns(): Promise<Campaign[]> {
+  if (isPgMode()) return (await sqlContent.listCampaignsDesc()).reverse();
+  const store = await getStoreAsync();
+  return [...store.campaigns];
+}
+
+export async function listAllTestimonials(): Promise<Testimonial[]> {
+  if (isPgMode()) return (await sqlContent.listTestimonialsDesc()).reverse();
+  const store = await getStoreAsync();
+  return [...store.testimonials];
+}
+
+export async function listAllPressReleases(): Promise<PressRelease[]> {
+  if (isPgMode()) return (await sqlContent.listPressReleasesDesc()).reverse();
+  const store = await getStoreAsync();
+  return [...store.press_releases];
+}
+
 /** @deprecated Utiliser getPublishedNewsAsync */
 export const getPublishedNews = getPublishedNewsAsync;
 export const getPublishedStudies = getPublishedStudiesAsync;

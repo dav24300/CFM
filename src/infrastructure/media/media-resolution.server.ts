@@ -1,5 +1,5 @@
 import "server-only";
-import { getStoreAsync } from "@/infrastructure/persistence/store-access";
+import { getSiteSettings } from "@/infrastructure/repositories/settings.repository";
 import { MEDIA, type SiteMediaSettings } from "@/lib/media";
 import { pngToSvgFallback } from "@/infrastructure/media/media-resolver";
 import {
@@ -16,8 +16,7 @@ function pick(publicPath: string, svgFallback: string): string {
 }
 
 async function getSettings(): Promise<Record<string, string>> {
-  const store = await getStoreAsync();
-  return store.site_settings;
+  return getSiteSettings();
 }
 
 export async function getSiteMedia(): Promise<

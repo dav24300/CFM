@@ -1,6 +1,9 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
-import { getStoreAsync } from "@/infrastructure/persistence/store-access";
+import {
+  getSiteSetting,
+  getSiteSettings,
+} from "@/infrastructure/repositories/settings.repository";
 import { SITE } from "@/lib/constants";
 import { CACHE_TAGS } from "@/infrastructure/cache/cache-tags";
 import type {
@@ -14,8 +17,7 @@ import type {
 const REVALIDATE_SECONDS = Number(process.env.CFM_CONTENT_CACHE_TTL ?? 300);
 
 async function loadSiteConfig(): Promise<SiteConfig> {
-  const store = await getStoreAsync();
-  const s = store.site_settings;
+  const s = await getSiteSettings();
   return {
     name: s.site_name || SITE.name,
     sigle: s.site_sigle || SITE.sigle,
@@ -30,8 +32,7 @@ async function loadSiteConfig(): Promise<SiteConfig> {
 }
 
 async function loadSocialLinks(): Promise<SocialLinks> {
-  const store = await getStoreAsync();
-  const raw = store.site_settings.social_links;
+  const raw = await getSiteSetting("social_links");
   if (!raw) {
     return {
       facebook: "https://facebook.com/cfmasbl",
@@ -48,8 +49,7 @@ async function loadSocialLinks(): Promise<SocialLinks> {
 }
 
 async function loadContentBlocks(): Promise<ContentBlocks> {
-  const store = await getStoreAsync();
-  const raw = store.site_settings.content_blocks;
+  const raw = await getSiteSetting("content_blocks");
   if (!raw) return {};
   try {
     return JSON.parse(raw) as ContentBlocks;

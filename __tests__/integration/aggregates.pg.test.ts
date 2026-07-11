@@ -1262,4 +1262,97 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
       expect(remaining.map((p) => p.id)).toEqual([p1.id]);
     });
   });
+
+  describe("site_settings (C12b)", () => {
+    let settings: typeof import("@/infrastructure/repositories/settings.repository");
+    let media: typeof import("@/infrastructure/media/media.repository");
+
+    beforeAll(async () => {
+      settings = await import("@/infrastructure/repositories/settings.repository");
+      media = await import("@/infrastructure/media/media.repository");
+    });
+
+    it("patch : upsert de nouvelles clés, merge sans suppression, patch vide no-op", async () => {
+      await settings.patchSiteSettings({ site_name: "CFM Intégration", site_sigle: "CFM" });
+      await settings.patchSiteSettings({ site_name: "CFM Intégration v2" });
+      // La clé non patchée n'est jamais supprimée (merge, pas de prune).
+      expect(await settings.getSiteSetting("site_name")).toBe("CFM Intégration v2");
+      expect(await settings.getSiteSetting("site_sigle")).toBe("CFM");
+      expect(await settings.getSiteSetting("clef_inconnue")).toBeUndefined();
+
+      await settings.patchSiteSettings({}); // no-op silencieux
+      const all = await settings.getSiteSettings();
+      expect(all.site_name).toBe("CFM Intégration v2");
+      expect(all.site_sigle).toBe("CFM");
+    });
+
+    it("mutateSiteSetting : clé absente → mutateFn(undefined), puis RMW sur la valeur courante", async () => {
+      let seen: string | undefined = "sentinelle";
+      await settings.mutateSiteSetting("c12b_rmw", (cur) => {
+        seen = cur;
+        return "v1";
+      });
+      expect(seen).toBeUndefined(); // parité Store : clé inexistante
+      expect(await settings.getSiteSetting("c12b_rmw")).toBe("v1");
+
+      await settings.mutateSiteSetting("c12b_rmw", (cur) => `${cur}+v2`);
+      expect(await settings.getSiteSetting("c12b_rmw")).toBe("v1+v2");
+    });
+
+    it("catalogue média : 2 mutations parallèles sur clé absente → les deux appliquées", async () => {
+      expect(await settings.getSiteSetting("media_catalog")).toBeUndefined();
+      await Promise.all([
+        media.addToCatalog({ path: "/media/uploads/c12b-a.webp", category: "upload" }),
+        media.addToCatalog({ path: "/media/uploads/c12b-b.webp", category: "upload" }),
+      ]);
+      const catalog = JSON.parse((await settings.getSiteSetting("media_catalog"))!) as {
+        path: string;
+        uploaded_at?: string;
+      }[];
+      expect(catalog.map((c) => c.path).sort()).toEqual([
+        "/media/uploads/c12b-a.webp",
+        "/media/uploads/c12b-b.webp",
+      ]);
+      expect(catalog.every((c) => Boolean(c.uploaded_at))).toBe(true);
+    });
+
+    it("catalogue média : métadonnées concurrentes + retrait, aucune perte", async () => {
+      await Promise.all([
+        media.updateCatalogMeta("/media/uploads/c12b-a.webp", { alt: "Visuel A" }),
+        media.updateCatalogMeta("/media/uploads/c12b-b.webp", { alt: "Visuel B" }),
+      ]);
+      const catalog = JSON.parse((await settings.getSiteSetting("media_catalog"))!) as {
+        path: string;
+        alt?: string;
+      }[];
+      expect(catalog.find((c) => c.path.endsWith("c12b-a.webp"))?.alt).toBe("Visuel A");
+      expect(catalog.find((c) => c.path.endsWith("c12b-b.webp"))?.alt).toBe("Visuel B");
+
+      await media.removeFromCatalog("/media/uploads/c12b-b.webp");
+      const after = JSON.parse((await settings.getSiteSetting("media_catalog"))!) as {
+        path: string;
+      }[];
+      expect(after.map((c) => c.path)).toEqual(["/media/uploads/c12b-a.webp"]);
+    });
+
+    it("findMediaUsages : croise settings + contenu + partenaires sans lire le Store", async () => {
+      const target = "/media/uploads/c12b-usage.webp";
+      await media.setSiteSetting("hero_image", target);
+      // Une actu du bloc C12a reçoit ce visuel en couverture.
+      const news = await content.listAllNews();
+      expect(news.length).toBeGreaterThan(0);
+      expect(
+        await content.adminUpdateContent("news", news[0].id, { cover_image: target })
+      ).toBe(true);
+
+      const usages = await media.findMediaUsages(target);
+      expect(usages).toContain("site_settings.hero_image");
+      expect(usages.some((u) => u.startsWith(`news:${news[0].id} `))).toBe(true);
+
+      // scanMissingMedia parcourt les mêmes agrégats (partners de C12a sans logo exclu ici).
+      const missing = await media.scanMissingMedia();
+      expect(Array.isArray(missing)).toBe(true);
+      expect(missing.every((m) => m.id > 0 && typeof m.field === "string")).toBe(true);
+    });
+  });
 });
