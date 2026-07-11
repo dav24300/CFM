@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/primitives/input";
+import { Textarea } from "@/components/ui/primitives/textarea";
+import { Button } from "@/components/ui/primitives/button";
 
 export function MessageComposer() {
   const router = useRouter();
@@ -38,34 +41,30 @@ export function MessageComposer() {
       <label htmlFor="msg-subject" className="sr-only">
         Sujet
       </label>
-      <input
+      <Input
         id="msg-subject"
         type="text"
         value={subject}
         onChange={(e) => setSubject(e.target.value)}
         placeholder="Sujet (facultatif)"
-        className="mb-2 w-full border border-site-hairline bg-white px-3.5 py-2.5 text-sm text-site-ink outline-none placeholder:text-site-muted-2 focus:border-site-primary"
+        className="mb-2 px-3.5 py-2.5 text-sm"
       />
       <label htmlFor="msg-body" className="sr-only">
         Votre message
       </label>
-      <textarea
+      <Textarea
         id="msg-body"
         rows={3}
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder="Votre message…"
-        className="w-full resize-y border border-site-hairline bg-white px-3.5 py-2.5 text-sm leading-[1.5] text-site-ink outline-none placeholder:text-site-muted-2 focus:border-site-primary"
+        className="resize-y px-3.5 py-2.5 text-sm leading-[1.5]"
       />
-      {error && <p className="mt-2 text-xs text-[#c0362c]">{error}</p>}
+      {error && <p className="mt-2 text-xs text-site-danger">{error}</p>}
       <div className="mt-3 flex justify-end">
-        <button
-          type="submit"
-          disabled={isSending || !body.trim()}
-          className="bg-site-primary px-5 py-2.5 text-[13px] font-semibold text-white transition hover:bg-site-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        <Button type="submit" size="sm" disabled={isSending || !body.trim()}>
           {isSending ? "Envoi…" : "Envoyer"}
-        </button>
+        </Button>
       </div>
     </form>
   );

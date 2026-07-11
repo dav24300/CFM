@@ -55,7 +55,7 @@ export function ClaimButton({ missionId }: { missionId: number }) {
         </svg>
         {loading ? "Envoi…" : "Je participe"}
       </button>
-      {error && <p className="text-xs text-[#c0362c]">{error}</p>}
+      {error && <p className="text-xs text-site-danger">{error}</p>}
     </div>
   );
 }

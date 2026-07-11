@@ -29,7 +29,7 @@ function Toggle({ label }: { label: string }) {
 
 export function AlertToggles() {
   return (
-    <div className="bg-[#12325f] p-5 text-white">
+    <div className="bg-site-navy p-5 text-white">
       <h3 className="mb-1.5 text-[13px] font-semibold uppercase tracking-[0.05em] text-site-light">
         Alertes
       </h3>

@@ -107,7 +107,7 @@ export function HomeHero({
   return (
     <section
       ref={scopeRef}
-      className="relative flex min-h-[min(760px,90vh)] items-end overflow-hidden bg-[#0f1622]"
+      className="relative flex min-h-[min(760px,90vh)] items-end overflow-hidden bg-site-hero-dark"
     >
       {/* Couche 1 — média plein cadre + ken-burns */}
       <div ref={baseRef} className="absolute inset-[-34px]">
@@ -178,7 +178,7 @@ export function HomeHero({
             aria-hidden
           />
           <p
-            className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-[#9fbdf0]"
+            className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-site-hero-eyebrow"
             style={revealStyle(0.2)}
           >
             {kicker}

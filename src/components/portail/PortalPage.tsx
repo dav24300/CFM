@@ -33,13 +33,13 @@ export function PortalPage({
 
 const PILL: Record<string, string> = {
   new: "bg-site-pale text-site-primary",
-  pending: "bg-[#fef3e2] text-[#b7791f]",
-  in_progress: "bg-[#e7effa] text-[#2563aa]",
-  treated: "bg-[#e3f3f0] text-site-success",
-  completed: "bg-[#e3f3f0] text-site-success",
-  approved: "bg-[#e3f3f0] text-site-success",
-  failed: "bg-[#fbeae8] text-[#c0362c]",
-  rejected: "bg-[#fbeae8] text-[#c0362c]",
+  pending: "bg-site-warn-bg text-site-warn-fg",
+  in_progress: "bg-site-info-bg text-site-info-fg",
+  treated: "bg-site-ok-bg text-site-success",
+  completed: "bg-site-ok-bg text-site-success",
+  approved: "bg-site-ok-bg text-site-success",
+  failed: "bg-site-danger-bg text-site-danger",
+  rejected: "bg-site-danger-bg text-site-danger",
 };
 
 const STATUS_LABEL: Record<string, string> = {
