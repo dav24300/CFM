@@ -54,12 +54,12 @@ export function MissingMediaSection() {
   return (
     <div className="space-y-3">
       <p className="text-sm text-admin-muted">{items.length} élément(s) sans visuel</p>
-      <ul className="divide-y rounded-xl border bg-white">
+      <ul className="divide-y rounded-xl border bg-admin-surface">
         {items.map((item) => (
           <li key={`${item.type}-${item.id}`} className="flex items-center justify-between gap-4 p-4 text-sm">
             <div>
               <strong>{item.title}</strong>
-              <span className="ml-2 text-xs text-gray-500">
+              <span className="ml-2 text-xs text-admin-muted">
                 {item.type} · {item.field}
               </span>
             </div>

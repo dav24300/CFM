@@ -111,7 +111,7 @@ export function MediaLibrarySection() {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {filtered.map((item) => (
-          <div key={item.path} className="group rounded-lg border bg-white p-2 shadow-sm">
+          <div key={item.path} className="group rounded-lg border bg-admin-surface p-2 shadow-sm">
             <div className="relative aspect-video overflow-hidden rounded bg-admin-bg">
               {item.path.endsWith(".pdf") ? (
                 <div className="flex h-full items-center justify-center text-xs text-admin-ink">PDF</div>
@@ -121,7 +121,7 @@ export function MediaLibrarySection() {
                 <Image src={item.path} alt={item.alt || ""} fill className="object-cover" sizes="120px" />
               )}
             </div>
-            <p className="mt-1 truncate text-xs text-gray-600" title={item.path}>
+            <p className="mt-1 truncate text-xs text-admin-muted" title={item.path}>
               {item.path.split("/").pop()}
             </p>
             <span className="text-[10px] text-amber-700">Bibliothèque</span>

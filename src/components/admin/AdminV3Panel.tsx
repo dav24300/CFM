@@ -288,7 +288,7 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
           {events.map((ev) => {
             const pendingN = pendingCounts.find((p) => p.eventId === ev.id)?.count || 0;
             return (
-            <div key={ev.id} className="rounded-lg bg-white p-4 shadow text-sm">
+            <div key={ev.id} className="rounded-lg bg-admin-surface p-4 shadow text-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <strong>{ev.title}</strong>
@@ -340,7 +340,7 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
                 </div>
               </div>
               {ev.thumbnail && (
-                <p className="mt-1 truncate text-xs text-gray-500">Miniature : {ev.thumbnail}</p>
+                <p className="mt-1 truncate text-xs text-admin-muted">Miniature : {ev.thumbnail}</p>
               )}
               <form onSubmit={(e) => createPoll(e, ev.id)} className="mt-3 flex flex-wrap gap-2 border-t pt-3">
                 <Input name="question" placeholder="Sondage…" className="flex-1 min-w-[120px] text-xs" />
@@ -407,12 +407,12 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
               <div
                 key={m.id}
                 className={`flex justify-between gap-2 rounded-lg p-3 text-sm ${
-                  m.status === "pending" ? "bg-amber-50" : m.status === "rejected" ? "bg-red-50" : "bg-gray-50"
+                  m.status === "pending" ? "bg-amber-50" : m.status === "rejected" ? "bg-red-50" : "bg-admin-bg"
                 }`}
               >
                 <span>
                   <strong>{m.author_name}</strong>
-                  <span className="ml-2 text-xs text-gray-500">{m.status}</span>
+                  <span className="ml-2 text-xs text-admin-muted">{m.status}</span>
                   <br />
                   {m.content}
                 </span>
@@ -433,7 +433,7 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
           <h2 className="text-lg font-bold">Sondages ({polls.length})</h2>
           <div className="mt-3 space-y-3">
             {polls.map((poll) => (
-              <div key={poll.id} className="rounded-lg bg-white p-4 shadow text-sm">
+              <div key={poll.id} className="rounded-lg bg-admin-surface p-4 shadow text-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <strong>{poll.question}</strong>
                   <span className="text-xs text-admin-muted">{poll.active ? "Ouvert" : "Fermé"}</span>
@@ -454,7 +454,7 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
                   <a
                     href={`/api/admin/live/polls/${poll.id}?format=csv`}
                     download
-                    className="rounded border px-2 py-1 text-xs hover:bg-gray-50"
+                    className="rounded border px-2 py-1 text-xs hover:bg-admin-bg"
                   >
                     Export CSV
                   </a>
@@ -472,14 +472,14 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
             <button
               key={tpl.label}
               type="button"
-              className="rounded border px-2 py-1 text-xs hover:bg-gray-50"
+              className="rounded border px-2 py-1 text-xs hover:bg-admin-bg"
               onClick={() => setPushForm({ topic: tpl.topic, title: tpl.title, body: tpl.body })}
             >
               {tpl.label}
             </button>
           ))}
         </div>
-        <form onSubmit={sendPush} className="mt-3 space-y-2 rounded-xl bg-white p-4 shadow max-w-lg">
+        <form onSubmit={sendPush} className="mt-3 space-y-2 rounded-xl bg-admin-surface p-4 shadow max-w-lg">
           <NativeSelect value={pushForm.topic} onChange={(e) => setPushForm({ ...pushForm, topic: e.target.value })} className="text-sm">
             <option value="lives">Lives</option>
             <option value="campaigns">Campagnes</option>

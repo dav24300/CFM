@@ -34,6 +34,7 @@
 
   /* ---- Admin — canaux RGB (espaces) pour opacités Tailwind + thème sombre ---- */
   --admin-bg: 246 247 249;
+  --admin-surface: 255 255 255;
   --admin-sidebar: 22 24 29;
   --admin-sidebar-active: 34 37 44;
   --admin-ink: 28 28 26;
@@ -99,6 +100,7 @@
 /* Thème sombre — ADMIN uniquement (classe .dark posée sur le wrapper .theme-admin) */
 .theme-admin.dark {
   --admin-bg: 20 22 27;
+  --admin-surface: 27 30 36;
   --admin-sidebar: 12 14 18;
   --admin-sidebar-active: 30 33 40;
   --admin-ink: 231 233 238;

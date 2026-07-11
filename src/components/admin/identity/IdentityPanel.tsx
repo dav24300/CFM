@@ -86,7 +86,7 @@ export function IdentityPanel() {
         <PreviewButton href="/contact" tags={[CACHE_TAGS.siteConfig]} />
       </div>
 
-      <form onSubmit={handleSubmit} className="grid gap-4 rounded-xl border bg-white p-4 shadow-sm md:grid-cols-2">
+      <form onSubmit={handleSubmit} className="grid gap-4 rounded-xl border bg-admin-surface p-4 shadow-sm md:grid-cols-2">
         <Input placeholder="Nom complet" value={form.site_name} onChange={(e) => setField("site_name", e.target.value)} />
         <Input placeholder="Sigle (CFM)" value={form.site_sigle} onChange={(e) => setField("site_sigle", e.target.value)} />
         <Input placeholder="Tagline" className="md:col-span-2" value={form.site_tagline} onChange={(e) => setField("site_tagline", e.target.value)} />

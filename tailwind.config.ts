@@ -46,6 +46,7 @@ const config: Config = {
         // ---- Admin (console de travail, teal) — canaux RGB pour thème sombre + opacités ----
         admin: {
           bg: "rgb(var(--admin-bg) / <alpha-value>)",
+          surface: "rgb(var(--admin-surface) / <alpha-value>)",
           sidebar: "rgb(var(--admin-sidebar) / <alpha-value>)",
           "sidebar-active": "rgb(var(--admin-sidebar-active) / <alpha-value>)",
           ink: "rgb(var(--admin-ink) / <alpha-value>)",

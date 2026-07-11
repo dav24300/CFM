@@ -36,7 +36,7 @@ export function DesignHeroPreview({ image, video, poster, alt }: Props) {
             sizes="400px"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-admin-deep/80 text-sm text-gray-400">
+          <div className="flex h-full w-full items-center justify-center bg-admin-deep/80 text-sm text-admin-muted-2">
             Aucun média hero sélectionné
           </div>
         )}

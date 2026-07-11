@@ -3,6 +3,7 @@
 import { LogOut, RefreshCw, Menu } from "lucide-react";
 import { SITE } from "@/lib/constants";
 import type { AdminAccess, AdminStats } from "@/components/admin/types";
+import { AdminThemeToggle } from "@/components/admin/layout/AdminThemeToggle";
 
 type Props = {
   access: AdminAccess;
@@ -25,7 +26,7 @@ export function AdminHeader({ access, stats, onRefresh, loading, onLogout, onMen
     (stats?.pending_users || 0);
 
   return (
-    <header className="flex items-center justify-between border-b border-admin-border bg-white px-6 py-4">
+    <header className="flex items-center justify-between border-b border-admin-border bg-admin-surface px-6 py-4">
       <div className="flex items-center gap-3">
         <button
           type="button"
@@ -50,11 +51,12 @@ export function AdminHeader({ access, stats, onRefresh, loading, onLogout, onMen
         </div>
       </div>
       <div className="flex items-center gap-2">
+        <AdminThemeToggle />
         <button
           type="button"
           onClick={onRefresh}
           disabled={loading}
-          className="flex items-center gap-1 rounded-lg border px-3 py-2 text-sm hover:bg-admin-bg disabled:opacity-50"
+          className="flex items-center gap-1 rounded-lg border border-admin-border px-3 py-2 text-sm text-admin-muted hover:bg-admin-bg disabled:opacity-50"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           Actualiser

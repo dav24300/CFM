@@ -70,9 +70,9 @@ export function I18nPanel() {
     <div className="space-y-8">
       <h2 className="font-display text-xl font-bold text-admin-ink">Langues & textes</h2>
 
-      <section className="rounded-xl border bg-white p-4">
+      <section className="rounded-xl border bg-admin-surface p-4">
         <h3 className="font-semibold">Override i18n</h3>
-        <p className="mt-1 text-sm text-gray-600">
+        <p className="mt-1 text-sm text-admin-muted">
           Clés au format pointé (ex. <code>home.hero.title</code>). Les overrides sont stockés en base.
         </p>
         <form onSubmit={saveOverride} className="mt-4 grid gap-3 md:grid-cols-2">
@@ -90,7 +90,7 @@ export function I18nPanel() {
           <Button type="submit" size="sm" className="w-fit">Enregistrer override</Button>
         </form>
         {Object.keys(localeOverrides).length > 0 && (
-          <ul className="mt-4 space-y-1 text-xs text-gray-600">
+          <ul className="mt-4 space-y-1 text-xs text-admin-muted">
             {Object.entries(localeOverrides).map(([k, v]) => (
               <li key={k}><strong>{k}</strong>: {v}</li>
             ))}
@@ -98,7 +98,7 @@ export function I18nPanel() {
         )}
       </section>
 
-      <section className="rounded-xl border bg-white p-4">
+      <section className="rounded-xl border bg-admin-surface p-4">
         <h3 className="font-semibold">Constantes site — liens sociaux (JSON)</h3>
         <form onSubmit={saveSocial} className="mt-3 space-y-2">
           <Textarea value={socialLinks} onChange={(e) => setSocialLinks(e.target.value)} rows={4} className="font-mono text-xs" />

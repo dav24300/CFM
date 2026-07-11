@@ -125,18 +125,18 @@ export function PagesPanel() {
         </TabsList>
       </Tabs>
 
-      <section className="space-y-3 rounded-xl border bg-white p-4 shadow-sm">
+      <section className="space-y-3 rounded-xl border bg-admin-surface p-4 shadow-sm">
         <h3 className="font-semibold">Timeline À propos (JSON)</h3>
         <p className="text-xs text-admin-muted">Tableau d&apos;objets : date, title, description, image (optionnel)</p>
         <Textarea rows={10} value={timelineJson} onChange={(e) => setTimelineJson(e.target.value)} className="font-mono text-xs" />
       </section>
 
-      <section className="space-y-3 rounded-xl border bg-white p-4 shadow-sm">
+      <section className="space-y-3 rounded-xl border bg-admin-surface p-4 shadow-sm">
         <h3 className="font-semibold">Confidentialité (markdown)</h3>
         <Textarea rows={12} value={privacyMd} onChange={(e) => setPrivacyMd(e.target.value)} className="font-mono text-xs" />
       </section>
 
-      <section className="space-y-3 rounded-xl border bg-white p-4 shadow-sm">
+      <section className="space-y-3 rounded-xl border bg-admin-surface p-4 shadow-sm">
         <h3 className="font-semibold">Mentions légales (markdown)</h3>
         <Textarea rows={12} value={mentionsMd} onChange={(e) => setMentionsMd(e.target.value)} className="font-mono text-xs" />
       </section>
