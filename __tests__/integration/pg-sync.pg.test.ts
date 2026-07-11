@@ -15,13 +15,13 @@ function fixtureStore(): Store {
     _counters: { global: 200 },
     _seed_version: 4,
     news: [
-      { id: 1, title: "N1", slug: "n1", excerpt: null, content: "c", category: "actualite", published: 1, created_at: t },
+      { id: 1, title: "N1", slug: "n1", excerpt: null, content: "c", category: "actualite", cover_image: null, cover_image_alt: null, published: 1, created_at: t },
     ],
     studies: [],
     campaigns: [],
     partners: [{ id: 2, name: "P", logo_url: null, website: null, description: null, sort_order: 1 }],
     testimonials: [],
-    actions: [{ id: 3, province: "Kinshasa", title: "A", description: null, date: "2025-01-15", type: "evenement" }],
+    actions: [{ id: 3, province: "Kinshasa", title: "A", description: null, date: "2025-01-15", type: "evenement", photo: null }],
     memberships: [{ id: 4, type: "membre", first_name: "Jean", last_name: "K", phone: "1", status: "pending", created_at: t }],
     help_requests: [{ id: 5, status: "new", category: "aide", created_at: t }],
     newsletter: [{ id: 6, email: "a@ex.com", created_at: t }],
@@ -180,6 +180,10 @@ describe.skipIf(!TEST_URL)("pg-sync différentiel (intégration PG)", () => {
   });
 
   it("séquences : INSERT sans id utilise nextval au-dessus du compteur global", async () => {
+    // Simule un cold start avec données présentes : le bloc DO du schéma
+    // (idempotent, monotone) rehausse les séquences au-dessus du compteur.
+    const { applyFullSchema } = await import("@/infrastructure/persistence/pg-sync");
+    await sqlClient.withClient((c) => applyFullSchema(c));
     const res = await sqlClient.query<{ id: number }>(
       "INSERT INTO newsletter (email, created_at) VALUES ('seq@ex.com', NOW()) RETURNING id"
     );
