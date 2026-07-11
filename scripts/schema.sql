@@ -1,12 +1,14 @@
 -- CFM ASBL — Schéma PostgreSQL normalisé (Phase R3)
 -- Exécuter : psql $DATABASE_URL -f scripts/schema.sql
 
--- Meta : compteurs + marqueur de sync normalisée
+-- Meta : compteurs + marqueur de sync normalisée + version des seeds one-shot
 CREATE TABLE IF NOT EXISTS store_meta (
   id INTEGER PRIMARY KEY DEFAULT 1,
   counters JSONB NOT NULL DEFAULT '{"global": 100}',
+  seed_version INTEGER NOT NULL DEFAULT 0,
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE store_meta ADD COLUMN IF NOT EXISTS seed_version INTEGER NOT NULL DEFAULT 0;
 
 -- ── V1 Contenu ──────────────────────────────────────────────────────────────
 
@@ -213,12 +215,18 @@ CREATE TABLE IF NOT EXISTS live_events (
   youtube_id VARCHAR(100),
   stream_url TEXT,
   replay_url TEXT,
+  thumbnail TEXT,
+  thumbnail_alt TEXT,
   chat_moderation SMALLINT DEFAULT 1,
   viewer_count INTEGER DEFAULT 0,
   started_at TIMESTAMPTZ,
   ended_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL
 );
+-- Colonnes présentes dans le domaine (LiveEvent.thumbnail) mais absentes des
+-- anciennes bases : sans elles, chaque cycle save/load perdait ces champs.
+ALTER TABLE live_events ADD COLUMN IF NOT EXISTS thumbnail TEXT;
+ALTER TABLE live_events ADD COLUMN IF NOT EXISTS thumbnail_alt TEXT;
 
 CREATE TABLE IF NOT EXISTS live_chat_messages (
   id INTEGER PRIMARY KEY,
@@ -330,3 +338,42 @@ CREATE TABLE IF NOT EXISTS member_resources (
 
 CREATE INDEX IF NOT EXISTS idx_events_date ON events("date");
 CREATE INDEX IF NOT EXISTS idx_member_messages_user ON member_messages(user_id);
+
+-- ── Séquences d'ID par table (refactor persistance P1) ─────────────────────
+-- Remplace le compteur global en mémoire (nextId) : élimine les collisions
+-- multi-instances. Séquences volontairement NON-OWNED pendant la transition
+-- (immunisées contre TRUNCATE ... RESTART IDENTITY si l'ancien code tourne
+-- encore, ex. rollback) ; OWNED BY posé au teardown final.
+-- Bloc idempotent et monotone : rejouable à chaque démarrage de process.
+DO $$
+DECLARE
+  t TEXT;
+  seq TEXT;
+  target BIGINT;
+  cur BIGINT;
+BEGIN
+  FOR t IN SELECT unnest(ARRAY[
+    'news','studies','campaigns','partners','testimonials','actions',
+    'press_releases','memberships','help_requests','newsletter',
+    'contact_messages','users','family_links','donations','petitions',
+    'petition_signatures','help_request_updates','password_reset_tokens',
+    'live_events','live_chat_messages','live_polls','live_poll_votes',
+    'push_subscriptions','events','member_messages','member_resources'])
+  LOOP
+    seq := t || '_id_seq';
+    IF NOT EXISTS (SELECT FROM pg_class WHERE relkind = 'S' AND relname = seq) THEN
+      EXECUTE format('CREATE SEQUENCE %I', seq);
+    END IF;
+    -- Seuil : max(id) de la table ET compteur global historique (les ids
+    -- existants proviennent d'un compteur unique inter-tables).
+    EXECUTE format(
+      'SELECT GREATEST(COALESCE((SELECT MAX(id)::bigint FROM %I), 0),
+                       COALESCE((SELECT (counters->>''global'')::bigint FROM store_meta WHERE id = 1), 0),
+                       100)', t) INTO target;
+    EXECUTE format('SELECT last_value FROM %I', seq) INTO cur;
+    IF target > cur THEN
+      PERFORM setval(seq, target);
+    END IF;
+    EXECUTE format('ALTER TABLE %I ALTER COLUMN id SET DEFAULT nextval(%L)', t, seq);
+  END LOOP;
+END $$;

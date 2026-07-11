@@ -12,6 +12,7 @@ vi.mock("@/infrastructure/persistence/db-adapter", () => ({
   getPgStoreCache: () => mockGetCache(),
   setPgStoreCache: (store: Store) => mockSetCache(store),
   isPostgresEnabled: () => true,
+  claimSeedVersion: async () => false,
 }));
 
 describe("postgresStoreAdapter", () => {
@@ -87,8 +88,8 @@ describe("postgresStoreAdapter", () => {
       });
     });
 
-    // Le premier read() peut déclencher un save de seeding (migrateV4 sur collections
-    // portail vides) ; la sauvegarde du write() est donc le DERNIER appel.
+    // Un save de seeding one-shot peut précéder (si claimSeedVersion l'accorde) ;
+    // la sauvegarde du write() est donc le DERNIER appel.
     expect(mockSave).toHaveBeenCalled();
     const lastSave = mockSave.mock.calls.at(-1)![0] as Store;
     expect(lastSave.news).toHaveLength(1);

@@ -31,6 +31,8 @@ import type {
 
 export type Store = {
   _counters: Record<string, number>;
+  /** Version des seeds one-shot appliqués (store-seed.ts) ; absent = jamais stampé. */
+  _seed_version?: number;
   news: News[];
   studies: Study[];
   campaigns: Campaign[];

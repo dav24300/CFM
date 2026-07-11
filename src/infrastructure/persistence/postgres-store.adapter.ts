@@ -2,12 +2,19 @@ import "server-only";
 import type { StorePort } from "@/domain/ports/store.port";
 import type { Store } from "@/domain/entities/store";
 import {
+  claimSeedVersion,
   loadStoreFromPostgres,
   saveStoreToPostgres,
   setPgStoreCache,
   getPgStoreCache,
 } from "@/infrastructure/persistence/db-adapter";
-import { loadSeedStore, nextId, migrateV4 } from "@/infrastructure/persistence/store-seed";
+import {
+  CURRENT_SEED_VERSION,
+  loadSeedStore,
+  nextId,
+  normalizeCollections,
+  seedDemoData,
+} from "@/infrastructure/persistence/store-seed";
 import {
   getJsonStore,
   updateJsonStore,
@@ -45,10 +52,20 @@ async function loadStore(): Promise<Store> {
   try {
     const fromPg = await loadStoreFromPostgres();
     if (fromPg) {
-      // Normalise + seed les collections portail (idempotent : ne s'exécute qu'une fois).
-      if (migrateV4(fromPg)) {
+      // Normalisation des collections manquantes : toujours, sans injection de données.
+      normalizeCollections(fromPg);
+      // Seeds de démo one-shot (ZC-5) : uniquement si store_meta.seed_version
+      // est en retard, sous verrou advisory (course multi-instances éliminée).
+      if ((fromPg._seed_version ?? 0) < CURRENT_SEED_VERSION) {
         try {
-          await saveStoreToPostgres(fromPg);
+          if (await claimSeedVersion()) {
+            seedDemoData(fromPg);
+            fromPg._seed_version = CURRENT_SEED_VERSION;
+            await saveStoreToPostgres(fromPg);
+          } else {
+            // Une autre instance a déjà stampé ; ce snapshot sera rafraîchi au prochain load.
+            fromPg._seed_version = CURRENT_SEED_VERSION;
+          }
         } catch {
           // Seed non bloquant : le portail reste utilisable même si la persistance échoue.
         }

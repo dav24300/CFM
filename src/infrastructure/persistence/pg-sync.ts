@@ -4,6 +4,7 @@ import path from "path";
 import type { PoolClient } from "pg";
 import type { Store } from "@/domain/entities/store";
 import { normalizePgRows } from "@/infrastructure/persistence/normalize-pg-row";
+import { isTableMigrated } from "@/infrastructure/persistence/sql/migrated-tables";
 
 export function isNormalizedPgEnabled(): boolean {
   return Boolean(process.env.DATABASE_URL) && process.env.CFM_PG_NORMALIZED !== "false";
@@ -20,257 +21,332 @@ export async function hasNormalizedData(client: PoolClient): Promise<boolean> {
   return (res.rowCount ?? 0) > 0;
 }
 
-const TRUNCATE_TABLES = [
-  "events",
-  "member_messages",
-  "member_resources",
-  "live_poll_votes",
-  "live_polls",
-  "live_chat_messages",
-  "live_events",
-  "push_subscriptions",
-  "petition_signatures",
-  "petitions",
-  "help_request_updates",
-  "password_reset_tokens",
-  "family_links",
-  "donations",
-  "users",
-  "help_requests",
-  "contact_messages",
-  "memberships",
-  "newsletter",
-  "news",
-  "studies",
-  "campaigns",
-  "partners",
-  "testimonials",
-  "actions",
-  "press_releases",
-  "site_settings",
-  "store_meta",
-].join(", ");
+/**
+ * Sync différentiel Store → tables normalisées.
+ *
+ * Remplace l'ancien TRUNCATE 28 tables + réinsertion complète :
+ * - upsert par ligne (INSERT ... ON CONFLICT DO UPDATE) + prune des lignes absentes ;
+ * - effet final identique pour les tables non migrées (iso-comportement) ;
+ * - les tables du registre MIGRATED_TABLES (écrites en SQL ciblé par les
+ *   repositories) sont ignorées : aucune écriture Store ne peut les corrompre,
+ *   et aucun TRUNCATE CASCADE ne peut plus emporter leurs lignes via les FK.
+ *
+ * Ordre d'exécution : prune enfants→parents PUIS upsert parents→enfants.
+ * Le prune préalable évite les violations d'index uniques transitoires
+ * (ex. signature supprimée puis re-signée : même (petition_id, email) sous un
+ * nouvel id — l'ancienne ligne doit disparaître avant l'insertion).
+ */
+
+type Row = Record<string, unknown>;
+
+type TableSpec = {
+  table: string;
+  pk: string;
+  pkType: "int" | "text";
+  cols: string[];
+  rows: (store: Store) => Row[];
+};
+
+const nowIso = () => new Date().toISOString();
+
+/** Ordre parents → enfants (FK) ; le prune parcourt cette liste à l'envers. */
+const TABLE_SPECS: TableSpec[] = [
+  {
+    table: "news",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "title", "slug", "excerpt", "content", "category", "cover_image", "cover_image_alt", "published", "created_at"],
+    rows: (s) => s.news as unknown as Row[],
+  },
+  {
+    table: "studies",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "title", "slug", "summary", "content", "file_url", "published", "created_at"],
+    rows: (s) => s.studies as unknown as Row[],
+  },
+  {
+    table: "campaigns",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "title", "slug", "description", "content", "image_url", "petition_slug", "active", "created_at"],
+    rows: (s) => s.campaigns as unknown as Row[],
+  },
+  {
+    table: "partners",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "name", "logo_url", "website", "description", "sort_order"],
+    rows: (s) => s.partners as unknown as Row[],
+  },
+  {
+    table: "testimonials",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "author", "role", "content", "photo", "photo_alt", "anonymous", "published", "created_at"],
+    rows: (s) => s.testimonials as unknown as Row[],
+  },
+  {
+    table: "actions",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "province", "title", "description", "date", "type", "photo"],
+    rows: (s) => s.actions as unknown as Row[],
+  },
+  {
+    table: "press_releases",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "title", "slug", "content", "file_url", "published", "created_at"],
+    rows: (s) => s.press_releases as unknown as Row[],
+  },
+  {
+    table: "site_settings",
+    pk: "key",
+    pkType: "text",
+    cols: ["key", "value"],
+    rows: (s) =>
+      Object.entries(s.site_settings || {}).map(([key, value]) => ({ key, value })),
+  },
+  {
+    table: "memberships",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "data", "created_at"],
+    rows: (s) =>
+      s.memberships.map((m) => {
+        const rec = m as Row;
+        return { id: rec.id, data: JSON.stringify(m), created_at: rec.created_at || nowIso() };
+      }),
+  },
+  {
+    table: "help_requests",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "status", "data", "created_at"],
+    rows: (s) =>
+      s.help_requests.map((h) => {
+        const rec = h as Row;
+        return {
+          id: rec.id,
+          status: rec.status || "new",
+          data: JSON.stringify(h),
+          created_at: rec.created_at || nowIso(),
+        };
+      }),
+  },
+  {
+    table: "newsletter",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "email", "created_at"],
+    rows: (s) => s.newsletter as unknown as Row[],
+  },
+  {
+    table: "contact_messages",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "data", "created_at"],
+    rows: (s) =>
+      s.contact_messages.map((c) => {
+        const rec = c as Row;
+        return { id: rec.id, data: JSON.stringify(c), created_at: rec.created_at || nowIso() };
+      }),
+  },
+  {
+    table: "users",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "email", "password_hash", "first_name", "last_name", "phone", "province", "role", "membership_type", "military_link", "parent_military_name", "skills", "status", "verified_at", "created_at"],
+    rows: (s) => (s.users || []) as unknown as Row[],
+  },
+  {
+    table: "family_links",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "parent_user_id", "child_user_id", "relationship", "status", "initiated_by", "created_at"],
+    rows: (s) => (s.family_links || []) as unknown as Row[],
+  },
+  {
+    table: "donations",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "user_id", "amount", "currency", "provider", "phone", "transaction_id", "status", "donor_name", "donor_email", "created_at"],
+    rows: (s) => (s.donations || []) as unknown as Row[],
+  },
+  {
+    table: "petitions",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "title", "slug", "description", "content", "goal", "signatures_count", "active", "created_at"],
+    rows: (s) => (s.petitions || []) as unknown as Row[],
+  },
+  {
+    table: "petition_signatures",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "petition_id", "user_id", "email", "name", "signed_at"],
+    rows: (s) => (s.petition_signatures || []) as unknown as Row[],
+  },
+  {
+    table: "help_request_updates",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "help_request_id", "status", "note", "updated_by", "created_at"],
+    rows: (s) => (s.help_request_updates || []) as unknown as Row[],
+  },
+  {
+    table: "password_reset_tokens",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "user_id", "token", "expires_at", "used", "created_at"],
+    rows: (s) => (s.password_reset_tokens || []) as unknown as Row[],
+  },
+  {
+    table: "live_events",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "title", "slug", "description", "status", "youtube_id", "stream_url", "replay_url", "thumbnail", "thumbnail_alt", "chat_moderation", "viewer_count", "started_at", "ended_at", "created_at"],
+    rows: (s) => (s.live_events || []) as unknown as Row[],
+  },
+  {
+    table: "live_chat_messages",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "live_event_id", "user_id", "author_name", "content", "status", "created_at"],
+    rows: (s) => (s.live_chat_messages || []) as unknown as Row[],
+  },
+  {
+    table: "live_polls",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "live_event_id", "question", "options", "active", "created_at"],
+    rows: (s) =>
+      (s.live_polls || []).map((p) => ({
+        id: p.id,
+        live_event_id: p.live_event_id,
+        question: p.question,
+        options: JSON.stringify(p.options),
+        active: p.active,
+        created_at: p.created_at,
+      })),
+  },
+  {
+    table: "live_poll_votes",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "poll_id", "option_id", "voter_key", "created_at"],
+    rows: (s) => (s.live_poll_votes || []) as unknown as Row[],
+  },
+  {
+    table: "push_subscriptions",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "endpoint", "p256dh", "auth", "topics", "created_at"],
+    rows: (s) =>
+      (s.push_subscriptions || []).map((sub) => ({
+        id: sub.id,
+        endpoint: sub.endpoint,
+        p256dh: sub.p256dh,
+        auth: sub.auth,
+        topics: sub.topics || ["lives"],
+        created_at: sub.created_at,
+      })),
+  },
+  {
+    table: "events",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "title", "description", "province", "date", "time", "type", "location", "capacity", "rsvp_user_ids", "created_at"],
+    rows: (s) =>
+      (s.events || []).map((ev) => ({
+        id: ev.id,
+        title: ev.title,
+        description: ev.description,
+        province: ev.province,
+        date: ev.date,
+        time: ev.time,
+        type: ev.type,
+        location: ev.location,
+        capacity: ev.capacity ?? null,
+        rsvp_user_ids: JSON.stringify(ev.rsvp_user_ids || []),
+        created_at: ev.created_at,
+      })),
+  },
+  {
+    table: "member_messages",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "user_id", "direction", "author_name", "subject", "body", "read", "created_at"],
+    rows: (s) => (s.member_messages || []) as unknown as Row[],
+  },
+  {
+    table: "member_resources",
+    pk: "id",
+    pkType: "int",
+    cols: ["id", "title", "category", "description", "file_url", "external_url", "created_at"],
+    rows: (s) => (s.member_resources || []) as unknown as Row[],
+  },
+];
+
+async function pruneTable(client: PoolClient, spec: TableSpec, store: Store): Promise<void> {
+  const keep = spec.rows(store).map((r) => r[spec.pk]);
+  const cast = spec.pkType === "int" ? "int[]" : "text[]";
+  await client.query(
+    `DELETE FROM "${spec.table}" WHERE NOT ("${spec.pk}" = ANY($1::${cast}))`,
+    [keep]
+  );
+}
+
+async function upsertRow(client: PoolClient, spec: TableSpec, row: Row): Promise<void> {
+  const colsSql = spec.cols.map((c) => `"${c}"`).join(", ");
+  const placeholders = spec.cols.map((_, i) => `$${i + 1}`).join(", ");
+  const updates = spec.cols
+    .filter((c) => c !== spec.pk)
+    .map((c) => `"${c}" = EXCLUDED."${c}"`)
+    .join(", ");
+  await client.query(
+    `INSERT INTO "${spec.table}" (${colsSql}) VALUES (${placeholders})
+     ON CONFLICT ("${spec.pk}") DO UPDATE SET ${updates}`,
+    spec.cols.map((c) => (row[c] === undefined ? null : row[c]))
+  );
+}
 
 export async function saveStoreToTables(client: PoolClient, store: Store): Promise<void> {
-  await client.query(`TRUNCATE ${TRUNCATE_TABLES} RESTART IDENTITY CASCADE`);
+  // 1. Prune des lignes absentes du store (enfants d'abord — les FK ON DELETE
+  //    CASCADE ne touchent que des lignes elles-mêmes absentes du store).
+  for (let i = TABLE_SPECS.length - 1; i >= 0; i--) {
+    const spec = TABLE_SPECS[i];
+    if (isTableMigrated(spec.table)) continue;
+    await pruneTable(client, spec, store);
+  }
 
+  // 2. Upsert (parents d'abord pour satisfaire les FK).
+  for (const spec of TABLE_SPECS) {
+    if (isTableMigrated(spec.table)) continue;
+    for (const row of spec.rows(store)) {
+      await upsertRow(client, spec, row);
+    }
+  }
+
+  // 3. store_meta : compteurs + updated_at. seed_version n'est jamais écrasé
+  //    ici (il n'est posé que par le seeding one-shot, cf. db-adapter).
   await client.query(
-    `INSERT INTO store_meta (id, counters, updated_at) VALUES (1, $1::jsonb, NOW())`,
-    [JSON.stringify(store._counters || { global: 100 })]
+    `INSERT INTO store_meta (id, counters, seed_version, updated_at)
+     VALUES (1, $1::jsonb, $2, NOW())
+     ON CONFLICT (id) DO UPDATE SET counters = EXCLUDED.counters, updated_at = NOW()`,
+    [JSON.stringify(store._counters || { global: 100 }), store._seed_version ?? 0]
   );
-
-  for (const n of store.news) {
-    await client.query(
-      `INSERT INTO news (id, title, slug, excerpt, content, category, cover_image, cover_image_alt, published, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
-      [n.id, n.title, n.slug, n.excerpt, n.content, n.category, n.cover_image ?? null, n.cover_image_alt ?? null, n.published, n.created_at]
-    );
-  }
-
-  for (const s of store.studies) {
-    await client.query(
-      `INSERT INTO studies (id, title, slug, summary, content, file_url, published, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-      [s.id, s.title, s.slug, s.summary, s.content, s.file_url, s.published, s.created_at]
-    );
-  }
-
-  for (const c of store.campaigns) {
-    await client.query(
-      `INSERT INTO campaigns (id, title, slug, description, content, image_url, petition_slug, active, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-      [c.id, c.title, c.slug, c.description, c.content, c.image_url, c.petition_slug ?? null, c.active, c.created_at]
-    );
-  }
-
-  for (const p of store.partners) {
-    await client.query(
-      `INSERT INTO partners (id, name, logo_url, website, description, sort_order) VALUES ($1,$2,$3,$4,$5,$6)`,
-      [p.id, p.name, p.logo_url, p.website, p.description, p.sort_order]
-    );
-  }
-
-  for (const t of store.testimonials) {
-    await client.query(
-      `INSERT INTO testimonials (id, author, role, content, photo, photo_alt, anonymous, published, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-      [t.id, t.author, t.role, t.content, t.photo ?? null, t.photo_alt ?? null, t.anonymous, t.published, t.created_at]
-    );
-  }
-
-  for (const a of store.actions) {
-    await client.query(
-      `INSERT INTO actions (id, province, title, description, date, type, photo) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-      [a.id, a.province, a.title, a.description, a.date, a.type, a.photo ?? null]
-    );
-  }
-
-  for (const pr of store.press_releases) {
-    await client.query(
-      `INSERT INTO press_releases (id, title, slug, content, file_url, published, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-      [pr.id, pr.title, pr.slug, pr.content, pr.file_url, pr.published, pr.created_at]
-    );
-  }
-
-  for (const [key, value] of Object.entries(store.site_settings || {})) {
-    await client.query(`INSERT INTO site_settings (key, value) VALUES ($1, $2)`, [key, value]);
-  }
-
-  for (const m of store.memberships) {
-    const rec = m as Record<string, unknown>;
-    await client.query(
-      `INSERT INTO memberships (id, data, created_at) VALUES ($1, $2::jsonb, $3)`,
-      [rec.id, JSON.stringify(m), (rec.created_at as string) || new Date().toISOString()]
-    );
-  }
-
-  for (const h of store.help_requests) {
-    const rec = h as Record<string, unknown>;
-    await client.query(
-      `INSERT INTO help_requests (id, status, data, created_at) VALUES ($1, $2, $3::jsonb, $4)`,
-      [rec.id, (rec.status as string) || "new", JSON.stringify(h), (rec.created_at as string) || new Date().toISOString()]
-    );
-  }
-
-  for (const n of store.newsletter) {
-    await client.query(`INSERT INTO newsletter (id, email, created_at) VALUES ($1, $2, $3)`, [n.id, n.email, n.created_at]);
-  }
-
-  for (const c of store.contact_messages) {
-    const rec = c as Record<string, unknown>;
-    await client.query(
-      `INSERT INTO contact_messages (id, data, created_at) VALUES ($1, $2::jsonb, $3)`,
-      [rec.id, JSON.stringify(c), (rec.created_at as string) || new Date().toISOString()]
-    );
-  }
-
-  for (const u of store.users || []) {
-    await client.query(
-      `INSERT INTO users (id, email, password_hash, first_name, last_name, phone, province, role, membership_type,
-        military_link, parent_military_name, skills, status, verified_at, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
-      [u.id, u.email, u.password_hash, u.first_name, u.last_name, u.phone, u.province, u.role, u.membership_type,
-        u.military_link, u.parent_military_name, u.skills, u.status, u.verified_at, u.created_at]
-    );
-  }
-
-  for (const fl of store.family_links || []) {
-    await client.query(
-      `INSERT INTO family_links (id, parent_user_id, child_user_id, relationship, status, initiated_by, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-      [fl.id, fl.parent_user_id, fl.child_user_id, fl.relationship, fl.status, fl.initiated_by, fl.created_at]
-    );
-  }
-
-  for (const d of store.donations || []) {
-    await client.query(
-      `INSERT INTO donations (id, user_id, amount, currency, provider, phone, transaction_id, status, donor_name, donor_email, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
-      [d.id, d.user_id, d.amount, d.currency, d.provider, d.phone, d.transaction_id, d.status, d.donor_name, d.donor_email, d.created_at]
-    );
-  }
-
-  for (const p of store.petitions || []) {
-    await client.query(
-      `INSERT INTO petitions (id, title, slug, description, content, goal, signatures_count, active, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-      [p.id, p.title, p.slug, p.description, p.content, p.goal, p.signatures_count, p.active, p.created_at]
-    );
-  }
-
-  for (const s of store.petition_signatures || []) {
-    await client.query(
-      `INSERT INTO petition_signatures (id, petition_id, user_id, email, name, signed_at) VALUES ($1,$2,$3,$4,$5,$6)`,
-      [s.id, s.petition_id, s.user_id, s.email, s.name, s.signed_at]
-    );
-  }
-
-  for (const u of store.help_request_updates || []) {
-    await client.query(
-      `INSERT INTO help_request_updates (id, help_request_id, status, note, updated_by, created_at) VALUES ($1,$2,$3,$4,$5,$6)`,
-      [u.id, u.help_request_id, u.status, u.note, u.updated_by, u.created_at]
-    );
-  }
-
-  for (const t of store.password_reset_tokens || []) {
-    await client.query(
-      `INSERT INTO password_reset_tokens (id, user_id, token, expires_at, used, created_at) VALUES ($1,$2,$3,$4,$5,$6)`,
-      [t.id, t.user_id, t.token, t.expires_at, t.used, t.created_at]
-    );
-  }
-
-  for (const e of store.live_events || []) {
-    await client.query(
-      `INSERT INTO live_events (id, title, slug, description, status, youtube_id, stream_url, replay_url,
-        chat_moderation, viewer_count, started_at, ended_at, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
-      [e.id, e.title, e.slug, e.description, e.status, e.youtube_id, e.stream_url, e.replay_url,
-        e.chat_moderation, e.viewer_count, e.started_at, e.ended_at, e.created_at]
-    );
-  }
-
-  for (const m of store.live_chat_messages || []) {
-    await client.query(
-      `INSERT INTO live_chat_messages (id, live_event_id, user_id, author_name, content, status, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-      [m.id, m.live_event_id, m.user_id, m.author_name, m.content, m.status, m.created_at]
-    );
-  }
-
-  for (const p of store.live_polls || []) {
-    await client.query(
-      `INSERT INTO live_polls (id, live_event_id, question, options, active, created_at) VALUES ($1,$2,$3,$4::jsonb,$5,$6)`,
-      [p.id, p.live_event_id, p.question, JSON.stringify(p.options), p.active, p.created_at]
-    );
-  }
-
-  for (const v of store.live_poll_votes || []) {
-    await client.query(
-      `INSERT INTO live_poll_votes (id, poll_id, option_id, voter_key, created_at) VALUES ($1,$2,$3,$4,$5)`,
-      [v.id, v.poll_id, v.option_id, v.voter_key, v.created_at]
-    );
-  }
-
-  for (const s of store.push_subscriptions || []) {
-    await client.query(
-      `INSERT INTO push_subscriptions (id, endpoint, p256dh, auth, topics, created_at) VALUES ($1,$2,$3,$4,$5,$6)`,
-      [s.id, s.endpoint, s.p256dh, s.auth, s.topics || ["lives"], s.created_at]
-    );
-  }
-
-  for (const ev of store.events || []) {
-    await client.query(
-      `INSERT INTO events (id, title, description, province, "date", "time", type, location, capacity, rsvp_user_ids, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11)`,
-      [ev.id, ev.title, ev.description, ev.province, ev.date, ev.time, ev.type, ev.location,
-        ev.capacity ?? null, JSON.stringify(ev.rsvp_user_ids || []), ev.created_at]
-    );
-  }
-
-  for (const m of store.member_messages || []) {
-    await client.query(
-      `INSERT INTO member_messages (id, user_id, direction, author_name, subject, body, "read", created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-      [m.id, m.user_id, m.direction, m.author_name, m.subject ?? null, m.body, m.read, m.created_at]
-    );
-  }
-
-  for (const r of store.member_resources || []) {
-    await client.query(
-      `INSERT INTO member_resources (id, title, category, description, file_url, external_url, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-      [r.id, r.title, r.category, r.description, r.file_url ?? null, r.external_url ?? null, r.created_at]
-    );
-  }
 }
 
 export async function loadStoreFromTables(client: PoolClient): Promise<Store | null> {
   if (!(await hasNormalizedData(client))) return null;
 
-  const meta = await client.query<{ counters: Store["_counters"] }>(
-    "SELECT counters FROM store_meta WHERE id = 1"
+  const meta = await client.query<{ counters: Store["_counters"]; seed_version: number | null }>(
+    "SELECT counters, seed_version FROM store_meta WHERE id = 1"
   );
   const counters = meta.rows[0]?.counters || { global: 100 };
+  const seedVersion = meta.rows[0]?.seed_version ?? 0;
 
   const q = async <T extends import("pg").QueryResultRow>(sql: string) =>
     normalizePgRows((await client.query<T>(sql)).rows);
@@ -333,6 +409,7 @@ export async function loadStoreFromTables(client: PoolClient): Promise<Store | n
 
   return {
     _counters: counters,
+    _seed_version: seedVersion,
     news,
     studies,
     campaigns,

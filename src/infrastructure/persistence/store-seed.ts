@@ -22,12 +22,15 @@ import type {
   MemberResource,
 } from "@/domain/entities/v4";
 
+/** Version courante des seeds one-shot (V2 pétitions, V3 live, V4 portail). */
+export const CURRENT_SEED_VERSION = 4;
+
 export function loadSeedStore(): Store {
-  // Le JSON de seed ne contient pas les collections récentes ; migrateV4 les normalise.
+  // Le JSON de seed ne contient pas les collections récentes ; on normalise puis on seede.
   const store = structuredClone(seedData) as unknown as Store;
-  migrateV2(store);
-  migrateV3(store);
-  migrateV4(store);
+  normalizeCollections(store);
+  seedDemoData(store);
+  store._seed_version = CURRENT_SEED_VERSION;
   return store;
 }
 
@@ -209,7 +212,11 @@ export function defaultStore(): Store {
   };
 }
 
-export function migrateV2(store: Store): boolean {
+/**
+ * Normalise les collections manquantes (toujours exécuté, aucune donnée injectée).
+ * Anciennement la première moitié de migrateV2/V3/V4.
+ */
+export function normalizeCollections(store: Store): boolean {
   let changed = false;
   if (!store.users) { store.users = []; changed = true; }
   if (!store.family_links) { store.family_links = []; changed = true; }
@@ -218,6 +225,24 @@ export function migrateV2(store: Store): boolean {
   if (!store.petition_signatures) { store.petition_signatures = []; changed = true; }
   if (!store.help_request_updates) { store.help_request_updates = []; changed = true; }
   if (!store.password_reset_tokens) { store.password_reset_tokens = []; changed = true; }
+  if (!store.live_events) { store.live_events = []; changed = true; }
+  if (!store.live_chat_messages) { store.live_chat_messages = []; changed = true; }
+  if (!store.live_polls) { store.live_polls = []; changed = true; }
+  if (!store.live_poll_votes) { store.live_poll_votes = []; changed = true; }
+  if (!store.push_subscriptions) { store.push_subscriptions = []; changed = true; }
+  if (!store.events) { store.events = []; changed = true; }
+  if (!store.member_messages) { store.member_messages = []; changed = true; }
+  if (!store.member_resources) { store.member_resources = []; changed = true; }
+  return changed;
+}
+
+/**
+ * Seeds de démonstration one-shot (anciennement re-seed sur length===0 à chaque
+ * chargement — cause de la résurrection des données supprimées, ZC-5).
+ * Ne doit être appelé que si (_seed_version ?? 0) < CURRENT_SEED_VERSION.
+ */
+export function seedDemoData(store: Store): boolean {
+  let changed = false;
 
   if (store.petitions.length === 0) {
     const now = new Date().toISOString();
@@ -250,16 +275,6 @@ export function migrateV2(store: Store): boolean {
     });
     changed = true;
   }
-  return changed;
-}
-
-export function migrateV3(store: Store): boolean {
-  let changed = false;
-  if (!store.live_events) { store.live_events = []; changed = true; }
-  if (!store.live_chat_messages) { store.live_chat_messages = []; changed = true; }
-  if (!store.live_polls) { store.live_polls = []; changed = true; }
-  if (!store.live_poll_votes) { store.live_poll_votes = []; changed = true; }
-  if (!store.push_subscriptions) { store.push_subscriptions = []; changed = true; }
 
   if (store.live_events.length === 0) {
     const now = new Date().toISOString();
@@ -282,14 +297,6 @@ export function migrateV3(store: Store): boolean {
     });
     changed = true;
   }
-  return changed;
-}
-
-export function migrateV4(store: Store): boolean {
-  let changed = false;
-  if (!store.events) { store.events = []; changed = true; }
-  if (!store.member_messages) { store.member_messages = []; changed = true; }
-  if (!store.member_resources) { store.member_resources = []; changed = true; }
 
   if (store.events.length === 0) {
     const now = new Date().toISOString();
@@ -389,6 +396,20 @@ export function migrateV4(store: Store): boolean {
     changed = true;
   }
 
+  return changed;
+}
+
+/**
+ * Normalise toujours ; applique les seeds de démo une seule fois (gate _seed_version)
+ * puis stampe la version. Retourne true si le store a été modifié.
+ */
+export function applySeedsOnce(store: Store): boolean {
+  let changed = normalizeCollections(store);
+  if ((store._seed_version ?? 0) < CURRENT_SEED_VERSION) {
+    seedDemoData(store);
+    store._seed_version = CURRENT_SEED_VERSION;
+    changed = true;
+  }
   return changed;
 }
 
