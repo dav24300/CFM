@@ -1,0 +1,40 @@
+{
+  "endpoint": "/api/admin/partners",
+  "status": 200,
+  "body": {
+    "partners": [
+      {
+        "description": "Partenariats avec les institutions de la RDC",
+        "id": 6,
+        "logo_url": null,
+        "name": "Institutions nationales",
+        "sort_order": 1,
+        "website": null
+      },
+      {
+        "description": "Plaidoyer auprès des instances internationales",
+        "id": 7,
+        "logo_url": null,
+        "name": "Organisations internationales",
+        "sort_order": 2,
+        "website": null
+      },
+      {
+        "description": null,
+        "id": 142,
+        "logo_url": "/media/axes/economie.svg",
+        "name": "Partenaire E2E e2e-1783802156843",
+        "sort_order": 99,
+        "website": "https://example.com"
+      },
+      {
+        "description": null,
+        "id": 147,
+        "logo_url": "/media/axes/economie.svg",
+        "name": "Partenaire E2E e2e-1783802520927",
+        "sort_order": 99,
+        "website": "https://example.com"
+      }
+    ]
+  }
+}

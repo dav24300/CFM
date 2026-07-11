@@ -1,0 +1,14 @@
+{
+  "endpoint": "/api/health",
+  "status": 200,
+  "body": {
+    "checks": {
+      "app": "ok",
+      "database": "ok",
+      "redis": "skipped"
+    },
+    "status": "ok",
+    "timestamp": "<volatile>",
+    "version": "1.0.0"
+  }
+}

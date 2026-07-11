@@ -1,0 +1,56 @@
+{
+  "endpoint": "/api/admin/news",
+  "status": 200,
+  "body": {
+    "news": [
+      {
+        "category": "actualite",
+        "content": "Contenu test E2E.",
+        "cover_image": null,
+        "cover_image_alt": null,
+        "created_at": "<volatile>",
+        "excerpt": "Extrait E2E",
+        "id": 146,
+        "published": 1,
+        "slug": "actualite-e2e-e2e-1783802520927",
+        "title": "Actualité E2E e2e-1783802520927"
+      },
+      {
+        "category": "actualite",
+        "content": "Contenu test E2E.",
+        "cover_image": null,
+        "cover_image_alt": null,
+        "created_at": "<volatile>",
+        "excerpt": "Extrait E2E",
+        "id": 141,
+        "published": 1,
+        "slug": "actualite-e2e-e2e-1783802156843",
+        "title": "Actualité E2E e2e-1783802156843"
+      },
+      {
+        "category": "campagne",
+        "content": "CFM lance une campagne nationale pour l'autonomisation économique des veuves de militaires par l'entrepreneuriat.",
+        "cover_image": "/media/axes/economie.svg",
+        "cover_image_alt": "Campagne autonomisation des veuves",
+        "created_at": "<volatile>",
+        "excerpt": "Former et accompagner les veuves de militaires vers l'entrepreneuriat.",
+        "id": 2,
+        "published": 1,
+        "slug": "campagne-autonomisation-veuves",
+        "title": "Lancement de la campagne d'autonomisation des veuves"
+      },
+      {
+        "category": "evenement",
+        "content": "En 2025, CFM a organisé un rassemblement majeur des familles de militaires à la Foire Internationale de Kinshasa (FIKIN).",
+        "cover_image": "/media/actualites/fikin-2025.png",
+        "cover_image_alt": "Rassemblement FIKIN 2025 des familles militaires",
+        "created_at": "<volatile>",
+        "excerpt": "Un moment historique de rassemblement et de plaidoyer pour les droits des dépendants des militaires.",
+        "id": 1,
+        "published": 1,
+        "slug": "rassemblement-fikin-2025",
+        "title": "Rassemblement des familles militaires à la FIKIN 2025"
+      }
+    ]
+  }
+}

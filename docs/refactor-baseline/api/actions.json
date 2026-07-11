@@ -1,0 +1,51 @@
+{
+  "endpoint": "/api/actions",
+  "status": 200,
+  "body": [
+    {
+      "date": "2099-01-01",
+      "description": "Action créée par test E2E.",
+      "id": 145,
+      "photo": null,
+      "province": "Kinshasa",
+      "title": "Action E2E e2e-1783802156843",
+      "type": "sensibilisation"
+    },
+    {
+      "date": "2099-01-01",
+      "description": "Action créée par test E2E.",
+      "id": 150,
+      "photo": null,
+      "province": "Kinshasa",
+      "title": "Action E2E e2e-1783802520927",
+      "type": "sensibilisation"
+    },
+    {
+      "date": "2025-03-09",
+      "description": "Formation entrepreneuriat pour veuves",
+      "id": 11,
+      "photo": null,
+      "province": "Nord-Kivu",
+      "title": "Atelier autonomisation femmes",
+      "type": "atelier"
+    },
+    {
+      "date": "2025-02-19",
+      "description": "Rencontre avec les autorités locales",
+      "id": 12,
+      "photo": null,
+      "province": "Kasaï-Oriental",
+      "title": "Plaidoyer provincial",
+      "type": "plaidoyer"
+    },
+    {
+      "date": "2025-01-14",
+      "description": "Grand rassemblement des familles militaires",
+      "id": 10,
+      "photo": "/media/fikin-2025/rassemblement-01.svg",
+      "province": "Kinshasa",
+      "title": "Rassemblement FIKIN 2025",
+      "type": "evenement"
+    }
+  ]
+}

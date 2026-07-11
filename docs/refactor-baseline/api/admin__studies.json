@@ -1,0 +1,18 @@
+{
+  "endpoint": "/api/admin/studies",
+  "status": 200,
+  "body": {
+    "studies": [
+      {
+        "content": "Cette étude identifie les lacunes dans la protection sociale, l'accès à l'éducation, au logement et aux soins de santé pour les dépendants des militaires.",
+        "created_at": "<volatile>",
+        "file_url": null,
+        "id": 3,
+        "published": 1,
+        "slug": "analyse-conditions-sociales-2025",
+        "summary": "Étude sur les faiblesses du système de protection des familles de militaires.",
+        "title": "Analyse des conditions sociales des dépendants militaires en RDC"
+      }
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "endpoint": "/api/admin/petitions",
+  "status": 200,
+  "body": {
+    "petitions": [
+      {
+        "active": 1,
+        "content": "Cette pétition vise à obtenir une réforme structurelle de la protection des veuves, orphelins et familles de militaires en RDC.",
+        "created_at": "<volatile>",
+        "description": "Appelons le gouvernement à renforcer la protection sociale des dépendants des militaires.",
+        "goal": 1000,
+        "id": 105,
+        "signatures_count": 2,
+        "slug": "reforme-protection-familles",
+        "title": "Réforme de la protection des familles militaires"
+      },
+      {
+        "active": 1,
+        "content": "Cette pétition demande des mesures concrètes d'accompagnement économique : formation, financement et réseaux d'entraide pour les femmes des familles militaires.",
+        "created_at": "<volatile>",
+        "description": "Soutenons l'accès au microcrédit et à la formation entrepreneuriale pour les veuves et conjoints de militaires.",
+        "goal": 500,
+        "id": 106,
+        "signatures_count": 1,
+        "slug": "autonomisation-femmes-veuves",
+        "title": "Autonomisation économique des femmes et veuves de militaires"
+      }
+    ]
+  }
+}

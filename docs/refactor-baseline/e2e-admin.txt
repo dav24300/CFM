@@ -1,0 +1,24 @@
+
+🧪 E2E Admin → Site (E1–E13) — http://localhost:58753
+
+✅ — Admin login — /api/admin/login
+✅ E1 Actualité → /plaidoyer — Actualité E2E e2e-1783802520927
+✅ E1 Actualité → /actualites/[slug] — actualite-e2e-e2e-1783802520927
+✅ E2 Hero → homepage — Hero E2E e2e-1783802520927
+✅ E3 Partenaire → Footer — Partenaire E2E e2e-1783802520927
+✅ E4 Identité → /contact — contact-e2e-1783802520927@cfmasbl.com
+✅ E5 i18n FR → Header — À propos E2E e2e-1783802520927
+✅ E5 i18n EN → Header — About E2E e2e-1783802520927
+✅ E6 Pétition → /petitions — Pétition E2E e2e-1783802520927
+✅ E6 Dépublier pétition — masquée
+✅ E7 Live → /live — Live E2E e2e-1783802520927
+✅ E7 Live → homepage — badge/section
+✅ E8 Donateurs publics → /s-engager — toggle actif (pas de dons complétés)
+✅ E9 Réseaux sociaux → Footer — https://social-e2e-e2e-1783802520927.example.com
+✅ E10 Action → /actions — Action E2E e2e-1783802520927
+✅ E11 Timeline → /a-propos — Timeline E2E e2e-1783802520927
+✅ E12 Légal → /confidentialite — contenu CMS visible
+✅ E13 Preview < 5 s — 1437ms
+
+--- Résultat: 18/18 ---
+

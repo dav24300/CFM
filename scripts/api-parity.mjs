@@ -42,9 +42,9 @@ function argValue(flag, fallback) {
 const outDir = path.resolve(root, argValue("--out", "docs/refactor-baseline/api"));
 const base = argValue("--base", process.env.SMOKE_BASE_URL || "http://localhost:3000");
 
-// Clés volatiles masquées avant comparaison (timestamps, jetons).
+// Clés volatiles masquées avant comparaison (timestamps, jetons, compteurs de visite).
 const VOLATILE_KEY =
-  /(_at|_seen_at|timestamp|token|expires|exported)$/i;
+  /(_at|_seen_at|timestamp|token|expires|exported|viewer_count)$/i;
 
 function normalize(value) {
   if (Array.isArray(value)) return value.map(normalize);

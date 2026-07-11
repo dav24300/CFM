@@ -1,0 +1,7 @@
+{
+  "endpoint": "/api/push/vapid",
+  "status": 200,
+  "body": {
+    "publicKey": null
+  }
+}

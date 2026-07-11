@@ -1,0 +1,40 @@
+{
+  "endpoint": "/api/admin/users",
+  "status": 200,
+  "body": {
+    "users": [
+      {
+        "created_at": "<volatile>",
+        "email": "admin@gouv.cd",
+        "first_name": "david",
+        "id": 124,
+        "last_name": "moembo",
+        "membership_type": "famille",
+        "military_link": "enfant",
+        "parent_military_name": "Moembo",
+        "phone": "+243859588332",
+        "province": "Kinshasa",
+        "role": "member",
+        "skills": null,
+        "status": "active",
+        "verified_at": "<volatile>"
+      },
+      {
+        "created_at": "<volatile>",
+        "email": "davidmoembo8@gmail.com",
+        "first_name": "david",
+        "id": 111,
+        "last_name": "moembo",
+        "membership_type": "famille",
+        "military_link": "enfant",
+        "parent_military_name": "moembo",
+        "phone": "0859588332",
+        "province": "Kinshasa",
+        "role": "member",
+        "skills": null,
+        "status": "active",
+        "verified_at": "<volatile>"
+      }
+    ]
+  }
+}

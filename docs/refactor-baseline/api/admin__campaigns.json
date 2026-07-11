@@ -1,0 +1,30 @@
+{
+  "endpoint": "/api/admin/campaigns",
+  "status": 200,
+  "body": {
+    "campaigns": [
+      {
+        "active": 1,
+        "content": "Campagne de sensibilisation et de plaidoyer pour l'amélioration de l'accès aux soins de santé sexuelle et reproductive.",
+        "created_at": "<volatile>",
+        "description": "Sensibilisation et accès aux soins de santé reproductive.",
+        "id": 5,
+        "image_url": "/media/axes/sante.svg",
+        "petition_slug": "reforme-protection-familles",
+        "slug": "sante-sexuelle-camps",
+        "title": "Santé sexuelle des femmes dans les camps militaires"
+      },
+      {
+        "active": 1,
+        "content": "Programme d'accompagnement vers l'entrepreneuriat : formation, microcrédit, mentorat et réseau de femmes entrepreneures.",
+        "created_at": "<volatile>",
+        "description": "Entrepreneuriat et indépendance économique pour les femmes et veuves de militaires.",
+        "id": 4,
+        "image_url": "/media/axes/economie.svg",
+        "petition_slug": "autonomisation-femmes-veuves",
+        "slug": "autonomisation-femmes-veuves",
+        "title": "Autonomisation des femmes et veuves"
+      }
+    ]
+  }
+}

@@ -386,11 +386,13 @@ async function testE10Territory() {
 
 /** E11 — timeline → /a-propos */
 async function testE11Timeline() {
+  // Le redesign /a-propos (design-system) affiche date + description (title en
+  // secours seulement) : le marqueur vit donc dans description.
   const marker = `Timeline E2E ${TAG}`;
   const blocks = {
     about_timeline: {
-      fr: [{ date: "2099", title: marker, description: "Événement E2E." }],
-      en: [{ date: "2099", title: marker, description: "E2E event." }],
+      fr: [{ date: "2099", title: "Événement E2E", description: marker }],
+      en: [{ date: "2099", title: "E2E event", description: marker }],
     },
   };
   const patchRes = await api("/api/admin/settings", {
