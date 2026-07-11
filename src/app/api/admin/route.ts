@@ -8,7 +8,7 @@ import {
   getHelpRequestById,
 } from "@/lib/db";
 import { adminUpdateContent, updateContactStatus } from "@/infrastructure/repositories/content.repository";
-import { updateStoreAsync } from "@/infrastructure/persistence/store-access";
+import { patchSiteSettings } from "@/infrastructure/repositories/settings.repository";
 import {
   activateUser,
   suspendUser,
@@ -139,9 +139,8 @@ export async function POST(request: NextRequest) {
         url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/membre/tableau-de-bord`,
       });
     } else if (action === "petition_signatures_mark_read") {
-      await updateStoreAsync((store) => {
-        store.site_settings = store.site_settings || {};
-        store.site_settings.petition_signatures_seen_at = new Date().toISOString();
+      await patchSiteSettings({
+        petition_signatures_seen_at: new Date().toISOString(),
       });
     } else if (action === "delete" && id && table) {
       await adminDelete(table, id);

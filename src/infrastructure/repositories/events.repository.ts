@@ -20,6 +20,12 @@ export async function getUpcomingEvents(): Promise<PortalEvent[]> {
     .sort(byDateAsc);
 }
 
+/** Tous les événements du portail, sans tri (ordre du store). */
+export async function listPortalEvents(): Promise<PortalEvent[]> {
+  const store = await getStoreAsync();
+  return store.events ?? [];
+}
+
 /** Tous les événements, triés par date croissante. */
 export async function getAllEvents(): Promise<PortalEvent[]> {
   const store = await getStoreAsync();

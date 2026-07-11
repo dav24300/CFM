@@ -13,6 +13,7 @@ import {
   voteLivePoll,
   incrementViewerCount,
   getPendingChatCount,
+  getChatMessageWithEvent,
 } from "@/infrastructure/repositories/live.repository";
 import { getCurrentMember } from "@/infrastructure/auth/member-auth";
 import { savePushSubscription, getVapidPublicKey } from "@/infrastructure/push/web-push.adapter";
@@ -66,12 +67,7 @@ export async function moderateLiveChatMessage(
   messageId: number,
   status: "approved" | "rejected"
 ) {
-  const { getStoreAsync } = await import("@/infrastructure/persistence/store-access");
-  const store = await getStoreAsync();
-  const msg = store.live_chat_messages.find((m) => m.id === messageId);
-  const event = msg
-    ? store.live_events.find((e) => e.id === msg.live_event_id)
-    : undefined;
+  const { msg, event } = await getChatMessageWithEvent(messageId);
 
   await moderateChatMessage(messageId, status);
 

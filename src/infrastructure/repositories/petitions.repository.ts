@@ -117,6 +117,32 @@ export async function deletePetition(id: number): Promise<boolean> {
   return found;
 }
 
+/**
+ * Compteurs pétitions pour le tableau de bord admin.
+ * `seenAtIso` : dernier horodatage vu par l'admin — les signatures plus
+ * récentes sont comptées comme nouvelles (tout est nouveau si invalide).
+ */
+export async function getPetitionAdminCounters(seenAtIso: string): Promise<{
+  petitions: number;
+  signatures: number;
+  newSignatures: number;
+}> {
+  const store = await getStoreAsync();
+  const seenAt = Date.parse(seenAtIso);
+  const signatures = store.petition_signatures || [];
+  const newSignatures = signatures.filter((s) => {
+    const ts = Date.parse(s.signed_at);
+    if (!Number.isFinite(ts)) return false;
+    if (!Number.isFinite(seenAt)) return true;
+    return ts > seenAt;
+  }).length;
+  return {
+    petitions: (store.petitions || []).length,
+    signatures: signatures.length,
+    newSignatures,
+  };
+}
+
 export async function getPetitionSignatures(
   petitionId: number
 ): Promise<PetitionSignature[]> {

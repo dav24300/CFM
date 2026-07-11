@@ -123,3 +123,18 @@ export async function getAllFamilyLinks(): Promise<FamilyLink[]> {
   const store = await getStoreAsync();
   return [...store.family_links].reverse();
 }
+
+/** Compteurs liens familiaux pour le tableau de bord admin. */
+export async function getFamilyLinkCounters(): Promise<{
+  total: number;
+  pending: number;
+}> {
+  const store = await getStoreAsync();
+  const links = store.family_links || [];
+  return {
+    total: links.length,
+    pending: links.filter(
+      (l) => l.status !== "approved" && l.status !== "rejected"
+    ).length,
+  };
+}

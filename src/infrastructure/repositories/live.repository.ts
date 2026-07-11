@@ -187,6 +187,39 @@ export async function moderateChatMessage(
   });
 }
 
+/** Message de chat et événement live associé (pour la modération temps réel). */
+export async function getChatMessageWithEvent(messageId: number): Promise<{
+  msg: LiveChatMessage | undefined;
+  event: LiveEvent | undefined;
+}> {
+  const store = await getStoreAsync();
+  const msg = store.live_chat_messages.find((m) => m.id === messageId);
+  const event = msg
+    ? store.live_events.find((e) => e.id === msg.live_event_id)
+    : undefined;
+  return { msg, event };
+}
+
+/** Compteurs live pour le tableau de bord admin. */
+export async function getLiveAdminCounters(): Promise<{
+  liveEvents: number;
+  pendingChat: number;
+}> {
+  const store = await getStoreAsync();
+  return {
+    liveEvents: (store.live_events || []).length,
+    pendingChat: (store.live_chat_messages || []).filter(
+      (m) => m.status === "pending"
+    ).length,
+  };
+}
+
+/** Nombre d'abonnements push enregistrés (stats admin du live). */
+export async function countPushSubscriptions(): Promise<number> {
+  const store = await getStoreAsync();
+  return store.push_subscriptions?.length ?? 0;
+}
+
 export async function getPollsForEvent(eventId: number): Promise<LivePoll[]> {
   const store = await getStoreAsync();
   return store.live_polls.filter((p) => p.live_event_id === eventId);

@@ -17,6 +17,12 @@ import type {
 } from "@/domain/entities/content";
 import { decryptHelpRequest } from "@/infrastructure/encryption/aes.adapter";
 import { compareIsoDesc, toDateString } from "@/infrastructure/persistence/normalize-pg-row";
+import { getPetitionAdminCounters } from "@/infrastructure/repositories/petitions.repository";
+import { getUserAdminCounters } from "@/infrastructure/repositories/users.repository";
+import { getFamilyLinkCounters } from "@/infrastructure/repositories/family-links.repository";
+import { countDonations } from "@/infrastructure/repositories/donations.repository";
+import { getLiveAdminCounters } from "@/infrastructure/repositories/live.repository";
+import { getSiteSetting } from "@/infrastructure/repositories/settings.repository";
 
 export type { News, Study, Campaign, Testimonial, Action, PressRelease };
 
@@ -129,6 +135,26 @@ export async function addHelpRequest(data: Record<string, unknown>): Promise<voi
   });
 }
 
+/** Demandes d'aide brutes du store (non déchiffrées), sans tri. */
+export async function listHelpRequestsRaw(): Promise<Record<string, unknown>[]> {
+  const store = await getStoreAsync();
+  return store.help_requests ?? [];
+}
+
+/** Dates de création (created_at brutes) des formulaires reçus. */
+export async function getFormsActivityDates(): Promise<{
+  help: string[];
+  memberships: string[];
+  contacts: string[];
+}> {
+  const store = await getStoreAsync();
+  return {
+    help: store.help_requests.map((h) => h.created_at as string),
+    memberships: store.memberships.map((m) => m.created_at as string),
+    contacts: store.contact_messages.map((c) => c.created_at as string),
+  };
+}
+
 export async function getHelpRequestById(
   id: number
 ): Promise<Record<string, unknown> | undefined> {
@@ -169,21 +195,12 @@ export async function updateContactStatus(
 
 export async function getAdminStats() {
   const store = await getStoreAsync();
-  const seenAtRaw = store.site_settings?.petition_signatures_seen_at || "";
-  const seenAt = Date.parse(seenAtRaw);
-  const pendingUsers = (store.users || []).filter((u) => u.status === "pending").length;
-  const pendingFamily = (store.family_links || []).filter(
-    (l) => l.status !== "approved" && l.status !== "rejected"
-  ).length;
-  const pendingChat = (store.live_chat_messages || []).filter(
-    (m) => m.status === "pending"
-  ).length;
-  const newPetitionSignatures = (store.petition_signatures || []).filter((s) => {
-    const ts = Date.parse(s.signed_at);
-    if (!Number.isFinite(ts)) return false;
-    if (!Number.isFinite(seenAt)) return true;
-    return ts > seenAt;
-  }).length;
+  const seenAtRaw = (await getSiteSetting("petition_signatures_seen_at")) || "";
+  const petitionCounters = await getPetitionAdminCounters(seenAtRaw);
+  const userCounters = await getUserAdminCounters();
+  const familyCounters = await getFamilyLinkCounters();
+  const liveCounters = await getLiveAdminCounters();
+  const donations = await countDonations();
   return {
     news: store.news.length,
     studies: store.studies.length,
@@ -194,16 +211,16 @@ export async function getAdminStats() {
     contacts: store.contact_messages.length,
     pending_memberships: store.memberships.filter((m) => m.status === "pending").length,
     new_help: store.help_requests.filter((h) => h.status === "new").length,
-    users: (store.users || []).length,
-    pending_users: pendingUsers,
-    donations: (store.donations || []).length,
-    petitions: (store.petitions || []).length,
-    petition_signatures: (store.petition_signatures || []).length,
-    new_petition_signatures: newPetitionSignatures,
-    family_links: (store.family_links || []).length,
-    pending_family_links: pendingFamily,
-    live_events: (store.live_events || []).length,
-    pending_chat: pendingChat,
+    users: userCounters.users,
+    pending_users: userCounters.pendingUsers,
+    donations,
+    petitions: petitionCounters.petitions,
+    petition_signatures: petitionCounters.signatures,
+    new_petition_signatures: petitionCounters.newSignatures,
+    family_links: familyCounters.total,
+    pending_family_links: familyCounters.pending,
+    live_events: liveCounters.liveEvents,
+    pending_chat: liveCounters.pendingChat,
   };
 }
 
@@ -303,6 +320,42 @@ export async function adminCreate(
     },
     { invalidate: "content", contentTable: table }
   );
+}
+
+/**
+ * Applique un patch partiel sur une actualité (édition admin).
+ * Retourne false si l'actualité est introuvable ; invalide le cache
+ * contenu « news » uniquement en cas de succès.
+ */
+export async function updateNewsItem(
+  id: number,
+  patch: {
+    title?: string;
+    content?: string;
+    slug?: string;
+    excerpt?: string;
+    category?: string;
+    cover_image?: string;
+    cover_image_alt?: string;
+    published?: 0 | 1;
+  }
+): Promise<boolean> {
+  let found = false;
+  await updateStoreAsync((store) => {
+    const item = store.news.find((n) => n.id === id);
+    if (!item) return;
+    found = true;
+    if (patch.title !== undefined) item.title = patch.title;
+    if (patch.content !== undefined) item.content = patch.content;
+    if (patch.slug !== undefined) item.slug = patch.slug;
+    if (patch.excerpt !== undefined) item.excerpt = patch.excerpt || null;
+    if (patch.category !== undefined) item.category = patch.category || "actualite";
+    if (patch.cover_image !== undefined) item.cover_image = patch.cover_image || null;
+    if (patch.cover_image_alt !== undefined) item.cover_image_alt = patch.cover_image_alt || null;
+    if (patch.published !== undefined) item.published = patch.published;
+  });
+  if (found) invalidateContentCache("news");
+  return found;
 }
 
 export async function adminUpdateStatus(

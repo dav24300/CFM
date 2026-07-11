@@ -60,6 +60,18 @@ export async function getAllDonations(): Promise<Donation[]> {
   return [...store.donations].reverse();
 }
 
+/** Dates de création (created_at brutes) de tous les dons. */
+export async function listDonationCreationDates(): Promise<string[]> {
+  const store = await getStoreAsync();
+  return store.donations.map((d) => d.created_at);
+}
+
+/** Nombre total de dons enregistrés. */
+export async function countDonations(): Promise<number> {
+  const store = await getStoreAsync();
+  return (store.donations || []).length;
+}
+
 export async function adminUpdateDonation(
   donationId: number,
   patch: { status?: Donation["status"]; transaction_id?: string | null }

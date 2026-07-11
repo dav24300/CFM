@@ -1,7 +1,10 @@
 import { NextRequest } from "next/server";
 import fs from "fs";
 import path from "path";
-import { getStoreAsync, updateStoreAsync } from "@/lib/store";
+import {
+  getSiteSetting,
+  patchSiteSettings,
+} from "@/infrastructure/repositories/settings.repository";
 import { invalidateI18nCache } from "@/infrastructure/cache/invalidate-i18n";
 import { requireAdminAccess } from "@/lib/admin-rest";
 import { jsonData, jsonError, jsonSuccess } from "@/lib/api-response";
@@ -20,8 +23,7 @@ export async function GET() {
   const auth = await requireAdminAccess();
   if (!auth.ok) return auth.response;
 
-  const store = await getStoreAsync();
-  const overridesRaw = store.site_settings.i18n_overrides;
+  const overridesRaw = await getSiteSetting("i18n_overrides");
   const overrides = overridesRaw ? (JSON.parse(overridesRaw) as Record<string, Record<string, string>>) : {};
 
   const base: Record<string, Record<string, unknown>> = {};
@@ -42,13 +44,11 @@ export async function PATCH(request: NextRequest) {
     return jsonError("locale, key et value requis", 400);
   }
 
-  await updateStoreAsync((store) => {
-    const raw = store.site_settings.i18n_overrides;
-    const overrides = raw ? (JSON.parse(raw) as Record<string, Record<string, string>>) : {};
-    if (!overrides[locale]) overrides[locale] = {};
-    overrides[locale][key] = value;
-    store.site_settings.i18n_overrides = JSON.stringify(overrides);
-  });
+  const raw = await getSiteSetting("i18n_overrides");
+  const overrides = raw ? (JSON.parse(raw) as Record<string, Record<string, string>>) : {};
+  if (!overrides[locale]) overrides[locale] = {};
+  overrides[locale][key] = value;
+  await patchSiteSettings({ i18n_overrides: JSON.stringify(overrides) });
   invalidateI18nCache();
 
   await logAdminAction({

@@ -126,6 +126,38 @@ export async function getAllUsers(): Promise<User[]> {
   return [...store.users].reverse();
 }
 
+/** Dates de création (created_at brutes) de tous les utilisateurs. */
+export async function listUserCreationDates(): Promise<string[]> {
+  const store = await getStoreAsync();
+  return store.users.map((u) => u.created_at);
+}
+
+/** Nombre de comptes « famille », optionnellement filtrés par province. */
+export async function countFamilyUsers(
+  province?: string | null
+): Promise<number> {
+  const store = await getStoreAsync();
+  const users = store.users ?? [];
+  return users.filter((u) => {
+    if (u.membership_type !== "famille") return false;
+    if (province && u.province !== province) return false;
+    return true;
+  }).length;
+}
+
+/** Compteurs utilisateurs pour le tableau de bord admin. */
+export async function getUserAdminCounters(): Promise<{
+  users: number;
+  pendingUsers: number;
+}> {
+  const store = await getStoreAsync();
+  const users = store.users || [];
+  return {
+    users: users.length,
+    pendingUsers: users.filter((u) => u.status === "pending").length,
+  };
+}
+
 export async function getHelpRequestsForUser(userId: number) {
   const user = await getUserById(userId);
   if (!user) return [];

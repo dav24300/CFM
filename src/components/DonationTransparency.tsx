@@ -1,11 +1,10 @@
 import { getAllDonations } from "@/lib/members";
 import { getTranslations } from "@/lib/i18n-server";
-import { getStoreAsync } from "@/lib/store";
+import { getSiteSetting } from "@/infrastructure/repositories/settings.repository";
 
 export async function DonationTransparency() {
   const { t } = await getTranslations();
-  const store = await getStoreAsync();
-  const showDonorList = store.site_settings?.donors_public === "1";
+  const showDonorList = (await getSiteSetting("donors_public")) === "1";
 
   const donations = (await getAllDonations()).filter((d) => d.status === "completed");
   const totalUsd = donations
