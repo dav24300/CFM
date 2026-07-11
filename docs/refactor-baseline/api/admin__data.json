@@ -131,6 +131,17 @@
     "newsletter": [],
     "petition_signatures": [
       {
+        "email": "c3-pgup@ex.com",
+        "id": 151,
+        "is_new": true,
+        "name": "Test C3",
+        "petition_id": 105,
+        "petition_slug": "reforme-protection-familles",
+        "petition_title": "Réforme de la protection des familles militaires",
+        "signed_at": "<volatile>",
+        "user_id": null
+      },
+      {
         "email": "admin@gouv.cd",
         "id": 125,
         "is_new": true,
@@ -172,8 +183,8 @@
         "description": "Appelons le gouvernement à renforcer la protection sociale des dépendants des militaires.",
         "goal": 1000,
         "id": 105,
-        "signatures": 2,
-        "signatures_count": 2,
+        "signatures": 3,
+        "signatures_count": 3,
         "slug": "reforme-protection-familles",
         "title": "Réforme de la protection des familles militaires"
       },

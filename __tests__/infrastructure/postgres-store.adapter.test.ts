@@ -28,11 +28,7 @@ describe("postgresStoreAdapter", () => {
     mockGetCache.mockReturnValue(null);
   });
 
-  afterEach(async () => {
-    const { resetPgFallbackForTests } = await import(
-      "@/infrastructure/persistence/postgres-store.adapter"
-    );
-    resetPgFallbackForTests();
+  afterEach(() => {
     process.env = env;
   });
 
@@ -96,15 +92,20 @@ describe("postgresStoreAdapter", () => {
     expect(mockSetCache).toHaveBeenCalled();
   });
 
-  it("falls back to JSON store when postgres read fails", async () => {
-    mockLoad.mockRejectedValue(new AggregateError([], "connection refused"));
+  it("propagates PERSISTENCE_UNAVAILABLE when postgres read fails (no JSON fallback)", async () => {
+    mockLoad.mockRejectedValue(
+      Object.assign(new Error("connect ECONNREFUSED 127.0.0.1:5433"), {
+        code: "ECONNREFUSED",
+      })
+    );
 
     const { postgresStoreAdapter } = await import(
       "@/infrastructure/persistence/postgres-store.adapter"
     );
 
-    const store = await postgresStoreAdapter.read();
-    expect(store.news.length).toBeGreaterThan(0);
+    await expect(postgresStoreAdapter.read()).rejects.toMatchObject({
+      code: "PERSISTENCE_UNAVAILABLE",
+    });
     expect(mockLoad).toHaveBeenCalledTimes(1);
   });
 });

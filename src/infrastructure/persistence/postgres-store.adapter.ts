@@ -15,68 +15,48 @@ import {
   normalizeCollections,
   seedDemoData,
 } from "@/infrastructure/persistence/store-seed";
-import {
-  getJsonStore,
-  updateJsonStore,
-} from "@/infrastructure/persistence/json-store.impl";
+import { mapPgError } from "@/infrastructure/persistence/sql/pg-errors";
 
-let pgUnavailable = false;
-
-function logPgFallback(reason: unknown): void {
-  const detail = reason instanceof Error ? reason.message : String(reason);
-  console.warn(
-    `[cfm-store] PostgreSQL unavailable (${detail}). Using local JSON store for this process.`
-  );
-}
-
-async function loadLocalFallback(): Promise<Store> {
-  try {
-    const json = await getJsonStore();
-    setPgStoreCache(json);
-    return json;
-  } catch {
-    const seed = loadSeedStore();
-    setPgStoreCache(seed);
-    return seed;
-  }
-}
+/**
+ * Adaptateur Store sur PostgreSQL.
+ * Plus AUCUN fallback JSON silencieux (ZC-4) : une erreur PostgreSQL remonte
+ * en erreur domaine (PERSISTENCE_UNAVAILABLE → 503 via handleDomainError),
+ * jamais vers data/store.json (éphémère et par instance en serverless).
+ * Le mode JSON reste réservé au dev sans DATABASE_URL (json-store.adapter).
+ */
 
 async function loadStore(): Promise<Store> {
   const cached = getPgStoreCache();
   if (cached) return cached;
 
-  if (pgUnavailable || !process.env.DATABASE_URL) {
-    return loadLocalFallback();
+  let fromPg: Store | null = null;
+  try {
+    fromPg = await loadStoreFromPostgres();
+  } catch (err) {
+    mapPgError(err);
   }
 
-  try {
-    const fromPg = await loadStoreFromPostgres();
-    if (fromPg) {
-      // Normalisation des collections manquantes : toujours, sans injection de données.
-      normalizeCollections(fromPg);
-      // Seeds de démo one-shot (ZC-5) : uniquement si store_meta.seed_version
-      // est en retard, sous verrou advisory (course multi-instances éliminée).
-      if ((fromPg._seed_version ?? 0) < CURRENT_SEED_VERSION) {
-        try {
-          if (await claimSeedVersion()) {
-            seedDemoData(fromPg);
-            fromPg._seed_version = CURRENT_SEED_VERSION;
-            await saveStoreToPostgres(fromPg);
-          } else {
-            // Une autre instance a déjà stampé ; ce snapshot sera rafraîchi au prochain load.
-            fromPg._seed_version = CURRENT_SEED_VERSION;
-          }
-        } catch {
-          // Seed non bloquant : le portail reste utilisable même si la persistance échoue.
+  if (fromPg) {
+    // Normalisation des collections manquantes : toujours, sans injection de données.
+    normalizeCollections(fromPg);
+    // Seeds de démo one-shot (ZC-5) : uniquement si store_meta.seed_version
+    // est en retard, sous verrou advisory (course multi-instances éliminée).
+    if ((fromPg._seed_version ?? 0) < CURRENT_SEED_VERSION) {
+      try {
+        if (await claimSeedVersion()) {
+          seedDemoData(fromPg);
+          fromPg._seed_version = CURRENT_SEED_VERSION;
+          await saveStoreToPostgres(fromPg);
+        } else {
+          // Une autre instance a déjà stampé ; ce snapshot sera rafraîchi au prochain load.
+          fromPg._seed_version = CURRENT_SEED_VERSION;
         }
+      } catch {
+        // Seed non bloquant : le portail reste utilisable même si la persistance échoue.
       }
-      setPgStoreCache(fromPg);
-      return fromPg;
     }
-  } catch (err) {
-    pgUnavailable = true;
-    logPgFallback(err);
-    return loadLocalFallback();
+    setPgStoreCache(fromPg);
+    return fromPg;
   }
 
   const seed = loadSeedStore();
@@ -92,25 +72,17 @@ export const postgresStoreAdapter: StorePort = {
   },
 
   async write(mutator: (store: Store) => void): Promise<Store> {
-    if (pgUnavailable) {
-      const store = await updateJsonStore(mutator);
-      setPgStoreCache(store);
-      return store;
-    }
-
+    const store = structuredClone(await this.read()) as Store;
+    // Les erreurs du mutator (erreurs domaine : ALREADY_SIGNED, NOT_FOUND…)
+    // se propagent telles quelles — comportement inchangé.
+    mutator(store);
     try {
-      const store = structuredClone(await this.read()) as Store;
-      mutator(store);
       await saveStoreToPostgres(store);
-      setPgStoreCache(store);
-      return store;
     } catch (err) {
-      pgUnavailable = true;
-      logPgFallback(err);
-      const store = await updateJsonStore(mutator);
-      setPgStoreCache(store);
-      return store;
+      mapPgError(err);
     }
+    setPgStoreCache(store);
+    return store;
   },
 
   nextId(store: Store): number {
@@ -131,9 +103,4 @@ export async function bootstrapPostgresStore(): Promise<boolean> {
     return false;
   }
   return false;
-}
-
-/** @internal Tests only */
-export function resetPgFallbackForTests(): void {
-  pgUnavailable = false;
 }
