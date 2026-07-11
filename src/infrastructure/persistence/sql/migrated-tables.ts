@@ -13,6 +13,9 @@ const MIGRATED_TABLES = new Set<string>([
   "memberships",
   "help_requests",
   "help_request_updates",
+  "users",
+  "family_links",
+  "password_reset_tokens",
 ]);
 
 export function isTableMigrated(table: string): boolean {

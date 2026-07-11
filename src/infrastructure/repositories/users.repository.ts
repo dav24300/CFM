@@ -8,6 +8,7 @@ import { domainError } from "@/domain/errors/domain-error";
 import { decryptHelpRequest } from "@/infrastructure/encryption/aes.adapter";
 import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
 import * as sqlForms from "@/infrastructure/repositories/sql/forms.sql";
+import * as sqlUsers from "@/infrastructure/repositories/sql/users.sql";
 import type {
   User,
   HelpRequestUpdate,
@@ -15,14 +16,24 @@ import type {
   UserRole,
 } from "@/domain/entities/v2";
 
+/**
+ * Agrégat utilisateurs (AUTH) — dual-mode :
+ * - PG (DATABASE_URL) : SQL ciblé (sql/users.sql.ts), unicité email par
+ *   contrainte users_email_key — concurrent-safe.
+ * - JSON (dev) : branche Store historique inchangée.
+ * Validations, hash bcrypt et codes d'erreur domaine restent communs.
+ */
+
 const SALT_ROUNDS = 10;
 
 export async function getUserById(id: number): Promise<User | undefined> {
+  if (isPgMode()) return sqlUsers.getUserById(id);
   const store = await getStoreAsync();
   return store.users.find((u) => u.id === id);
 }
 
 export async function getUserByEmail(email: string): Promise<User | undefined> {
+  if (isPgMode()) return sqlUsers.getUserByEmail(email);
   const store = await getStoreAsync();
   return store.users.find(
     (u) => u.email.toLowerCase() === email.trim().toLowerCase()
@@ -49,6 +60,15 @@ export async function registerUser(data: {
 
   const role: UserRole = data.membership_type === "benevole" ? "volunteer" : "member";
   const hash = await bcrypt.hash(data.password, SALT_ROUNDS);
+
+  if (isPgMode()) {
+    // Le pré-check getUserByEmail ci-dessus préserve l'ordre des erreurs ;
+    // la contrainte users_email_key reste le garde-fou concurrent-safe
+    // (23505 → EMAIL_EXISTS) — plus de scan mémoire.
+    const { password: _password, ...fields } = data;
+    return sqlUsers.createUser({ ...fields, password_hash: hash, role });
+  }
+
   let created!: User;
 
   await updateStoreAsync((store) => {
@@ -87,6 +107,7 @@ export async function verifyUserPassword(
 }
 
 export async function activateUser(userId: number): Promise<User | undefined> {
+  if (isPgMode()) return sqlUsers.activateUser(userId);
   let user: User | undefined;
   await updateStoreAsync((store) => {
     const u = store.users?.find((x) => x.id === userId);
@@ -103,6 +124,7 @@ export async function updateMemberProfile(
   userId: number,
   data: { first_name?: string; last_name?: string; phone?: string; province?: string }
 ): Promise<User | undefined> {
+  if (isPgMode()) return sqlUsers.updateMemberProfile(userId, data);
   let updated: User | undefined;
   await updateStoreAsync((store) => {
     const u = store.users?.find((x) => x.id === userId);
@@ -117,6 +139,7 @@ export async function updateMemberProfile(
 }
 
 export async function suspendUser(userId: number): Promise<void> {
+  if (isPgMode()) return sqlUsers.suspendUser(userId);
   await updateStoreAsync((store) => {
     const user = store.users?.find((u) => u.id === userId);
     if (user) user.status = "suspended";
@@ -124,12 +147,14 @@ export async function suspendUser(userId: number): Promise<void> {
 }
 
 export async function getAllUsers(): Promise<User[]> {
+  if (isPgMode()) return sqlUsers.getAllUsers();
   const store = await getStoreAsync();
   return [...store.users].reverse();
 }
 
 /** Dates de création (created_at brutes) de tous les utilisateurs. */
 export async function listUserCreationDates(): Promise<string[]> {
+  if (isPgMode()) return sqlUsers.listUserCreationDates();
   const store = await getStoreAsync();
   return store.users.map((u) => u.created_at);
 }
@@ -138,6 +163,7 @@ export async function listUserCreationDates(): Promise<string[]> {
 export async function countFamilyUsers(
   province?: string | null
 ): Promise<number> {
+  if (isPgMode()) return sqlUsers.countFamilyUsers(province);
   const store = await getStoreAsync();
   const users = store.users ?? [];
   return users.filter((u) => {
@@ -152,6 +178,7 @@ export async function getUserAdminCounters(): Promise<{
   users: number;
   pendingUsers: number;
 }> {
+  if (isPgMode()) return sqlUsers.getUserAdminCounters();
   const store = await getStoreAsync();
   const users = store.users || [];
   return {

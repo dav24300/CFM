@@ -226,4 +226,277 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
       expect(res.rows[0].n).toBe(10);
     });
   });
+
+  describe("users + auth (C8)", () => {
+    let users: typeof import("@/infrastructure/repositories/users.repository");
+    let familyLinks: typeof import("@/infrastructure/repositories/family-links.repository");
+    let passwordReset: typeof import("@/infrastructure/auth/password-reset");
+    let parentId: number;
+    let childId: number;
+
+    beforeAll(async () => {
+      users = await import("@/infrastructure/repositories/users.repository");
+      familyLinks = await import("@/infrastructure/repositories/family-links.repository");
+      passwordReset = await import("@/infrastructure/auth/password-reset");
+    });
+
+    it("register : id séquence, email trim + lowercase, statut pending", async () => {
+      const created = await users.registerUser({
+        email: "  Parent.One@Ex.CD ",
+        password: "motdepasse1",
+        first_name: "Papa",
+        last_name: "K",
+        phone: "0991",
+        province: "Kinshasa",
+        membership_type: "famille",
+        military_link: "epoux",
+      });
+      parentId = created.id;
+      expect(created.id).toBeGreaterThan(100);
+      expect(created.email).toBe("parent.one@ex.cd");
+      expect(created.role).toBe("member");
+      expect(created.status).toBe("pending");
+      expect(created.verified_at).toBeNull();
+      expect(typeof created.created_at).toBe("string");
+    });
+
+    it("doublon d'email (casse différente) → EMAIL_EXISTS", async () => {
+      await expect(
+        users.registerUser({
+          email: "PARENT.ONE@EX.CD",
+          password: "motdepasse1",
+          first_name: "Dup",
+          last_name: "K",
+          phone: "0000",
+          membership_type: "soutien",
+        })
+      ).rejects.toMatchObject({ code: "EMAIL_EXISTS" });
+    });
+
+    it("contrainte users_email_key : INSERT direct en doublon → EMAIL_EXISTS", async () => {
+      const sqlUsers = await import("@/infrastructure/repositories/sql/users.sql");
+      await expect(
+        sqlUsers.createUser({
+          email: "Parent.One@Ex.CD",
+          password_hash: "x",
+          first_name: "Race",
+          last_name: "K",
+          phone: "0000",
+          role: "member",
+          membership_type: "soutien",
+        })
+      ).rejects.toMatchObject({ code: "EMAIL_EXISTS" });
+    });
+
+    it("lookup par email insensible à la casse + login", async () => {
+      const found = await users.getUserByEmail("  PARENT.ONE@ex.cd ");
+      expect(found?.id).toBe(parentId);
+      const ok = await users.verifyUserPassword("Parent.One@EX.CD", "motdepasse1");
+      expect(ok?.id).toBe(parentId);
+      expect(await users.verifyUserPassword("parent.one@ex.cd", "mauvais-mdp")).toBeNull();
+      expect(await users.getUserByEmail("inconnu@ex.cd")).toBeUndefined();
+    });
+
+    it("activate / suspend + profil", async () => {
+      const activated = await users.activateUser(parentId);
+      expect(activated?.status).toBe("active");
+      expect(activated?.verified_at).toBeTruthy();
+
+      const updated = await users.updateMemberProfile(parentId, {
+        first_name: "  Papa-Maj  ",
+        phone: " 0992 ",
+      });
+      expect(updated?.first_name).toBe("Papa-Maj");
+      expect(updated?.phone).toBe("0992");
+      expect(updated?.last_name).toBe("K");
+
+      await users.suspendUser(parentId);
+      expect((await users.getUserById(parentId))?.status).toBe("suspended");
+
+      // Ré-activation pour la suite (liens familiaux).
+      expect((await users.activateUser(parentId))?.status).toBe("active");
+      expect(await users.activateUser(999999)).toBeUndefined();
+    });
+
+    it("cycle reset password complet en transaction", async () => {
+      const token1 = await passwordReset.createPasswordResetToken(parentId);
+      expect(token1).toMatch(/^[0-9a-f]{64}$/);
+
+      // Un nouveau token invalide le précédent (non utilisé → supprimé).
+      const token2 = await passwordReset.createPasswordResetToken(parentId);
+      expect(await passwordReset.getValidResetToken(token1)).toBeNull();
+      const valid = await passwordReset.getValidResetToken(token2);
+      expect(valid?.user_id).toBe(parentId);
+      expect(valid?.used).toBe(0);
+
+      await expect(
+        passwordReset.resetPasswordWithToken(token2, "court")
+      ).rejects.toMatchObject({ code: "PASSWORD_TOO_SHORT" });
+
+      await passwordReset.resetPasswordWithToken(token2, "nouveaumdp1");
+
+      // Token consommé : refusé au second passage.
+      await expect(
+        passwordReset.resetPasswordWithToken(token2, "encoreunautre1")
+      ).rejects.toMatchObject({ code: "INVALID_TOKEN" });
+      expect(await passwordReset.getValidResetToken(token2)).toBeNull();
+
+      // Login : nouveau hash actif, ancien mot de passe refusé.
+      expect(await users.verifyUserPassword("parent.one@ex.cd", "motdepasse1")).toBeNull();
+      const ok = await users.verifyUserPassword("parent.one@ex.cd", "nouveaumdp1");
+      expect(ok?.id).toBe(parentId);
+
+      await expect(
+        passwordReset.resetPasswordWithToken("token-inconnu", "nouveaumdp1")
+      ).rejects.toMatchObject({ code: "INVALID_TOKEN" });
+    });
+
+    it("family link : invitation parent, gardes domaine, approve/reject", async () => {
+      const child = await users.registerUser({
+        email: "enfant.one@ex.cd",
+        password: "motdepasse1",
+        first_name: "Fille",
+        last_name: "K",
+        phone: "0993",
+        membership_type: "soutien",
+      });
+      childId = child.id;
+
+      await expect(
+        familyLinks.requestFamilyLinkByParent({
+          parent_user_id: parentId,
+          child_email: "inconnu@ex.cd",
+          relationship: "enfant",
+        })
+      ).rejects.toMatchObject({ code: "CHILD_NOT_FOUND" });
+
+      await expect(
+        familyLinks.requestFamilyLinkByParent({
+          parent_user_id: parentId,
+          child_email: "parent.one@ex.cd",
+          relationship: "enfant",
+        })
+      ).rejects.toMatchObject({ code: "SELF_LINK" });
+
+      // Un compte non « famille » ne peut pas inviter.
+      await expect(
+        familyLinks.requestFamilyLinkByParent({
+          parent_user_id: childId,
+          child_email: "parent.one@ex.cd",
+          relationship: "parent",
+        })
+      ).rejects.toMatchObject({ code: "NOT_FAMILY_PARENT" });
+
+      const link = await familyLinks.requestFamilyLinkByParent({
+        parent_user_id: parentId,
+        child_email: "ENFANT.ONE@EX.CD",
+        relationship: "enfant",
+      });
+      expect(link.id).toBeGreaterThan(100);
+      expect(link.status).toBe("pending_child");
+      expect(link.initiated_by).toBe("parent");
+
+      await expect(
+        familyLinks.requestFamilyLinkByParent({
+          parent_user_id: parentId,
+          child_email: "enfant.one@ex.cd",
+          relationship: "enfant",
+        })
+      ).rejects.toMatchObject({ code: "LINK_EXISTS" });
+
+      // Seul l'enfant destinataire peut répondre à pending_child.
+      await expect(
+        familyLinks.respondFamilyLink(link.id, parentId, true)
+      ).rejects.toMatchObject({ code: "FORBIDDEN" });
+      await expect(
+        familyLinks.respondFamilyLink(999999, childId, true)
+      ).rejects.toMatchObject({ code: "NOT_FOUND" });
+
+      await familyLinks.respondFamilyLink(link.id, childId, true);
+      const links = await familyLinks.getFamilyLinksForUser(parentId);
+      expect(links).toHaveLength(1);
+      expect(links[0].status).toBe("approved");
+    });
+
+    it("family link : demande enfant, rejet puis re-demande, admin approve", async () => {
+      await expect(
+        familyLinks.requestFamilyLinkByChild({
+          child_user_id: childId,
+          parent_email: "inconnu@ex.cd",
+          relationship: "parent",
+        })
+      ).rejects.toMatchObject({ code: "PARENT_NOT_FOUND" });
+
+      const parent2 = await users.registerUser({
+        email: "parent.two@ex.cd",
+        password: "motdepasse1",
+        first_name: "Maman",
+        last_name: "M",
+        phone: "0994",
+        province: "Goma",
+        membership_type: "famille",
+        military_link: "epouse",
+      });
+
+      const link = await familyLinks.requestFamilyLinkByChild({
+        child_user_id: childId,
+        parent_email: "Parent.Two@Ex.CD",
+        relationship: "parent",
+      });
+      expect(link.status).toBe("pending_parent");
+      expect(link.initiated_by).toBe("child");
+
+      // Seul le parent destinataire peut répondre à pending_parent.
+      await expect(
+        familyLinks.respondFamilyLink(link.id, childId, true)
+      ).rejects.toMatchObject({ code: "FORBIDDEN" });
+
+      await familyLinks.respondFamilyLink(link.id, parent2.id, false);
+      let all = await familyLinks.getAllFamilyLinks();
+      expect(all[0].id).toBe(link.id);
+      expect(all[0].status).toBe("rejected");
+
+      // Lien rejeté : une nouvelle demande du même couple est autorisée.
+      const retry = await familyLinks.requestFamilyLinkByChild({
+        child_user_id: childId,
+        parent_email: "parent.two@ex.cd",
+        relationship: "parent",
+      });
+      expect(retry.id).toBeGreaterThan(link.id);
+
+      await familyLinks.adminApproveFamilyLink(retry.id);
+      all = await familyLinks.getAllFamilyLinks();
+      expect(all.find((l) => l.id === retry.id)?.status).toBe("approved");
+
+      await familyLinks.adminRejectFamilyLink(retry.id);
+      all = await familyLinks.getAllFamilyLinks();
+      expect(all.find((l) => l.id === retry.id)?.status).toBe("rejected");
+      // Liens admin listés id DESC.
+      expect(all.map((l) => l.id)).toEqual([...all.map((l) => l.id)].sort((a, b) => b - a));
+
+      // Admin sur id inconnu : no-op silencieux (parité Store).
+      await familyLinks.adminApproveFamilyLink(999999);
+    });
+
+    it("compteurs et satellites C2", async () => {
+      const counters = await users.getUserAdminCounters();
+      expect(counters.users).toBe(3);
+      expect(counters.pendingUsers).toBe(2); // enfant + parent.two jamais activés
+
+      expect(await users.countFamilyUsers()).toBe(2);
+      expect(await users.countFamilyUsers("Kinshasa")).toBe(1);
+      expect(await users.countFamilyUsers("Lubumbashi")).toBe(0);
+
+      const dates = await users.listUserCreationDates();
+      expect(dates).toHaveLength(3);
+      expect(dates.every((d) => typeof d === "string" && d.length > 0)).toBe(true);
+
+      const all = await users.getAllUsers();
+      expect(all.map((u) => u.id)).toEqual([...all.map((u) => u.id)].sort((a, b) => b - a));
+
+      const familyCounters = await familyLinks.getFamilyLinkCounters();
+      expect(familyCounters.total).toBe(3); // approuvé + rejeté + rejeté
+      expect(familyCounters.pending).toBe(0); // approved + rejected exclus
+    });
+  });
 });
