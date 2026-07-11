@@ -312,18 +312,31 @@ async function upsertRow(client: PoolClient, spec: TableSpec, row: Row): Promise
   );
 }
 
-export async function saveStoreToTables(client: PoolClient, store: Store): Promise<void> {
+export async function saveStoreToTables(
+  client: PoolClient,
+  store: Store,
+  options: {
+    /**
+     * Scripts de provisionnement UNIQUEMENT (migrate-json-to-pg) : écrit aussi
+     * les tables migrées en SQL ciblé. JAMAIS au runtime — un snapshot Store
+     * périmé écraserait les écritures SQL concurrentes.
+     */
+    includeMigrated?: boolean;
+  } = {}
+): Promise<void> {
+  const skip = (table: string) => !options.includeMigrated && isTableMigrated(table);
+
   // 1. Prune des lignes absentes du store (enfants d'abord — les FK ON DELETE
   //    CASCADE ne touchent que des lignes elles-mêmes absentes du store).
   for (let i = TABLE_SPECS.length - 1; i >= 0; i--) {
     const spec = TABLE_SPECS[i];
-    if (isTableMigrated(spec.table)) continue;
+    if (skip(spec.table)) continue;
     await pruneTable(client, spec, store);
   }
 
   // 2. Upsert (parents d'abord pour satisfaire les FK).
   for (const spec of TABLE_SPECS) {
-    if (isTableMigrated(spec.table)) continue;
+    if (skip(spec.table)) continue;
     for (const row of spec.rows(store)) {
       await upsertRow(client, spec, row);
     }

@@ -184,6 +184,23 @@ describe.skipIf(!TEST_URL)("pg-sync différentiel (intégration PG)", () => {
     expect(sigs.rows[0].n).toBe(1);
   });
 
+  it("includeMigrated (scripts de provisionnement) : écrit aussi les tables migrées", async () => {
+    const { saveStoreToTables } = await import("@/infrastructure/persistence/pg-sync");
+    migrated.__setMigratedTablesForTests(["petitions", "petition_signatures"]);
+    const fixture = fixtureStore();
+    fixture.petitions[0].title = "Provisionné";
+    await sqlClient.withClient(async (c) => {
+      await c.query("BEGIN");
+      await saveStoreToTables(c, fixture, { includeMigrated: true });
+      await c.query("COMMIT");
+    });
+    migrated.__setMigratedTablesForTests([]);
+    const res = await sqlClient.query<{ title: string }>(
+      "SELECT title FROM petitions WHERE id = 21"
+    );
+    expect(res.rows[0]?.title).toBe("Provisionné");
+  });
+
   it("séquences : INSERT sans id utilise nextval au-dessus du compteur global", async () => {
     // Simule un cold start avec données présentes : le bloc DO du schéma
     // (idempotent, monotone) rehausse les séquences au-dessus du compteur.

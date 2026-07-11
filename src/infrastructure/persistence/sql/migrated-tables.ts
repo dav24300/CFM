@@ -24,6 +24,13 @@ const MIGRATED_TABLES = new Set<string>([
   "events",
   "member_messages",
   "member_resources",
+  "news",
+  "studies",
+  "campaigns",
+  "actions",
+  "testimonials",
+  "press_releases",
+  "partners",
 ]);
 
 export function isTableMigrated(table: string): boolean {

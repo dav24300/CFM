@@ -1028,4 +1028,238 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
       });
     });
   });
+
+  describe("contenu (C12a)", () => {
+    let sqlContent: typeof import("@/infrastructure/repositories/sql/content.sql");
+    let partnersRepo: typeof import("@/infrastructure/repositories/partners.repository");
+    let newsId: number;
+    let oldNewsId: number;
+    let draftNewsId: number;
+
+    beforeAll(async () => {
+      sqlContent = await import("@/infrastructure/repositories/sql/content.sql");
+      partnersRepo = await import("@/infrastructure/repositories/partners.repository");
+    });
+
+    it("adminCreate news : id séquence, slug auto (slugify), défauts published=1 / category actualite", async () => {
+      await content.adminCreate("news", {
+        title: "Première Édition Spéciale",
+        content: "Corps de l'article",
+      });
+      const res = await sqlClient.query<{
+        id: number;
+        slug: string;
+        excerpt: string | null;
+        category: string;
+        published: number;
+        created_at: Date;
+      }>("SELECT * FROM news ORDER BY id");
+      expect(res.rows).toHaveLength(1);
+      newsId = res.rows[0].id;
+      expect(newsId).toBeGreaterThan(100);
+      expect(res.rows[0].slug).toBe("premiere-edition-speciale");
+      expect(res.rows[0].excerpt).toBeNull();
+      expect(res.rows[0].category).toBe("actualite");
+      expect(res.rows[0].published).toBe(1);
+      expect(res.rows[0].created_at).toBeTruthy();
+    });
+
+    it("doublon de slug news → idx_news_slug lève PERSISTENCE_ERROR (écart assumé : la branche Store insérait silencieusement)", async () => {
+      await expect(
+        content.adminCreate("news", {
+          title: "Doublon",
+          slug: "premiere-edition-speciale",
+          content: "x",
+        })
+      ).rejects.toMatchObject({ code: "PERSISTENCE_ERROR" });
+      // Rien n'a été inséré, et idem côté studies (idx_studies_slug).
+      const n = await sqlClient.query<{ n: number }>("SELECT COUNT(*)::int AS n FROM news");
+      expect(n.rows[0].n).toBe(1);
+
+      await content.adminCreate("studies", { title: "Étude Alpha", content: "Corps" });
+      await expect(
+        content.adminCreate("studies", { title: "Étude Alpha", content: "Doublon" })
+      ).rejects.toMatchObject({ code: "PERSISTENCE_ERROR" });
+    });
+
+    it("adminCreate : table inconnue = no-op silencieux (parité Store)", async () => {
+      await content.adminCreate("pg_tables_inconnue", { title: "x", content: "y" });
+      // Aucune erreur ; rien d'inséré nulle part.
+      const n = await sqlClient.query<{ n: number }>("SELECT COUNT(*)::int AS n FROM news");
+      expect(n.rows[0].n).toBe(1);
+    });
+
+    it("updateNewsItem / adminUpdateContent : patch partiel, normalisations, id inconnu → false", async () => {
+      // Deux actualités supplémentaires pour les tris.
+      await content.adminCreate("news", { title: "Ancienne actu", content: "Corps ancien" });
+      await content.adminCreate("news", { title: "Brouillon", content: "Non publié" });
+      const rows = await sqlClient.query<{ id: number; slug: string }>(
+        "SELECT id, slug FROM news ORDER BY id"
+      );
+      oldNewsId = rows.rows[1].id;
+      draftNewsId = rows.rows[2].id;
+
+      // Dates contrôlées pour vérifier le tri DESC (via adminUpdateContent).
+      expect(
+        await content.adminUpdateContent("news", newsId, { created_at: "2026-03-01T00:00:00.000Z" })
+      ).toBe(true);
+      expect(
+        await content.adminUpdateContent("news", oldNewsId, { created_at: "2026-01-01T00:00:00.000Z" })
+      ).toBe(true);
+      expect(
+        await content.adminUpdateContent("news", draftNewsId, { created_at: "2026-05-01T00:00:00.000Z" })
+      ).toBe(true);
+
+      // updateNewsItem : excerpt "" → null, category "" → "actualite", dépublication.
+      expect(
+        await content.updateNewsItem(draftNewsId, { published: 0, excerpt: "", category: "" })
+      ).toBe(true);
+      const draft = await sqlClient.query<{
+        published: number;
+        excerpt: string | null;
+        category: string;
+      }>("SELECT published, excerpt, category FROM news WHERE id = $1", [draftNewsId]);
+      expect(draft.rows[0]).toEqual({ published: 0, excerpt: null, category: "actualite" });
+
+      expect(await content.updateNewsItem(999999, { title: "x" })).toBe(false);
+      expect(await content.adminUpdateContent("news", 999999, { title: "x" })).toBe(false);
+      expect(await content.adminUpdateContent("table_inconnue", newsId, { title: "x" })).toBe(false);
+
+      // Patch appliqué et persistant.
+      expect(await content.updateNewsItem(oldNewsId, { title: "Ancienne actu (modifiée)" })).toBe(true);
+      const updated = await sqlClient.query<{ title: string }>(
+        "SELECT title FROM news WHERE id = $1",
+        [oldNewsId]
+      );
+      expect(updated.rows[0].title).toBe("Ancienne actu (modifiée)");
+    });
+
+    it("tris publics : published=0 exclu, created_at DESC, created_at normalisé en ISO", async () => {
+      const news = await content.getPublishedNewsAsync();
+      expect(news.map((n) => n.id)).toEqual([newsId, oldNewsId]); // 2026-03 avant 2026-01, brouillon exclu
+      expect(news.every((n) => typeof n.created_at === "string")).toBe(true);
+
+      const studies = await content.getPublishedStudiesAsync();
+      expect(studies).toHaveLength(1);
+      expect(studies[0].slug).toBe("etude-alpha");
+    });
+
+    it("campaigns : description retombe sur content, active=1, désactivation exclut de la liste publique", async () => {
+      await content.adminCreate("campaigns", { title: "Campagne Un", content: "Contenu campagne" });
+      await content.adminCreate("campaigns", { title: "Campagne Deux", description: "Desc" });
+      const rows = await sqlClient.query<{
+        id: number;
+        description: string | null;
+        active: number;
+      }>("SELECT id, description, active FROM campaigns ORDER BY id");
+      expect(rows.rows[0].description).toBe("Contenu campagne"); // fallback description || content
+      expect(rows.rows.every((c) => c.active === 1)).toBe(true);
+
+      expect(await content.adminUpdateContent("campaigns", rows.rows[1].id, { active: 0 })).toBe(true);
+      const active = await content.getActiveCampaignsAsync();
+      expect(active.map((c) => c.id)).toEqual([rows.rows[0].id]);
+    });
+
+    it("testimonials : anonymous \"1\" → 1, absent → 0, published=1", async () => {
+      await content.adminCreate("testimonials", { content: "Témoignage anonyme", anonymous: "1" });
+      await content.adminCreate("testimonials", { content: "Témoignage signé", author: "Awa" });
+      const rows = await sqlClient.query<{
+        author: string | null;
+        anonymous: number;
+        published: number;
+      }>("SELECT author, anonymous, published FROM testimonials ORDER BY id");
+      expect(rows.rows[0]).toEqual({ author: null, anonymous: 1, published: 1 });
+      expect(rows.rows[1]).toEqual({ author: "Awa", anonymous: 0, published: 1 });
+      expect(await content.getPublishedTestimonialsAsync()).toHaveLength(2);
+    });
+
+    it("actions : tri date DESC avec null en dernier, date normalisée YYYY-MM-DD", async () => {
+      await content.adminCreate("actions", {
+        province: "Kinshasa",
+        title: "Février",
+        date: "2026-02-01",
+      });
+      await content.adminCreate("actions", {
+        province: "Goma",
+        title: "Avril",
+        date: "2026-04-01",
+        type: "distribution",
+      });
+      await content.adminCreate("actions", { province: "Ituri", title: "Sans date" });
+
+      const actions = await content.getActionsAsync();
+      expect(actions.map((a) => a.title)).toEqual(["Avril", "Février", "Sans date"]);
+      expect(actions[0].date).toBe("2026-04-01"); // DATE pg → chaîne YYYY-MM-DD
+      expect(actions[0].type).toBe("distribution");
+      expect(actions[1].type).toBe("action"); // défaut
+      expect(actions[2].date).toBeNull();
+    });
+
+    it("press_releases : création + liste publique", async () => {
+      await content.adminCreate("press_releases", { title: "Communiqué Un", content: "CP" });
+      const press = await content.getPublishedPressReleasesAsync();
+      expect(press).toHaveLength(1);
+      expect(press[0].slug).toBe("communique-un");
+      expect(press[0].file_url).toBeNull();
+    });
+
+    it("adminDelete : suppression + id/table inconnus no-op, compteurs admin", async () => {
+      await content.adminCreate("news", { title: "À supprimer", content: "x" });
+      const before = await sqlClient.query<{ n: number }>("SELECT COUNT(*)::int AS n FROM news");
+      expect(before.rows[0].n).toBe(4);
+      const target = await sqlClient.query<{ id: number }>(
+        "SELECT id FROM news WHERE slug = 'a-supprimer'"
+      );
+      await content.adminDelete("news", target.rows[0].id);
+      await content.adminDelete("news", 999999); // no-op silencieux
+      await content.adminDelete("table_inconnue", newsId); // table hors whitelist : no-op
+      const after = await sqlClient.query<{ n: number }>("SELECT COUNT(*)::int AS n FROM news");
+      expect(after.rows[0].n).toBe(3);
+
+      const counters = await sqlContent.getContentAdminCounters();
+      expect(counters).toEqual({ news: 3, studies: 1, campaigns: 2 });
+    });
+
+    it("getAdminData : listes contenu id DESC (brouillons inclus), actions triées par date", async () => {
+      const data = await content.getAdminData();
+      expect(data.news.map((n) => n.id)).toEqual([draftNewsId, oldNewsId, newsId]);
+      expect(data.studies).toHaveLength(1);
+      expect(data.campaigns.map((c) => c.id)).toEqual(
+        [...data.campaigns.map((c) => c.id)].sort((a, b) => b - a)
+      );
+      expect(data.testimonials).toHaveLength(2);
+      expect(data.press_releases).toHaveLength(1);
+      expect(data.actions.map((a) => a.title)).toEqual(["Avril", "Février", "Sans date"]);
+    });
+
+    it("partners : CRUD + sort_order (défaut COUNT+1, 0 explicite conservé, tri stable)", async () => {
+      const p1 = await partnersRepo.adminCreatePartner({ name: "Partenaire Un" });
+      expect(p1.id).toBeGreaterThan(100);
+      expect(p1.sort_order).toBe(1); // défaut = COUNT(*) + 1
+      expect(p1.logo_url).toBeNull();
+
+      const p2 = await partnersRepo.adminCreatePartner({
+        name: "Partenaire Zéro",
+        sort_order: 0,
+        website: "https://ex.cd",
+      });
+      expect(p2.sort_order).toBe(0); // ?? : 0 explicite conservé
+
+      const sorted = await partnersRepo.getAllPartners();
+      expect(sorted.map((p) => p.name)).toEqual(["Partenaire Zéro", "Partenaire Un"]);
+
+      expect(
+        await partnersRepo.adminUpdatePartner(p1.id, { logo_url: "/uploads/p1.png", sort_order: -1 })
+      ).toBe(true);
+      expect(await partnersRepo.adminUpdatePartner(999999, { name: "x" })).toBe(false);
+      const resorted = await partnersRepo.getAllPartners();
+      expect(resorted.map((p) => p.name)).toEqual(["Partenaire Un", "Partenaire Zéro"]);
+      expect(resorted[0].logo_url).toBe("/uploads/p1.png");
+
+      await partnersRepo.adminDeletePartner(p2.id);
+      await partnersRepo.adminDeletePartner(999999); // no-op silencieux
+      const remaining = await partnersRepo.getAllPartners();
+      expect(remaining.map((p) => p.id)).toEqual([p1.id]);
+    });
+  });
 });

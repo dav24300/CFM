@@ -31,6 +31,15 @@
         "type": "sensibilisation"
       },
       {
+        "date": "2099-01-01",
+        "description": "Action créée par test E2E.",
+        "id": 161,
+        "photo": null,
+        "province": "Kinshasa",
+        "title": "Action E2E e2e-1783810107864",
+        "type": "sensibilisation"
+      },
+      {
         "date": "2025-03-09",
         "description": "Formation entrepreneuriat pour veuves",
         "id": 11,
@@ -88,6 +97,18 @@
     "help_requests": [],
     "memberships": [],
     "news": [
+      {
+        "category": "actualite",
+        "content": "Contenu test E2E.",
+        "cover_image": null,
+        "cover_image_alt": null,
+        "created_at": "<volatile>",
+        "excerpt": "Extrait E2E",
+        "id": 161,
+        "published": 1,
+        "slug": "actualite-e2e-e2e-1783810107864",
+        "title": "Actualité E2E e2e-1783810107864"
+      },
       {
         "category": "actualite",
         "content": "Contenu test E2E.",

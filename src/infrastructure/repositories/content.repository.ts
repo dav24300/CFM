@@ -21,6 +21,7 @@ import type { Store } from "@/domain/entities/store";
 import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
 import * as sqlNewsletter from "@/infrastructure/repositories/sql/newsletter.sql";
 import * as sqlForms from "@/infrastructure/repositories/sql/forms.sql";
+import * as sqlContent from "@/infrastructure/repositories/sql/content.sql";
 import { getPetitionAdminCounters } from "@/infrastructure/repositories/petitions.repository";
 import { getUserAdminCounters } from "@/infrastructure/repositories/users.repository";
 import { getFamilyLinkCounters } from "@/infrastructure/repositories/family-links.repository";
@@ -31,6 +32,7 @@ import { getSiteSetting } from "@/infrastructure/repositories/settings.repositor
 export type { News, Study, Campaign, Testimonial, Action, PressRelease };
 
 export async function getPublishedNewsAsync(): Promise<News[]> {
+  if (isPgMode()) return sqlContent.getPublishedNews();
   const store = await getStoreAsync();
   return store.news
     .filter((n) => n.published === 1)
@@ -38,6 +40,7 @@ export async function getPublishedNewsAsync(): Promise<News[]> {
 }
 
 export async function getPublishedStudiesAsync(): Promise<Study[]> {
+  if (isPgMode()) return sqlContent.getPublishedStudies();
   const store = await getStoreAsync();
   return store.studies
     .filter((s) => s.published === 1)
@@ -45,6 +48,7 @@ export async function getPublishedStudiesAsync(): Promise<Study[]> {
 }
 
 export async function getActiveCampaignsAsync(): Promise<Campaign[]> {
+  if (isPgMode()) return sqlContent.getActiveCampaigns();
   const store = await getStoreAsync();
   return store.campaigns
     .filter((c) => c.active === 1)
@@ -52,6 +56,7 @@ export async function getActiveCampaignsAsync(): Promise<Campaign[]> {
 }
 
 export async function getPublishedTestimonialsAsync(): Promise<Testimonial[]> {
+  if (isPgMode()) return sqlContent.getPublishedTestimonials();
   const store = await getStoreAsync();
   return store.testimonials
     .filter((t) => t.published === 1)
@@ -59,6 +64,7 @@ export async function getPublishedTestimonialsAsync(): Promise<Testimonial[]> {
 }
 
 export async function getActionsAsync(): Promise<Action[]> {
+  if (isPgMode()) return sqlContent.getActionsSorted();
   const store = await getStoreAsync();
   return store.actions.sort((a, b) => {
     if (!a.date) return 1;
@@ -68,6 +74,7 @@ export async function getActionsAsync(): Promise<Action[]> {
 }
 
 export async function getPublishedPressReleasesAsync(): Promise<PressRelease[]> {
+  if (isPgMode()) return sqlContent.getPublishedPressReleases();
   const store = await getStoreAsync();
   return store.press_releases
     .filter((p) => p.published === 1)
@@ -238,8 +245,23 @@ async function getFormsAdminCounters(): Promise<{
   };
 }
 
-export async function getAdminStats() {
+/** Compteurs contenu (dual-mode) pour le tableau de bord admin. */
+async function getContentAdminCounters(): Promise<{
+  news: number;
+  studies: number;
+  campaigns: number;
+}> {
+  if (isPgMode()) return sqlContent.getContentAdminCounters();
   const store = await getStoreAsync();
+  return {
+    news: store.news.length,
+    studies: store.studies.length,
+    campaigns: store.campaigns.length,
+  };
+}
+
+export async function getAdminStats() {
+  const contentCounters = await getContentAdminCounters();
   const seenAtRaw = (await getSiteSetting("petition_signatures_seen_at")) || "";
   const petitionCounters = await getPetitionAdminCounters(seenAtRaw);
   const userCounters = await getUserAdminCounters();
@@ -248,9 +270,9 @@ export async function getAdminStats() {
   const donations = await countDonations();
   const formCounters = await getFormsAdminCounters();
   return {
-    news: store.news.length,
-    studies: store.studies.length,
-    campaigns: store.campaigns.length,
+    news: contentCounters.news,
+    studies: contentCounters.studies,
+    campaigns: contentCounters.campaigns,
     memberships: formCounters.memberships,
     help_requests: formCounters.help_requests,
     newsletter: await countNewsletterSubscribers(),
@@ -271,22 +293,28 @@ export async function getAdminStats() {
 }
 
 export async function getAdminData() {
+  if (isPgMode()) {
+    return {
+      memberships: await sqlForms.listMembershipsDesc(),
+      help_requests: (await sqlForms.listHelpRequestsDesc()).map((h) =>
+        decryptHelpRequest(h)
+      ),
+      newsletter: await listNewsletterSubscribers(),
+      contacts: await sqlForms.listContactMessagesDesc(),
+      news: await sqlContent.listNewsDesc(),
+      studies: await sqlContent.listStudiesDesc(),
+      campaigns: await sqlContent.listCampaignsDesc(),
+      actions: await getActionsAsync(),
+      testimonials: await sqlContent.listTestimonialsDesc(),
+      press_releases: await sqlContent.listPressReleasesDesc(),
+    };
+  }
   const store = await getStoreAsync();
-  const pg = isPgMode();
-  const memberships = pg
-    ? await sqlForms.listMembershipsDesc()
-    : [...store.memberships].reverse();
-  const helpRequests = pg
-    ? await sqlForms.listHelpRequestsDesc()
-    : [...store.help_requests].reverse();
-  const contacts = pg
-    ? await sqlForms.listContactMessagesDesc()
-    : [...store.contact_messages].reverse();
   return {
-    memberships,
-    help_requests: helpRequests.map((h) => decryptHelpRequest(h)),
+    memberships: [...store.memberships].reverse(),
+    help_requests: [...store.help_requests].reverse().map((h) => decryptHelpRequest(h)),
     newsletter: await listNewsletterSubscribers(),
-    contacts,
+    contacts: [...store.contact_messages].reverse(),
     news: [...store.news].reverse(),
     studies: [...store.studies].reverse(),
     campaigns: [...store.campaigns].reverse(),
@@ -300,6 +328,13 @@ export async function adminCreate(
   table: string,
   data: Record<string, string>
 ): Promise<void> {
+  if (isPgMode()) {
+    // Table inconnue : insert no-op mais invalidation quand même (parité avec
+    // withStoreMutation qui invalide inconditionnellement).
+    await sqlContent.adminCreate(table, data);
+    invalidateContentCache(table);
+    return;
+  }
   await withStoreMutation(
     (store) => {
       const now = new Date().toISOString();
@@ -396,6 +431,11 @@ export async function updateNewsItem(
     published?: 0 | 1;
   }
 ): Promise<boolean> {
+  if (isPgMode()) {
+    const found = await sqlContent.updateNewsItem(id, patch);
+    if (found) invalidateContentCache("news");
+    return found;
+  }
   let found = false;
   await updateStoreAsync((store) => {
     const item = store.news.find((n) => n.id === id);
@@ -439,6 +479,12 @@ export async function adminUpdateContent(
   const allowed = ["news", "studies", "campaigns", "actions", "testimonials", "press_releases"] as const;
   if (!allowed.includes(table as (typeof allowed)[number])) return false;
 
+  if (isPgMode()) {
+    const found = await sqlContent.adminUpdateContent(table, id, data);
+    if (found) invalidateContentCache(table);
+    return found;
+  }
+
   let found = false;
   await updateStoreAsync((store) => {
     const key = table as keyof typeof store;
@@ -458,6 +504,13 @@ export async function adminUpdateContent(
 export async function adminDelete(table: string, id: number): Promise<void> {
   const allowed = ["news", "studies", "campaigns", "actions", "testimonials", "press_releases"] as const;
   if (!allowed.includes(table as (typeof allowed)[number])) return;
+
+  if (isPgMode()) {
+    // id inconnu : delete no-op mais invalidation quand même (parité Store).
+    await sqlContent.adminDelete(table, id);
+    invalidateContentCache(table);
+    return;
+  }
 
   await withStoreMutation(
     (store) => {
