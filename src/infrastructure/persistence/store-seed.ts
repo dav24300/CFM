@@ -236,19 +236,10 @@ export function normalizeCollections(store: Store): boolean {
   return changed;
 }
 
-/**
- * Seeds de démonstration one-shot (anciennement re-seed sur length===0 à chaque
- * chargement — cause de la résurrection des données supprimées, ZC-5).
- * Ne doit être appelé que si (_seed_version ?? 0) < CURRENT_SEED_VERSION.
- */
-export function seedDemoData(store: Store): boolean {
-  let changed = false;
-
-  if (store.petitions.length === 0) {
-    const now = new Date().toISOString();
-    store._counters.global = (store._counters.global || 100) + 1;
-    store.petitions.push({
-      id: store._counters.global,
+/** Pétitions de démonstration (sans id — attribué par le compteur ou la séquence PG). */
+export function demoPetitionSeeds(now: string): Omit<Petition, "id">[] {
+  return [
+    {
       title: "Réforme de la protection des familles militaires",
       slug: "reforme-protection-familles",
       description:
@@ -259,10 +250,8 @@ export function seedDemoData(store: Store): boolean {
       signatures_count: 0,
       active: 1,
       created_at: now,
-    });
-    store._counters.global += 1;
-    store.petitions.push({
-      id: store._counters.global,
+    },
+    {
       title: "Autonomisation des veuves de militaires",
       slug: "autonomisation-veuves-petition",
       description:
@@ -272,7 +261,24 @@ export function seedDemoData(store: Store): boolean {
       signatures_count: 0,
       active: 1,
       created_at: now,
-    });
+    },
+  ];
+}
+
+/**
+ * Seeds de démonstration one-shot (anciennement re-seed sur length===0 à chaque
+ * chargement — cause de la résurrection des données supprimées, ZC-5).
+ * Ne doit être appelé que si (_seed_version ?? 0) < CURRENT_SEED_VERSION.
+ */
+export function seedDemoData(store: Store): boolean {
+  let changed = false;
+
+  if (store.petitions.length === 0) {
+    const now = new Date().toISOString();
+    for (const seed of demoPetitionSeeds(now)) {
+      store._counters.global = (store._counters.global || 100) + 1;
+      store.petitions.push({ id: store._counters.global, ...seed });
+    }
     changed = true;
   }
 

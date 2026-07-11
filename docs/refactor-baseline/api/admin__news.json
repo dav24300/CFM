@@ -10,6 +10,18 @@
         "cover_image_alt": null,
         "created_at": "<volatile>",
         "excerpt": "Extrait E2E",
+        "id": 157,
+        "published": 1,
+        "slug": "actualite-e2e-e2e-1783804081013",
+        "title": "Actualité E2E e2e-1783804081013"
+      },
+      {
+        "category": "actualite",
+        "content": "Contenu test E2E.",
+        "cover_image": null,
+        "cover_image_alt": null,
+        "created_at": "<volatile>",
+        "excerpt": "Extrait E2E",
         "id": 146,
         "published": 1,
         "slug": "actualite-e2e-e2e-1783802520927",

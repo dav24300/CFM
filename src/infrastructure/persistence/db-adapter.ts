@@ -46,18 +46,11 @@ export async function saveStoreToPostgres(store: Store): Promise<void> {
   await withClient(async (client) => {
     try {
       await client.query("BEGIN");
-      await client.query(
-        "INSERT INTO app_state (id, data) VALUES (1, $1::jsonb) ON CONFLICT (id) DO NOTHING",
-        [JSON.stringify(store)]
-      );
-      await client.query("SELECT id FROM app_state WHERE id = 1 FOR UPDATE");
-
-      await client.query(
-        `INSERT INTO app_state (id, data, updated_at)
-         VALUES (1, $1::jsonb, NOW())
-         ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()`,
-        [JSON.stringify(store)]
-      );
+      // app_state n'est plus écrit au runtime (il contiendrait des snapshots
+      // périmés des agrégats migrés en SQL — piège de restauration). Le verrou
+      // advisory reprend la sérialisation des writes Store que le
+      // SELECT ... FOR UPDATE sur app_state assurait auparavant.
+      await client.query("SELECT pg_advisory_xact_lock(hashtext('cfm_store_sync'))");
 
       if (isNormalizedPgEnabled()) {
         await saveStoreToTables(client, store);

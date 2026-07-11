@@ -34,6 +34,14 @@
         "name": "Partenaire E2E e2e-1783802520927",
         "sort_order": 99,
         "website": "https://example.com"
+      },
+      {
+        "description": null,
+        "id": 158,
+        "logo_url": "/media/axes/economie.svg",
+        "name": "Partenaire E2E e2e-1783804081013",
+        "sort_order": 99,
+        "website": "https://example.com"
       }
     ]
   }

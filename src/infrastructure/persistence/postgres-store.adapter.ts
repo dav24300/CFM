@@ -16,6 +16,7 @@ import {
   seedDemoData,
 } from "@/infrastructure/persistence/store-seed";
 import { mapPgError } from "@/infrastructure/persistence/sql/pg-errors";
+import { seedMigratedAggregates } from "@/infrastructure/persistence/sql/seed-hooks";
 
 /**
  * Adaptateur Store sur PostgreSQL.
@@ -47,6 +48,8 @@ async function loadStore(): Promise<Store> {
           seedDemoData(fromPg);
           fromPg._seed_version = CURRENT_SEED_VERSION;
           await saveStoreToPostgres(fromPg);
+          // Les tables migrées (SQL ciblé) ne passent plus par le save Store.
+          await seedMigratedAggregates();
         } else {
           // Une autre instance a déjà stampé ; ce snapshot sera rafraîchi au prochain load.
           fromPg._seed_version = CURRENT_SEED_VERSION;

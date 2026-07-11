@@ -86,6 +86,7 @@ describe.skipIf(!TEST_URL)("pg-sync différentiel (intégration PG)", () => {
   let db: typeof import("@/infrastructure/persistence/db-adapter");
   let sqlClient: typeof import("@/infrastructure/persistence/sql/sql-client");
   let migrated: typeof import("@/infrastructure/persistence/sql/migrated-tables");
+  let realMigrated: string[] = [];
 
   beforeAll(async () => {
     process.env.DATABASE_URL = TEST_URL;
@@ -100,11 +101,15 @@ describe.skipIf(!TEST_URL)("pg-sync différentiel (intégration PG)", () => {
     db = await import("@/infrastructure/persistence/db-adapter");
     sqlClient = await import("@/infrastructure/persistence/sql/sql-client");
     migrated = await import("@/infrastructure/persistence/sql/migrated-tables");
+    // Ces tests exercent le sync legacy sur TOUTES les tables : registre vidé,
+    // restauré en afterAll.
+    realMigrated = migrated.listMigratedTables();
+    migrated.__setMigratedTablesForTests([]);
     await sqlClient.ensureSchemaOnce();
   });
 
   afterAll(async () => {
-    migrated.__setMigratedTablesForTests([]);
+    migrated.__setMigratedTablesForTests(realMigrated);
     await sqlClient.closePoolForTests();
   });
 

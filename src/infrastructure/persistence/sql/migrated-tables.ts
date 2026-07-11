@@ -5,7 +5,8 @@
  * Chaque commit d'agrégat (C4+) ajoute ses tables à ce Set.
  */
 const MIGRATED_TABLES = new Set<string>([
-  // C4: "petitions", "petition_signatures",
+  "petitions",
+  "petition_signatures",
 ]);
 
 export function isTableMigrated(table: string): boolean {
