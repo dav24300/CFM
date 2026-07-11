@@ -83,8 +83,24 @@ function fixtureStore(): Store {
 
 describe.skipIf(!TEST_URL)("pg-sync différentiel (intégration PG)", () => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  let db: typeof import("@/infrastructure/persistence/db-adapter");
+  let pgSync: typeof import("@/infrastructure/persistence/pg-sync");
+  let seedHooks: typeof import("@/infrastructure/persistence/sql/seed-hooks");
   let sqlClient: typeof import("@/infrastructure/persistence/sql/sql-client");
+
+  // Depuis C13, pg-sync est un module scripts : on reproduit ici l'usage
+  // des scripts de provisionnement (BEGIN + saveStoreToTables + COMMIT).
+  const save = async (store: Store, options?: { includeMigrated?: boolean }) =>
+    sqlClient.withClient(async (c) => {
+      await c.query("BEGIN");
+      try {
+        await pgSync.saveStoreToTables(c, store, options);
+        await c.query("COMMIT");
+      } catch (err) {
+        await c.query("ROLLBACK");
+        throw err;
+      }
+    });
+  const load = async () => sqlClient.withClient((c) => pgSync.loadStoreFromTables(c));
   let migrated: typeof import("@/infrastructure/persistence/sql/migrated-tables");
   let realMigrated: string[] = [];
 
@@ -98,7 +114,8 @@ describe.skipIf(!TEST_URL)("pg-sync différentiel (intégration PG)", () => {
     await admin.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
     await admin.end();
 
-    db = await import("@/infrastructure/persistence/db-adapter");
+    pgSync = await import("@/infrastructure/persistence/pg-sync");
+    seedHooks = await import("@/infrastructure/persistence/sql/seed-hooks");
     sqlClient = await import("@/infrastructure/persistence/sql/sql-client");
     migrated = await import("@/infrastructure/persistence/sql/migrated-tables");
     // Ces tests exercent le sync legacy sur TOUTES les tables : registre vidé,
@@ -115,8 +132,8 @@ describe.skipIf(!TEST_URL)("pg-sync différentiel (intégration PG)", () => {
 
   it("save → load : iso-comportement (deep-equal des collections)", async () => {
     const fixture = fixtureStore();
-    await db.saveStoreToPostgres(fixture);
-    const loaded = await db.loadStoreFromPostgres();
+    await save(fixture);
+    const loaded = await load();
     expect(loaded).not.toBeNull();
     const l = loaded as Store;
 
@@ -147,7 +164,7 @@ describe.skipIf(!TEST_URL)("pg-sync différentiel (intégration PG)", () => {
   it("prune : une ligne supprimée du store disparaît de la table", async () => {
     const fixture = fixtureStore();
     fixture.newsletter = []; // désinscription
-    await db.saveStoreToPostgres(fixture);
+    await save(fixture);
     const res = await sqlClient.query("SELECT COUNT(*)::int AS n FROM newsletter");
     expect(res.rows[0].n).toBe(0);
   });
@@ -157,7 +174,7 @@ describe.skipIf(!TEST_URL)("pg-sync différentiel (intégration PG)", () => {
     fixture.petition_signatures = [
       { id: 99, petition_id: 21, user_id: null, email: "sig@ex.com", name: "S2", signed_at: "2026-01-02T00:00:00.000Z" },
     ];
-    await db.saveStoreToPostgres(fixture);
+    await save(fixture);
     const res = await sqlClient.query(
       "SELECT id, name FROM petition_signatures WHERE petition_id = 21"
     );
@@ -169,13 +186,13 @@ describe.skipIf(!TEST_URL)("pg-sync différentiel (intégration PG)", () => {
     fixture.petition_signatures = [
       { id: 99, petition_id: 21, user_id: null, email: "sig@ex.com", name: "S2", signed_at: "2026-01-02T00:00:00.000Z" },
     ];
-    await db.saveStoreToPostgres(fixture);
+    await save(fixture);
 
     migrated.__setMigratedTablesForTests(["petitions", "petition_signatures"]);
     const wiped = fixtureStore();
     wiped.petitions = [];
     wiped.petition_signatures = [];
-    await db.saveStoreToPostgres(wiped);
+    await save(wiped);
     migrated.__setMigratedTablesForTests([]);
 
     const pets = await sqlClient.query("SELECT COUNT(*)::int AS n FROM petitions");
@@ -185,15 +202,10 @@ describe.skipIf(!TEST_URL)("pg-sync différentiel (intégration PG)", () => {
   });
 
   it("includeMigrated (scripts de provisionnement) : écrit aussi les tables migrées", async () => {
-    const { saveStoreToTables } = await import("@/infrastructure/persistence/pg-sync");
     migrated.__setMigratedTablesForTests(["petitions", "petition_signatures"]);
     const fixture = fixtureStore();
     fixture.petitions[0].title = "Provisionné";
-    await sqlClient.withClient(async (c) => {
-      await c.query("BEGIN");
-      await saveStoreToTables(c, fixture, { includeMigrated: true });
-      await c.query("COMMIT");
-    });
+    await save(fixture, { includeMigrated: true });
     migrated.__setMigratedTablesForTests([]);
     const res = await sqlClient.query<{ title: string }>(
       "SELECT title FROM petitions WHERE id = 21"
@@ -216,7 +228,7 @@ describe.skipIf(!TEST_URL)("pg-sync différentiel (intégration PG)", () => {
 
   it("claimSeedVersion : accordé une seule fois", async () => {
     await sqlClient.query("UPDATE store_meta SET seed_version = 0 WHERE id = 1");
-    expect(await db.claimSeedVersion()).toBe(true);
-    expect(await db.claimSeedVersion()).toBe(false);
+    expect(await seedHooks.claimSeedVersion()).toBe(true);
+    expect(await seedHooks.claimSeedVersion()).toBe(false);
   });
 });

@@ -44,7 +44,6 @@ const vars = [
   ["SUPABASE_URL", process.env.SUPABASE_URL, false, false],
   ["SUPABASE_SERVICE_ROLE_KEY", process.env.SUPABASE_SERVICE_ROLE_KEY, true, false],
   ["SUPABASE_STORAGE_BUCKET", env("SUPABASE_STORAGE_BUCKET") || "media-uploads", false, false],
-  ["CFM_PG_NORMALIZED", "true", false, false],
   // --- Site ---
   ["NEXT_PUBLIC_SITE_URL", process.env.NEXT_PUBLIC_SITE_URL || "https://cfm-asbl.vercel.app", false, false],
   ["NEXT_PUBLIC_CONTACT_PHONE", env("NEXT_PUBLIC_CONTACT_PHONE"), false, true],

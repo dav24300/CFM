@@ -1,7 +1,7 @@
 # ADR 0001 — Persistance PostgreSQL normalisee
 
 - **Date**: 2026-07
-- **Statut**: Acceptee
+- **Statut**: Remplacee par [ADR 0005](0005-sql-par-agregat-sequences.md) (2026-07 — SQL cible par agregat ; le sync Store decrit ici ne subsiste que dans les scripts de provisionnement)
 
 ## Contexte
 

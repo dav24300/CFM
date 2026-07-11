@@ -6,10 +6,6 @@ import type { Store } from "@/domain/entities/store";
 import { normalizePgRows } from "@/infrastructure/persistence/normalize-pg-row";
 import { isTableMigrated } from "@/infrastructure/persistence/sql/migrated-tables";
 
-export function isNormalizedPgEnabled(): boolean {
-  return Boolean(process.env.DATABASE_URL) && process.env.CFM_PG_NORMALIZED !== "false";
-}
-
 export async function applyFullSchema(client: PoolClient): Promise<void> {
   const schemaPath = path.join(process.cwd(), "scripts", "schema.sql");
   const sql = fs.readFileSync(schemaPath, "utf-8");
@@ -22,19 +18,15 @@ export async function hasNormalizedData(client: PoolClient): Promise<boolean> {
 }
 
 /**
- * Sync différentiel Store → tables normalisées.
+ * Sync Store ↔ tables normalisées — MODULE SCRIPTS UNIQUEMENT depuis C13.
+ * Au runtime, tous les agrégats passent par repositories/sql/* ; ce module
+ * ne sert plus qu'aux scripts de provisionnement/sauvegarde :
+ * - migrate-json-to-pg.mjs : saveStoreToTables({includeMigrated: true})
+ * - hydrate-from-postgres.mjs : loadStoreFromTables
  *
- * Remplace l'ancien TRUNCATE 28 tables + réinsertion complète :
- * - upsert par ligne (INSERT ... ON CONFLICT DO UPDATE) + prune des lignes absentes ;
- * - effet final identique pour les tables non migrées (iso-comportement) ;
- * - les tables du registre MIGRATED_TABLES (écrites en SQL ciblé par les
- *   repositories) sont ignorées : aucune écriture Store ne peut les corrompre,
- *   et aucun TRUNCATE CASCADE ne peut plus emporter leurs lignes via les FK.
- *
- * Ordre d'exécution : prune enfants→parents PUIS upsert parents→enfants.
- * Le prune préalable évite les violations d'index uniques transitoires
- * (ex. signature supprimée puis re-signée : même (petition_id, email) sous un
- * nouvel id — l'ancienne ligne doit disparaître avant l'insertion).
+ * Sync différentiel (remplace l'ancien TRUNCATE 28 tables) :
+ * prune enfants→parents PUIS upsert parents→enfants — le prune préalable
+ * évite les violations d'index uniques transitoires.
  */
 
 type Row = Record<string, unknown>;

@@ -375,5 +375,9 @@ BEGIN
       PERFORM setval(seq, target);
     END IF;
     EXECUTE format('ALTER TABLE %I ALTER COLUMN id SET DEFAULT nextval(%L)', t, seq);
+    -- Teardown P1 (C13) : plus aucun TRUNCATE ... RESTART IDENTITY dans le
+    -- code — les séquences peuvent être rattachées à leur colonne (ménage
+    -- DROP TABLE, comportement standard).
+    EXECUTE format('ALTER SEQUENCE %I OWNED BY %I.id', seq, t);
   END LOOP;
 END $$;

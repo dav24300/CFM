@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { isPostgresEnabled } from "@/infrastructure/persistence/db-adapter";
+import { isPgMode, query } from "@/infrastructure/persistence/sql/sql-client";
 import { checkRedisHealth } from "@/infrastructure/rate-limit/redis";
-import { bootstrapPostgresStore } from "@/infrastructure/persistence/postgres-store.adapter";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -9,10 +8,10 @@ export const runtime = "nodejs";
 type CheckStatus = "ok" | "degraded" | "skipped";
 
 async function checkDatabase(): Promise<CheckStatus> {
-  if (!isPostgresEnabled()) return "skipped";
+  if (!isPgMode()) return "skipped";
   try {
-    const hydrated = await bootstrapPostgresStore();
-    return hydrated ? "ok" : "degraded";
+    await query("SELECT 1");
+    return "ok";
   } catch {
     return "degraded";
   }

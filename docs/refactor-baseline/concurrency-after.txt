@@ -1,0 +1,43 @@
+Run 1 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 1 — B: signature 200/persistée, newsletter 200/persistée
+Run 2 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 2 — B: signature 200/persistée, newsletter 200/persistée
+Run 3 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 3 — B: signature 200/persistée, newsletter 200/persistée
+Run 4 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 4 — B: signature 200/persistée, newsletter 200/persistée
+Run 5 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 5 — B: signature 200/persistée, newsletter 200/persistée
+Run 6 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 6 — B: signature 200/persistée, newsletter 200/persistée
+Run 7 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 7 — B: signature 200/persistée, newsletter 200/persistée
+Run 8 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 8 — B: signature 200/persistée, newsletter 200/persistée
+Run 9 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 9 — B: signature 200/persistée, newsletter 200/persistée
+Run 10 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 10 — B: signature 200/persistée, newsletter 200/persistée
+Run 11 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 11 — B: signature 200/persistée, newsletter 200/persistée
+Run 12 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 12 — B: signature 200/persistée, newsletter 200/persistée
+Run 13 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 13 — B: signature 200/persistée, newsletter 200/persistée
+Run 14 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 14 — B: signature 200/persistée, newsletter 200/persistée
+Run 15 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 15 — B: signature 200/persistée, newsletter 200/persistée
+Run 16 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 16 — B: signature 200/persistée, newsletter 200/persistée
+Run 17 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 17 — B: signature 200/persistée, newsletter 200/persistée
+Run 18 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 18 — B: signature 200/persistée, newsletter 200/persistée
+Run 19 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 19 — B: signature 200/persistée, newsletter 200/persistée
+Run 20 — A: 10/10 acceptées (HTTP), 10 persistées ✓
+Run 20 — B: signature 200/persistée, newsletter 200/persistée
+
+Résultat : 0 écriture(s) perdue(s) sur 20 run(s) (A: 0, B: 0)
+✓ Aucune perte

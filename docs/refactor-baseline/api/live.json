@@ -6,6 +6,23 @@
       {
         "chat_moderation": 1,
         "created_at": "<volatile>",
+        "description": "Test V3 mobilisation",
+        "ended_at": "<volatile>",
+        "id": 166,
+        "replay_url": null,
+        "slug": "live-v3-live-1783813657041",
+        "started_at": "<volatile>",
+        "status": "ended",
+        "stream_url": null,
+        "thumbnail": null,
+        "thumbnail_alt": null,
+        "title": "Live v3-live-1783813657041",
+        "viewer_count": "<volatile>",
+        "youtube_id": null
+      },
+      {
+        "chat_moderation": 1,
+        "created_at": "<volatile>",
         "description": "Replay du rassemblement historique des familles de militaires à la Foire Internationale de Kinshasa.",
         "ended_at": "<volatile>",
         "id": 110,
