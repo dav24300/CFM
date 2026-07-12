@@ -4,7 +4,7 @@
   "body": {
     "actions": [
       {
-        "date": "2025-03-09",
+        "date": "2025-03-10",
         "description": "Formation entrepreneuriat pour veuves",
         "id": 11,
         "photo": null,
@@ -13,7 +13,7 @@
         "type": "atelier"
       },
       {
-        "date": "2025-02-19",
+        "date": "2025-02-20",
         "description": "Rencontre avec les autorités locales",
         "id": 12,
         "photo": null,
@@ -22,7 +22,7 @@
         "type": "plaidoyer"
       },
       {
-        "date": "2025-01-14",
+        "date": "2025-01-15",
         "description": "Grand rassemblement des familles militaires",
         "id": 10,
         "photo": "/media/fikin-2025/rassemblement-01.svg",
