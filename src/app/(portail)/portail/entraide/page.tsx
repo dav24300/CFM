@@ -33,28 +33,6 @@ function formatDate(iso: string | null): string | null {
   });
 }
 
-// Fil communautaire : exemples statiques modérés (non persistés).
-const COMMUNITY_POSTS = [
-  {
-    initials: "BM",
-    group: "Scolarité",
-    title: "Groupe d’entraide scolarité à Goma ?",
-    author: "Béatrice M.",
-    province: "Nord-Kivu",
-    ago: "il y a 1 j",
-    replies: 4,
-  },
-  {
-    initials: "AK",
-    group: "Entrepreneuriat",
-    title: "Retour d’expérience : microcrédit et petit commerce",
-    author: "Alice K.",
-    province: "Haut-Katanga",
-    ago: "il y a 3 j",
-    replies: 9,
-  },
-];
-
 export default async function PortailEntraidePage() {
   const member = await getCurrentMember();
   if (!member) redirect("/membre/connexion");
@@ -130,59 +108,6 @@ export default async function PortailEntraidePage() {
             })}
           </div>
         )}
-      </section>
-
-      <section className="mt-10">
-        <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.05em] text-site-muted">
-          Fil d’entraide communautaire
-        </h2>
-        <div className="flex flex-col gap-3">
-          {COMMUNITY_POSTS.map((post) => (
-            <article
-              key={post.initials + post.title}
-              className="flex items-start gap-4 border border-site-hairline bg-white p-5"
-            >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center bg-site-surface text-[13px] font-semibold text-site-primary">
-                {post.initials}
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-site-primary">
-                    {post.group}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-site-success">
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5" />
-                    </svg>
-                    Modéré
-                  </span>
-                </div>
-                <h3 className="font-serif text-lg font-medium leading-snug text-site-ink">
-                  {post.title}
-                </h3>
-                <p className="mt-1 text-[13.5px] text-site-muted">
-                  {post.author} · {post.province} · {post.ago}
-                </p>
-              </div>
-              <div className="shrink-0 text-right">
-                <div className="font-serif text-base text-site-ink">
-                  {post.replies}
-                </div>
-                <div className="text-[11px] text-site-muted-2">réponses</div>
-              </div>
-            </article>
-          ))}
-        </div>
       </section>
     </PortalPage>
   );

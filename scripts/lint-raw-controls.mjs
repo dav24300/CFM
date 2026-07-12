@@ -18,10 +18,8 @@ const SCOPES = ["src/app/(site)", "src/app/(portail)"];
 const RAW_BUTTON = /<button[\s>]/;
 const RAW_STATUS = /\bbg-(green|red|amber|gray)-(600|700)\b/;
 
-// Fichiers encore non migrés — à retirer au fil des phases (voir plan design system).
-const BUTTON_ALLOWLIST = new Set([
-  "src/app/(portail)/portail/page.tsx",
-]);
+// Allowlist des fichiers encore non migrés (vide : (site)/(portail) sont clean).
+const BUTTON_ALLOWLIST = new Set([]);
 
 function walk(dir) {
   const out = [];
