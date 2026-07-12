@@ -13,6 +13,9 @@ const LIMITED_PREFIXES = [
   "/api/member/register",
   "/api/member/login",
   "/api/member/forgot-password",
+  // P2.5 — endpoints publics jusqu'ici sans aucune limite :
+  "/api/push",
+  "/api/member/reset-password",
 ];
 
 // Endpoints d'authentification à fort enjeu : plafond bien plus strict

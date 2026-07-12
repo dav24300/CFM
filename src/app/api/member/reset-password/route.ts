@@ -1,15 +1,19 @@
 import { NextRequest } from "next/server";
 import { resetPassword } from "@/application/services/member.service";
-import { handleDomainErrorOrFallback, jsonError, jsonSuccess } from "@/lib/api-response";
+import { handleDomainErrorOrFallback, jsonSuccess } from "@/lib/api-response";
+import { parseOrBadRequest } from "@/lib/validators";
+import { memberResetPasswordSchema } from "@/lib/validators/public-api";
 
 export async function POST(request: NextRequest) {
-  try {
-    const { token, password } = await request.json();
-    if (!token || !password) {
-      return jsonError("Champs requis", 400);
-    }
+  const parsed = parseOrBadRequest(
+    memberResetPasswordSchema,
+    await request.json().catch(() => null),
+    "Champs requis"
+  );
+  if (!parsed.ok) return parsed.response;
 
-    await resetPassword(token, password);
+  try {
+    await resetPassword(parsed.data.token, parsed.data.password);
     return jsonSuccess();
   } catch (err) {
     return handleDomainErrorOrFallback(err, "Erreur");

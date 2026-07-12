@@ -13,6 +13,8 @@ import {
   jsonSuccess,
   jsonUnauthorized,
 } from "@/lib/api-response";
+import { parseOrBadRequest } from "@/lib/validators";
+import { memberFamilyActionSchema } from "@/lib/validators/public-api";
 
 export async function GET() {
   const user = await getCurrentMember();
@@ -30,9 +32,15 @@ export async function POST(request: NextRequest) {
     return jsonForbidden("Compte non actif");
   }
 
+  const parsed = parseOrBadRequest(
+    memberFamilyActionSchema,
+    await request.json().catch(() => null),
+    "Action inconnue"
+  );
+  if (!parsed.ok) return parsed.response;
+
   try {
-    const body = await request.json();
-    const result = await manageFamilyLink(userId, body);
+    const result = await manageFamilyLink(userId, parsed.data);
     if (result) return jsonSuccess({ link: result });
     return jsonSuccess();
   } catch (err) {

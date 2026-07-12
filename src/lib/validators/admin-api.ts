@@ -155,6 +155,71 @@ export const adminMediaAssignSchema = z.object({
   path: z.string().min(1),
 });
 
+// ── P2.5 : partenaires ───────────────────────────────────────────────────────
+// L'UI (PartnersPanel) envoie explicitement `null` pour vider website /
+// logo_url / description : nullish obligatoire.
+
+export const adminPartnerCreateSchema = z.object({
+  name: z.string().trim().min(1),
+  logo_url: z.string().nullish(),
+  website: z.string().nullish(),
+  description: z.string().nullish(),
+  sort_order: z.coerce.number().int().nullish(),
+});
+
+export const adminPartnerPatchSchema = z.object({
+  // id validé dans la route (Number(...) + 404 "ID requis", parité historique).
+  id: z.unknown().optional(),
+  name: z.string().optional(),
+  logo_url: z.string().nullish(),
+  website: z.string().nullish(),
+  description: z.string().nullish(),
+  sort_order: z.coerce.number().int().nullish(),
+});
+
+// ── P2.5 : route action-based POST /api/admin/live ──────────────────────────
+// Schéma discriminé sur `action` (modèle adminActionSchema/P2.3) : action
+// inconnue → 400 "Action inconnue" (parité avec l'ancien fallthrough).
+
+const liveEventIdSchema = z.coerce.number().int().positive();
+
+export const adminLiveActionSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("pending_chat"), eventId: liveEventIdSchema }),
+  z.object({ action: z.literal("all_chat"), eventId: liveEventIdSchema }),
+  z.object({ action: z.literal("polls"), eventId: liveEventIdSchema }),
+  z.object({
+    action: z.literal("set_thumbnail"),
+    id: liveEventIdSchema,
+    thumbnail: z.string().nullish(),
+    thumbnail_alt: z.string().nullish(),
+  }),
+  z.object({
+    action: z.literal("create"),
+    title: z.string().min(1),
+    description: z.string().nullish(),
+    youtube_id: z.string().nullish(),
+    stream_url: z.string().nullish(),
+    // Parité : tout sauf `false` active la modération (`!== false` en route).
+    chat_moderation: z.unknown().optional(),
+  }),
+  z.object({
+    action: z.literal("set_status"),
+    id: liveEventIdSchema,
+    status: z.enum(["scheduled", "live", "ended", "replay"]),
+    replay_url: z.string().nullish(),
+  }),
+  z.object({
+    action: z.literal("send_push"),
+    topic: z.enum(["lives", "campaigns", "help"]),
+    title: z.string(),
+    body: z.string(),
+    url: z.string().nullish(),
+  }),
+  z.object({ action: z.literal("stats") }),
+]);
+
+export type AdminLiveActionPayload = z.infer<typeof adminLiveActionSchema>;
+
 // ── God-endpoint POST /api/admin (P2.3) ─────────────────────────────────────
 // Schéma discriminé sur `action` : toute action inconnue est rejetée en 400
 // (fail-closed — l'ancien dispatch if/else ignorait silencieusement).

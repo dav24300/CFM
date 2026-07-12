@@ -9,6 +9,11 @@ import { requireAdminAccess } from "@/lib/admin-rest";
 import { getClientIp } from "@/lib/rate-limit";
 import { jsonData, jsonNotFound, jsonSuccess } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
+import { parseOrBadRequest } from "@/lib/validators";
+import {
+  adminPartnerCreateSchema,
+  adminPartnerPatchSchema,
+} from "@/lib/validators/admin-api";
 
 export async function GET() {
   const auth = await requireAdminAccess();
@@ -20,13 +25,19 @@ export async function POST(request: NextRequest) {
   const auth = await requireAdminAccess();
   if (!auth.ok) return auth.response;
 
-  const body = await request.json();
+  const parsed = parseOrBadRequest(
+    adminPartnerCreateSchema,
+    await request.json().catch(() => null)
+  );
+  if (!parsed.ok) return parsed.response;
+
+  // null ⇒ undefined : le repository applique déjà `|| null` / `?? défaut`.
   const partner = await adminCreatePartner({
-    name: String(body.name || ""),
-    logo_url: body.logo_url,
-    website: body.website,
-    description: body.description,
-    sort_order: body.sort_order,
+    name: parsed.data.name,
+    logo_url: parsed.data.logo_url ?? undefined,
+    website: parsed.data.website ?? undefined,
+    description: parsed.data.description ?? undefined,
+    sort_order: parsed.data.sort_order ?? undefined,
   });
 
   await logAdminAction({
@@ -45,16 +56,21 @@ export async function PATCH(request: NextRequest) {
   const auth = await requireAdminAccess();
   if (!auth.ok) return auth.response;
 
-  const body = await request.json();
-  const id = Number(body.id);
+  const parsed = parseOrBadRequest(
+    adminPartnerPatchSchema,
+    await request.json().catch(() => null)
+  );
+  if (!parsed.ok) return parsed.response;
+
+  const id = Number(parsed.data.id);
   if (!id) return jsonNotFound("ID requis");
 
   const ok = await adminUpdatePartner(id, {
-    name: body.name,
-    logo_url: body.logo_url,
-    website: body.website,
-    description: body.description,
-    sort_order: body.sort_order,
+    name: parsed.data.name,
+    logo_url: parsed.data.logo_url,
+    website: parsed.data.website,
+    description: parsed.data.description,
+    sort_order: parsed.data.sort_order ?? undefined,
   });
   if (!ok) return jsonNotFound("Partenaire introuvable");
 
