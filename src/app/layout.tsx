@@ -9,6 +9,8 @@ import {
 } from "next/font/google";
 import { getOgImagePath, getFaviconPath } from "@/lib/media.server";
 import { getSiteConfig } from "@/lib/site-config.server";
+import { getLocale, getTranslations } from "@/lib/i18n-server";
+import { I18nProvider } from "@/components/i18n/I18nProvider";
 import { PWARegister } from "@/components/PWARegister";
 
 // Public / Portail
@@ -78,20 +80,23 @@ export const viewport: Viewport = {
   themeColor: "#14418a",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const { t } = await getTranslations();
   return (
-    <html lang="fr" className={fontVars}>
+    <html lang={locale} className={fontVars}>
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className="theme-site font-sans bg-white text-site-ink antialiased">
-
-        <PWARegister />
-        {children}
+        <I18nProvider locale={locale} messages={t}>
+          <PWARegister />
+          {children}
+        </I18nProvider>
       </body>
     </html>
   );
