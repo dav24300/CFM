@@ -35,9 +35,9 @@ const PILL: Record<string, string> = {
   new: "bg-site-pale text-site-primary",
   pending: "bg-site-warn-bg text-site-warn-fg",
   in_progress: "bg-site-info-bg text-site-info-fg",
-  treated: "bg-site-ok-bg text-site-success",
-  completed: "bg-site-ok-bg text-site-success",
-  approved: "bg-site-ok-bg text-site-success",
+  treated: "bg-site-ok-bg text-[var(--control-success-fg)]",
+  completed: "bg-site-ok-bg text-[var(--control-success-fg)]",
+  approved: "bg-site-ok-bg text-[var(--control-success-fg)]",
   failed: "bg-site-danger-bg text-site-danger",
   rejected: "bg-site-danger-bg text-site-danger",
 };
