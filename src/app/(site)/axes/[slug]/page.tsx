@@ -7,6 +7,7 @@ import { getActionsCached as getActions } from "@/infrastructure/cache/content-c
 import { getActivePetitionsCached } from "@/infrastructure/cache/petitions-cache";
 import { getResolvedAxisImageCached as getResolvedAxisImage } from "@/infrastructure/cache/media-cache";
 import { InteriorHero } from "@/components/ui/InteriorHero";
+import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { MagneticLink } from "@/components/home/MagneticLink";
@@ -256,14 +257,7 @@ export default async function AxisDetailPage({ params }: Props) {
             {/* Carte action */}
             <article className="border border-site-hairline">
               <div className="relative aspect-video bg-site-hero-dark">
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "repeating-linear-gradient(125deg,#232830 0,#232830 12px,#30363f 12px,#30363f 24px)",
-                  }}
-                  aria-hidden
-                />
+                <MediaPlaceholder tone="dark" className="absolute inset-0" />
                 <span className="absolute left-3 top-3 bg-site-primary px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.04em] text-white">
                   {action?.type || "Événement"}
                 </span>
@@ -315,14 +309,7 @@ export default async function AxisDetailPage({ params }: Props) {
           <div className="grid gap-3 sm:grid-cols-3">
             {[0, 1, 2].map((n) => (
               <div key={n} className="relative aspect-[4/3] border border-site-hairline">
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "repeating-linear-gradient(135deg,#ededea 0,#ededea 10px,#f6f6f4 10px,#f6f6f4 20px)",
-                  }}
-                  aria-hidden
-                />
+                <MediaPlaceholder className="absolute inset-0" />
               </div>
             ))}
           </div>

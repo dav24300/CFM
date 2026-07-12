@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, type ReactNode } from "react";
+import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { useReducedMotion } from "framer-motion";
 
 type Crumb = { label: string; href?: string };
@@ -107,13 +108,7 @@ export function InteriorHero({
           {image ? (
             <Image src={image} alt={imageAlt || ""} fill priority className="object-cover" sizes="100vw" />
           ) : (
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "repeating-linear-gradient(135deg,#232830 0,#232830 13px,#30363f 13px,#30363f 26px)",
-              }}
-            />
+            <MediaPlaceholder tone="dark" className="absolute inset-0" />
           )}
         </div>
       </div>
