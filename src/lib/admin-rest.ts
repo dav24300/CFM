@@ -1,5 +1,5 @@
 import { getAdminAccess } from "@/lib/admin-access";
-import { jsonForbidden, jsonUnauthorized } from "@/lib/api-response";
+import { jsonForbidden, jsonUnauthorized } from "@/infrastructure/http/api-response";
 
 export async function requireAdminRole() {
   const access = await getAdminAccess();

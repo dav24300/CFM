@@ -1,7 +1,8 @@
-import { getAdminData } from "@/lib/db";
-import { getAllDonations, getAllUsers } from "@/lib/members";
+import { getAdminData } from "@/infrastructure/repositories/content.repository";
+import { getAllDonations } from "@/infrastructure/repositories/donations.repository";
+import { getAllUsers } from "@/infrastructure/repositories/users.repository";
 import { requireAdminRole } from "@/lib/admin-rest";
-import { jsonError, jsonNotFound } from "@/lib/api-response";
+import { jsonError, jsonNotFound } from "@/infrastructure/http/api-response";
 import { csvCell } from "@/lib/csv";
 
 const EXPORTERS: Record<string, () => Promise<Record<string, unknown>[]>> = {

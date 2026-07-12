@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { requestPasswordReset } from "@/application/services/member.service";
-import { handleDomainError, jsonError, jsonSuccess } from "@/lib/api-response";
+import { handleDomainError, jsonError, jsonSuccess } from "@/infrastructure/http/api-response";
 
 export async function POST(request: NextRequest) {
   try {

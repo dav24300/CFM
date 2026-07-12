@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { jsonError } from "@/lib/api-response";
+import { jsonError } from "@/infrastructure/http/api-response";
 
 export { z };
 

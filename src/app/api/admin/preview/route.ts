@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { revalidateTag } from "next/cache";
 import { requireAdminAccess } from "@/lib/admin-rest";
-import { jsonError, jsonSuccess } from "@/lib/api-response";
+import { jsonError, jsonSuccess } from "@/infrastructure/http/api-response";
 import { CACHE_TAGS } from "@/infrastructure/cache/cache-tags";
 
 const ALLOWED_TAGS = new Set(Object.values(CACHE_TAGS));

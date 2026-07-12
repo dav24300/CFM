@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Heart, Briefcase, BookOpen, Leaf, Activity } from "lucide-react";
 import { AXES } from "@/lib/constants";
-import { getAxesHeroImage } from "@/lib/media.server";
+import { getAxesHeroImageCached as getAxesHeroImage } from "@/infrastructure/cache/media-cache";
 import { InteriorHero } from "@/components/ui/InteriorHero";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { getTranslations } from "@/lib/i18n-server";

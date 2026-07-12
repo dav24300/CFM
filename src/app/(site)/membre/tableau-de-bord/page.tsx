@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getLoggedInMember } from "@/lib/member-auth";
+import { getLoggedInMember } from "@/infrastructure/auth/member-auth";
 import { MemberDashboard } from "@/components/member/MemberDashboard";
 import { getActiveLiveEventCached } from "@/infrastructure/cache/live-cache";
 import { getActivePetitionsCached } from "@/infrastructure/cache/petitions-cache";

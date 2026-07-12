@@ -3,8 +3,8 @@ import {
   deletePetition,
   getPetitionById,
   updatePetition,
-} from "@/lib/members";
-import { jsonData, jsonNotFound, jsonSuccess } from "@/lib/api-response";
+} from "@/infrastructure/repositories/petitions.repository";
+import { jsonData, jsonNotFound, jsonSuccess } from "@/infrastructure/http/api-response";
 import { requireAdminAccess } from "@/lib/admin-rest";
 import { parseOrBadRequest } from "@/lib/validators";
 import { adminPetitionPatchSchema } from "@/lib/validators/admin-api";

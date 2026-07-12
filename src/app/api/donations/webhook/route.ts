@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { handleDonationWebhook } from "@/application/services/donation.service";
-import { jsonData, jsonError, jsonUnauthorized } from "@/lib/api-response";
+import { jsonData, jsonError, jsonUnauthorized } from "@/infrastructure/http/api-response";
 
 export async function POST(request: NextRequest) {
   try {

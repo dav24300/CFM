@@ -6,7 +6,7 @@ import {
   jsonForbidden,
   jsonSuccess,
   jsonUnauthorized,
-} from "@/lib/api-response";
+} from "@/infrastructure/http/api-response";
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { processDonation } from "@/application/services/donation.service";
-import { handleDomainError, jsonError, jsonSuccess } from "@/lib/api-response";
+import { handleDomainError, jsonError, jsonSuccess } from "@/infrastructure/http/api-response";
 import { parseOrBadRequest } from "@/lib/validators";
 import { donationCreateSchema } from "@/lib/validators/public-api";
 

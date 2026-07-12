@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PROVINCES_RDC } from "@/lib/constants";
-import type { PublicUser } from "@/lib/types/v2";
+import type { PublicUser } from "@/domain/entities/v2";
 import { useTranslations } from "@/lib/i18n-client";
 import { Input } from "@/components/ui/primitives/input";
 import { Button } from "@/components/ui/primitives/button";

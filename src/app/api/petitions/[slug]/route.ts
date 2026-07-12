@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 
 import { getPetition, signPetitionBySlug } from "@/application/services/petition.service";
 
-import { handleDomainError, jsonData, jsonError, jsonSuccess } from "@/lib/api-response";
+import { handleDomainError, jsonData, jsonError, jsonSuccess } from "@/infrastructure/http/api-response";
 
 import { parseOrBadRequest } from "@/lib/validators";
 import { petitionSignSchema } from "@/lib/validators/public-api";

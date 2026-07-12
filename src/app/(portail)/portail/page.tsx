@@ -3,8 +3,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { Shield, Check, ThumbsUp, MessageCircle, Play } from "lucide-react";
 import { getCurrentMember } from "@/infrastructure/auth/member-auth";
-import { getPublishedNews, getActiveCampaigns } from "@/lib/db";
-import { getResolvedNewsCover } from "@/lib/media.server";
+import {
+  getPublishedNewsCached as getPublishedNews,
+  getActiveCampaignsCached as getActiveCampaigns,
+} from "@/infrastructure/cache/content-cache";
+import { getResolvedNewsCoverCached as getResolvedNewsCover } from "@/infrastructure/cache/media-cache";
 import { getCoordinationStats } from "@/infrastructure/repositories/coordination.repository";
 import { PortalHomeHeader } from "@/components/portail/PortalHomeHeader";
 import { AlertToggles } from "@/components/portail/AlertToggles";

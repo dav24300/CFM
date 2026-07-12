@@ -1,14 +1,13 @@
 import { requireAdminRole } from "@/lib/admin-rest";
-import { getAdminData } from "@/lib/db";
+import { getAdminData } from "@/infrastructure/repositories/content.repository";
+import { getAllUsers, getUserById } from "@/infrastructure/repositories/users.repository";
+import { getAllDonations } from "@/infrastructure/repositories/donations.repository";
+import { getAllFamilyLinks } from "@/infrastructure/repositories/family-links.repository";
 import {
-  getAllUsers,
-  getAllDonations,
-  getAllFamilyLinks,
   getAllPetitions,
   getPetitionSignatures,
-  getUserById,
-} from "@/lib/members";
-import { jsonData } from "@/lib/api-response";
+} from "@/infrastructure/repositories/petitions.repository";
+import { jsonData } from "@/infrastructure/http/api-response";
 
 export async function GET() {
   // Dump complet (PII membres, dons, signatures) : réservé à l'admin, jamais volunteer.

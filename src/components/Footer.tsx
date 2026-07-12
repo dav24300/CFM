@@ -6,7 +6,7 @@ import { SITE } from "@/lib/constants";
 import { getDictionary, type Locale } from "@/lib/i18n";
 import { getI18nOverridesForLocale, applyI18nOverrides } from "@/lib/i18n-overrides.server";
 import { getSiteConfig, getSocialLinks, getPartners } from "@/lib/site-config.server";
-import { resolveMediaPath } from "@/lib/media.server";
+import { resolveMediaPath } from "@/infrastructure/media/media-resolution.server";
 import type { SiteConfig } from "@/domain/site-config";
 
 function XIcon({ className }: { className?: string }) {

@@ -2,11 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FileText, Megaphone } from "lucide-react";
 import { AnchorButton } from "@/components/ui/patterns/button-link";
-import { getPublishedStudies, getActiveCampaigns, getPublishedNews } from "@/lib/db";
+import {
+  getPublishedStudiesCached as getPublishedStudies,
+  getActiveCampaignsCached as getActiveCampaigns,
+  getPublishedNewsCached as getPublishedNews,
+} from "@/infrastructure/cache/content-cache";
 import { InteriorHero } from "@/components/ui/InteriorHero";
 import { MediaCard } from "@/components/ui/MediaCard";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
-import { getResolvedGallery, getResolvedNewsCover } from "@/lib/media.server";
+import {
+  getResolvedGalleryCached as getResolvedGallery,
+  getResolvedNewsCoverCached as getResolvedNewsCover,
+} from "@/infrastructure/cache/media-cache";
 import { getTranslations } from "@/lib/i18n-server";
 
 export async function generateMetadata(): Promise<Metadata> {

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { jsonForbidden } from "@/lib/api-response";
+import { jsonForbidden } from "@/infrastructure/http/api-response";
 
 const mocked = vi.hoisted(() => ({
   requireAdminRole: vi.fn(),
@@ -11,14 +11,10 @@ vi.mock("@/lib/admin-rest", () => ({
   requireAdminRole: mocked.requireAdminRole,
 }));
 
-vi.mock("@/lib/db", () => ({
-  getAdminData: mocked.getAdminData,
-  adminCreate: mocked.adminCreate,
-}));
-
-// P2.4 : la factory de routes passe par le repository (createContentItem),
-// plus par le ré-export @/lib/db — on mocke la source directe.
+// P2.4 : la factory de routes passe par le repository (createContentItem et
+// getAdminData) — on mocke la source directe.
 vi.mock("@/infrastructure/repositories/content.repository", () => ({
+  getAdminData: mocked.getAdminData,
   adminCreate: mocked.adminCreate,
   adminDelete: vi.fn(),
   adminUpdateContent: vi.fn(),

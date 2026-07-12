@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
-import { voteLivePoll } from "@/lib/live";
+import { voteLivePoll } from "@/infrastructure/repositories/live.repository";
 import { cookies } from "next/headers";
-import { jsonData, jsonError } from "@/lib/api-response";
+import { jsonData, jsonError } from "@/infrastructure/http/api-response";
 
 export async function POST(
   request: NextRequest,

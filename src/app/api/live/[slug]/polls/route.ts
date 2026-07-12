@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
-import { getLiveEventBySlug, getPollsForEvent, createLivePoll } from "@/lib/live";
+import { getLiveEventBySlug, getPollsForEvent, createLivePoll } from "@/infrastructure/repositories/live.repository";
 import { requireAdminAccess } from "@/lib/admin-rest";
-import { jsonData, jsonError, jsonNotFound } from "@/lib/api-response";
+import { jsonData, jsonError, jsonNotFound } from "@/infrastructure/http/api-response";
 
 export async function GET(
   _request: NextRequest,

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { createPetition, getAllPetitions } from "@/lib/members";
-import { jsonData, jsonError, jsonSuccess } from "@/lib/api-response";
+import { createPetition, getAllPetitions } from "@/infrastructure/repositories/petitions.repository";
+import { jsonData, jsonError, jsonSuccess } from "@/infrastructure/http/api-response";
 import { requireAdminRole } from "@/lib/admin-rest";
 import { parseOrBadRequest } from "@/lib/validators";
 import { adminPetitionCreateSchema } from "@/lib/validators/admin-api";

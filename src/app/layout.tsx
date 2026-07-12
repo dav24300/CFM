@@ -7,7 +7,10 @@ import {
   IBM_Plex_Sans,
   IBM_Plex_Mono,
 } from "next/font/google";
-import { getOgImagePath, getFaviconPath } from "@/lib/media.server";
+import {
+  getOgImagePathCached as getOgImagePath,
+  getFaviconPathCached as getFaviconPath,
+} from "@/infrastructure/cache/media-cache";
 import { getSiteConfig } from "@/lib/site-config.server";
 import { getLocale, getTranslations } from "@/lib/i18n-server";
 import { I18nProvider } from "@/components/i18n/I18nProvider";

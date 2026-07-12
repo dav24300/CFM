@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentMember } from "@/infrastructure/auth/member-auth";
-import { getResolvedGallery } from "@/lib/media.server";
+import { getResolvedGalleryCached as getResolvedGallery } from "@/infrastructure/cache/media-cache";
 import { PortalPage, PortalEmpty } from "@/components/portail/PortalPage";
 import { MediaMosaic } from "@/components/portail/MediaMosaic";
 

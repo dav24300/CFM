@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { deleteNewsletterSubscriber } from "@/infrastructure/repositories/content.repository";
 import { requireAdminAccess } from "@/lib/admin-rest";
-import { getClientIp } from "@/lib/rate-limit";
-import { jsonNotFound, jsonSuccess } from "@/lib/api-response";
+import { getClientIp } from "@/infrastructure/rate-limit/memory";
+import { jsonNotFound, jsonSuccess } from "@/infrastructure/http/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
 
 export async function DELETE(

@@ -12,7 +12,7 @@ import { Users, Heart, CreditCard, LogOut, Radio, Megaphone } from "lucide-react
 
 import { FamilyLinkManager } from "@/components/member/FamilyLinkManager";
 
-import type { PublicUser } from "@/lib/types/v2";
+import type { PublicUser } from "@/domain/entities/v2";
 
 import { SkeletonList } from "@/components/ui/primitives/skeleton";
 import { useTranslations } from "@/lib/i18n-client";

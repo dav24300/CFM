@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getPublishedNews, getActiveCampaigns } from "@/lib/db";
-import { getResolvedNewsCover } from "@/lib/media.server";
+import {
+  getPublishedNewsCached as getPublishedNews,
+  getActiveCampaignsCached as getActiveCampaigns,
+} from "@/infrastructure/cache/content-cache";
+import { getResolvedNewsCoverCached as getResolvedNewsCover } from "@/infrastructure/cache/media-cache";
 import { getTranslations } from "@/lib/i18n-server";
 import { dateLocale } from "@/lib/i18n";
 import { ButtonLink } from "@/components/ui/patterns/button-link";

@@ -2,7 +2,7 @@ import { getFormsActivityDates } from "@/infrastructure/repositories/content.rep
 import { listUserCreationDates } from "@/infrastructure/repositories/users.repository";
 import { listDonationCreationDates } from "@/infrastructure/repositories/donations.repository";
 import { requireAdminAccess } from "@/lib/admin-rest";
-import { jsonData } from "@/lib/api-response";
+import { jsonData } from "@/infrastructure/http/api-response";
 
 function dayKey(iso: string): string {
   return iso.slice(0, 10);

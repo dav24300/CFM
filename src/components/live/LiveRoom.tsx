@@ -3,8 +3,8 @@
 import { LivePlayer } from "@/components/live/LivePlayer";
 import { LiveChat } from "@/components/live/LiveChat";
 import { LivePolls } from "@/components/live/LivePolls";
-import type { LiveEvent } from "@/lib/types/v3";
-import type { LivePoll } from "@/lib/types/v3";
+import type { LiveEvent } from "@/domain/entities/v3";
+import type { LivePoll } from "@/domain/entities/v3";
 import { Radio } from "lucide-react";
 
 type Labels = {

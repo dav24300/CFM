@@ -1,4 +1,4 @@
-import { getAllDonations } from "@/lib/members";
+import { getAllDonations } from "@/infrastructure/repositories/donations.repository";
 import { getTranslations } from "@/lib/i18n-server";
 import { getSiteSetting } from "@/infrastructure/repositories/settings.repository";
 

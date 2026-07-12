@@ -6,8 +6,8 @@ import {
   verifyPassword,
 } from "@/infrastructure/auth/admin-auth";
 import { logAdminAction } from "@/lib/admin-audit";
-import { jsonError, jsonUnauthorized } from "@/lib/api-response";
-import { getClientIp } from "@/lib/rate-limit";
+import { jsonError, jsonUnauthorized } from "@/infrastructure/http/api-response";
+import { getClientIp } from "@/infrastructure/rate-limit/memory";
 
 function attachSessionCookie(response: NextResponse, token: string): NextResponse {
   response.cookies.set(
