@@ -16,8 +16,6 @@ import {
   FileSignature,
   Activity,
   Menu,
-  Bell,
-  Search,
   Shield,
   LogOut,
   ChevronRight,
@@ -25,6 +23,8 @@ import {
 import { PORTAL_ROLE_LABELS, type PortalRole } from "@/lib/portal-role";
 import { PortalRoleContext } from "@/components/portail/portal-role-context";
 import { cn } from "@/lib/utils/cn";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import type { Locale } from "@/lib/i18n";
 
 type NavItem = {
   key: string;
@@ -39,7 +39,7 @@ type NavItem = {
 const NAV: NavItem[] = [
   { key: "accueil", href: "/portail", label: "Fil d'annonces", icon: LayoutList },
   { key: "aide", href: "/portail/aide", label: "Mes demandes d'aide", icon: LifeBuoy, roleOnly: "famille" },
-  { key: "messages", href: "/portail/messages", label: "Messagerie", icon: MessageCircle, badge: "2" },
+  { key: "messages", href: "/portail/messages", label: "Messagerie", icon: MessageCircle },
   { key: "entraide", href: "/portail/entraide", label: "Entraide", icon: HandHeart },
   { key: "medias", href: "/portail/medias", label: "Médias & galerie", icon: ImageIcon },
   { key: "ressources", href: "/portail/ressources", label: "Ressources & démarches", icon: FileText },
@@ -57,20 +57,18 @@ const NAV: NavItem[] = [
   },
 ];
 
-const LANGS = ["FR", "EN", "LN", "SW"];
-
 type Props = {
   name: string;
   initials: string;
   initialRole: PortalRole;
+  locale: Locale;
   children: ReactNode;
 };
 
-export function PortalShell({ name, initials, initialRole, children }: Props) {
+export function PortalShell({ name, initials, initialRole, locale, children }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [lang, setLang] = useState("FR");
 
   // Ferme le tiroir à chaque changement de route.
   useEffect(() => {
@@ -186,39 +184,8 @@ export function PortalShell({ name, initials, initialRole, children }: Props) {
             <Menu className="h-6 w-6" />
           </button>
 
-          <div className="relative hidden max-w-sm flex-1 sm:block">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-site-muted-2" aria-hidden />
-            <input
-              type="search"
-              placeholder="Rechercher dans le portail…"
-              className="w-full border border-site-hairline bg-site-surface py-2 pl-9 pr-3 text-sm focus:border-site-primary focus:outline-none"
-            />
-          </div>
-
           <div className="ml-auto flex items-center gap-3">
-            <div className="hidden items-center gap-1 sm:flex">
-              {LANGS.map((l) => (
-                <button
-                  key={l}
-                  type="button"
-                  onClick={() => setLang(l)}
-                  className={cn(
-                    "px-2 py-1 text-xs font-semibold transition-colors",
-                    lang === l ? "bg-site-pale text-site-primary" : "text-site-muted-2 hover:text-site-primary"
-                  )}
-                >
-                  {l}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              className="relative p-1.5 text-site-muted hover:text-site-primary"
-              aria-label="Notifications"
-            >
-              <Bell className="h-5 w-5" />
-              <span className="absolute right-1 top-1 h-2 w-2 bg-site-live" />
-            </button>
+            <LocaleSwitcher current={locale} />
           </div>
         </header>
 
