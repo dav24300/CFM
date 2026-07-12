@@ -50,10 +50,8 @@ export { Section } from "./patterns/section";
 export type { SectionProps } from "./patterns/section";
 
 // Media & layout components
-export { HeroMedia, HeroItem } from "./HeroMedia";
 export { ScrollReveal } from "./ScrollReveal";
 export { MediaCard } from "./MediaCard";
-export { PageHero } from "./PageHero";
 export { StatCounter } from "./StatCounter";
 export { TestimonialCarousel } from "./TestimonialCarousel";
 export { ImageGallery, Lightbox } from "./ImageGallery";
