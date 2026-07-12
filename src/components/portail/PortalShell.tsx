@@ -189,7 +189,7 @@ export function PortalShell({ name, initials, initialRole, locale, children }: P
           </div>
         </header>
 
-        <main className="flex-1 bg-site-surface">
+        <main id="main-content" className="flex-1 bg-site-surface">
           <PortalRoleContext.Provider value={initialRole}>{children}</PortalRoleContext.Provider>
         </main>
       </div>

@@ -158,7 +158,7 @@ function DashboardShell({ access }: Props) {
             onLogout={logout}
             onMenuToggle={() => setSidebarOpen((v) => !v)}
           />
-          <main className="flex-1 overflow-auto p-6">
+          <main id="main-content" className="flex-1 overflow-auto p-6">
             {loadError ? (
               <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
                 <p className="text-sm text-red-800">
