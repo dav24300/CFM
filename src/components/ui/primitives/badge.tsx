@@ -7,10 +7,10 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-site-deep text-white",
-        accent: "bg-site-pale text-site-primary",
-        live: "animate-live-pulse bg-site-live text-white",
-        muted: "bg-site-surface text-site-muted",
+        default: "bg-[var(--control-chip-solid)] text-[var(--control-chip-solid-fg)]",
+        accent: "bg-[var(--control-accent-soft)] text-[var(--control-accent)]",
+        live: "animate-live-pulse bg-[var(--control-live)] text-white",
+        muted: "bg-[var(--control-surface)] text-[var(--control-muted)]",
       },
     },
     defaultVariants: {
