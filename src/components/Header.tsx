@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { ButtonLink } from "@/components/ui/patterns/button-link";
 import { Menu, X, Shield, User, ChevronDown } from "lucide-react";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { AXES } from "@/lib/constants";
@@ -140,13 +141,13 @@ export function Header({ locale, site, nav, memberLogin, isAuthenticated, member
             <User className="h-4 w-4" aria-hidden />
             <span className="hidden xl:inline">{isAuthenticated ? memberArea : nav.member}</span>
           </Link>
-          <Link
+          <ButtonLink
             href="/contact#aide"
-            className="bg-site-primary px-[18px] py-[11px] text-sm font-semibold text-white transition hover:bg-site-primary-dark"
+            className="px-[18px] py-[11px] text-sm"
             data-cta="cta_aide"
           >
             {nav.help}
-          </Link>
+          </ButtonLink>
         </nav>
 
         <button
@@ -212,14 +213,14 @@ export function Header({ locale, site, nav, memberLogin, isAuthenticated, member
             <div className="mt-3 flex items-center justify-between">
               <LocaleSwitcher current={locale} />
             </div>
-            <Link
+            <ButtonLink
               href="/contact#aide"
-              className="mt-2 bg-site-primary py-3.5 text-center text-[15px] font-semibold text-white"
+              className="mt-2 w-full py-3.5 text-[15px]"
               onClick={() => setOpen(false)}
               data-cta="cta_aide"
             >
               {nav.help}
-            </Link>
+            </ButtonLink>
           </div>
         </nav>
       )}

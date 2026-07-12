@@ -72,7 +72,7 @@
   --control-border: var(--site-hairline);
   --control-border-strong: var(--site-primary);
   --control-radius: 0px;
-  --control-ring: rgba(20, 65, 138, 0.3);
+  --control-ring: rgba(20, 65, 138, 0.55);
   --control-ring-offset: #ffffff;
   --control-danger: var(--site-danger);
   --control-danger-ring: rgba(192, 54, 44, 0.3);
