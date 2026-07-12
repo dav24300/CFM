@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { getPublishedNews, getActiveCampaigns } from "@/lib/db";
 import { getResolvedNewsCover } from "@/lib/media.server";
 import { getTranslations } from "@/lib/i18n-server";
-import { dateLocale } from "@/lib/i18n-supplement";
+import { dateLocale } from "@/lib/i18n";
 import { ButtonLink } from "@/components/ui/patterns/button-link";
 
 type Props = { params: Promise<{ slug: string }> };

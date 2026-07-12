@@ -7,7 +7,7 @@ import { getPublishedPressReleases } from "@/lib/db";
 import { SITE } from "@/lib/constants";
 import { InteriorHero } from "@/components/ui/InteriorHero";
 import { getTranslations } from "@/lib/i18n-server";
-import { dateLocale } from "@/lib/i18n-supplement";
+import { dateLocale } from "@/lib/i18n";
 import { getPressKitPath } from "@/lib/media.server";
 
 function pressKitAvailable(kitPath: string): boolean {
