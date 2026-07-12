@@ -306,12 +306,12 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {ev.status === "scheduled" && (
-                    <button type="button" onClick={() => setStatus(ev.id, "live")} className="rounded bg-red-600 px-2 py-1 text-xs text-white">
+                    <button type="button" onClick={() => setStatus(ev.id, "live")} className="rounded bg-admin-danger-fg px-2 py-1 text-xs text-white">
                       Démarrer live
                     </button>
                   )}
                   {ev.status === "live" && (
-                    <button type="button" onClick={() => setStatus(ev.id, "ended")} className="rounded bg-gray-600 px-2 py-1 text-xs text-white">
+                    <button type="button" onClick={() => setStatus(ev.id, "ended")} className="rounded bg-admin-deep px-2 py-1 text-xs text-white">
                       Terminer
                     </button>
                   )}
@@ -395,10 +395,10 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
             </h2>
             {chatMode === "pending" && pending.length > 0 && (
               <div className="flex gap-2">
-                <button type="button" onClick={() => moderateBulk("approved")} className="rounded bg-green-600 px-2 py-1 text-xs text-white">
+                <button type="button" onClick={() => moderateBulk("approved")} className="rounded bg-admin-ok-fg px-2 py-1 text-xs text-white">
                   Tout approuver
                 </button>
-                <button type="button" onClick={() => moderateBulk("rejected")} className="rounded bg-red-600 px-2 py-1 text-xs text-white">
+                <button type="button" onClick={() => moderateBulk("rejected")} className="rounded bg-admin-danger-fg px-2 py-1 text-xs text-white">
                   Tout refuser
                 </button>
               </div>
@@ -420,8 +420,8 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
                 </span>
                 {m.status === "pending" && (
                   <div className="flex gap-1 shrink-0">
-                    <button type="button" onClick={() => moderate(m.id, "approved")} className="rounded bg-green-600 px-2 py-0.5 text-xs text-white">OK</button>
-                    <button type="button" onClick={() => moderate(m.id, "rejected")} className="rounded bg-red-600 px-2 py-0.5 text-xs text-white">Refuser</button>
+                    <button type="button" onClick={() => moderate(m.id, "approved")} className="rounded bg-admin-ok-fg px-2 py-0.5 text-xs text-white">OK</button>
+                    <button type="button" onClick={() => moderate(m.id, "rejected")} className="rounded bg-admin-danger-fg px-2 py-0.5 text-xs text-white">Refuser</button>
                   </div>
                 )}
               </div>
