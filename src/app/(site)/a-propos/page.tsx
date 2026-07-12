@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ButtonLink } from "@/components/ui/patterns/button-link";
 import Image from "next/image";
 import { getTranslations, getLocale } from "@/lib/i18n-server";
 import { getSiteConfig, getAboutTimeline } from "@/lib/site-config.server";
@@ -184,13 +185,13 @@ export default async function AboutPage() {
               Engagez-vous à nos côtés
             </h2>
             <div className="mt-7 flex flex-wrap justify-center gap-3">
-              <Link
+              <ButtonLink
                 href="/s-engager"
-                className="bg-site-primary px-[30px] py-4 text-[15px] font-semibold text-white transition hover:bg-site-primary-dark"
+                className="px-[30px] py-4 text-[15px]"
                 data-cta="cta_adhesion"
               >
                 S’engager avec nous
-              </Link>
+              </ButtonLink>
               <Link
                 href="/contact"
                 className="border border-site-ink px-7 py-[15px] text-[15px] font-semibold text-site-ink transition hover:bg-site-ink hover:text-white"
