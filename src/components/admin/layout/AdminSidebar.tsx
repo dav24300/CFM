@@ -84,7 +84,7 @@ export function AdminSidebar({ active, onChange, stats, open = false, onClose }:
         </span>
         <div className="leading-tight">
           <div className="font-display text-sm font-semibold text-white">CFM Admin</div>
-          <div className="text-[11px] text-white/40">Console de gestion</div>
+          <div className="text-[11px] text-white/70">Console de gestion</div>
         </div>
       </div>
       <nav className="flex flex-col gap-0.5 px-3 pb-6">
@@ -103,7 +103,7 @@ export function AdminSidebar({ active, onChange, stats, open = false, onClose }:
                 "flex w-full items-center gap-3 rounded-admin-ctrl border-l-2 px-3 py-2.5 text-left text-sm font-medium transition-colors",
                 isActive
                   ? "border-admin-accent bg-admin-sidebar-active text-white"
-                  : "border-transparent text-white/55 hover:bg-admin-surface/[0.06] hover:text-white"
+                  : "border-transparent text-white/65 hover:bg-admin-surface/[0.06] hover:text-white"
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
