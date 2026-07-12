@@ -1,45 +1,43 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getCurrentMember } from "@/infrastructure/auth/member-auth";
 import {
   getUpcomingEvents,
   rsvpEvent,
 } from "@/infrastructure/repositories/events.repository";
+import {
+  jsonData,
+  jsonError,
+  jsonNotFound,
+  jsonUnauthorized,
+} from "@/lib/api-response";
 
 export async function GET() {
   const member = await getCurrentMember();
-  if (!member) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  if (!member) return jsonUnauthorized();
   const events = await getUpcomingEvents();
-  return NextResponse.json({ events });
+  return jsonData({ events });
 }
 
 export async function POST(request: NextRequest) {
   const member = await getCurrentMember();
-  if (!member) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  if (!member) return jsonUnauthorized();
 
   let body: { eventId?: unknown };
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "invalid_body" }, { status: 400 });
+    return jsonError("Champs invalides", 400);
   }
 
   const eventId =
-    typeof body.eventId === "number"
-      ? body.eventId
-      : Number(body.eventId);
+    typeof body.eventId === "number" ? body.eventId : Number(body.eventId);
   if (!Number.isFinite(eventId)) {
-    return NextResponse.json({ error: "invalid_event" }, { status: 400 });
+    return jsonError("Événement invalide", 400);
   }
 
   const event = await rsvpEvent(eventId, member.id);
-  if (!event) {
-    return NextResponse.json({ error: "not_found" }, { status: 404 });
-  }
+  if (!event) return jsonNotFound("Événement introuvable");
 
   const going = event.rsvp_user_ids.includes(member.id);
-  return NextResponse.json({ event, going });
+  return jsonData({ event, going });
 }

@@ -1,9 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getCurrentMember } from "@/infrastructure/auth/member-auth";
 import {
   getOpenHelpRequests,
   claimHelpRequest,
 } from "@/infrastructure/repositories/entraide.repository";
+import {
+  jsonData,
+  jsonError,
+  jsonForbidden,
+  jsonNotFound,
+  jsonSuccess,
+  jsonUnauthorized,
+} from "@/lib/api-response";
 
 function canHandleMissions(role: string | null | undefined): boolean {
   return role === "volunteer" || role === "coordinator";
@@ -11,30 +19,22 @@ function canHandleMissions(role: string | null | undefined): boolean {
 
 export async function GET() {
   const member = await getCurrentMember();
-  if (!member) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-  if (!canHandleMissions(member.role)) {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
-  }
+  if (!member) return jsonUnauthorized();
+  if (!canHandleMissions(member.role)) return jsonForbidden();
   const missions = await getOpenHelpRequests();
-  return NextResponse.json({ missions });
+  return jsonData({ missions });
 }
 
 export async function POST(request: NextRequest) {
   const member = await getCurrentMember();
-  if (!member) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-  if (!canHandleMissions(member.role)) {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
-  }
+  if (!member) return jsonUnauthorized();
+  if (!canHandleMissions(member.role)) return jsonForbidden();
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "invalid_body" }, { status: 400 });
+    return jsonError("Champs invalides", 400);
   }
 
   const id =
@@ -42,13 +42,11 @@ export async function POST(request: NextRequest) {
       ? Number((body as { id: unknown }).id)
       : NaN;
   if (!Number.isFinite(id)) {
-    return NextResponse.json({ error: "invalid_id" }, { status: 400 });
+    return jsonError("Identifiant invalide", 400);
   }
 
   const volunteerName = `${member.first_name} ${member.last_name}`.trim();
   const ok = await claimHelpRequest(id, member.id, volunteerName);
-  if (!ok) {
-    return NextResponse.json({ error: "not_found" }, { status: 404 });
-  }
-  return NextResponse.json({ ok: true });
+  if (!ok) return jsonNotFound("Mission introuvable");
+  return jsonSuccess();
 }

@@ -106,7 +106,7 @@ export async function PATCH(request: NextRequest) {
       status: "success",
       ip: getClientIp(request),
     });
-    return jsonData({ ok: true });
+    return jsonSuccess();
   } catch {
     return jsonError("Erreur mise à jour", 500);
   }

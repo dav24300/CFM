@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { requireAdminAccess } from "@/lib/admin-rest";
-import { jsonData, jsonNotFound } from "@/lib/api-response";
+import { jsonData, jsonNotFound, jsonSuccess } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
 import { getClientIp } from "@/lib/rate-limit";
 import { assignMedia } from "@/application/services/media.service";
@@ -29,5 +29,5 @@ export async function PATCH(request: NextRequest) {
     metadata: { field, path },
   });
 
-  return jsonData({ ok: true });
+  return jsonSuccess();
 }
