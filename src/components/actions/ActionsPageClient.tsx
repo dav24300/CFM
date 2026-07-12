@@ -12,7 +12,7 @@ import { ButtonLink } from "@/components/ui/patterns/button-link";
 import { SkeletonList } from "@/components/ui/primitives/skeleton";
 import { resolveMediaPath } from "@/lib/media";
 import { useTranslations } from "@/lib/i18n-client";
-import { dateLocale } from "@/lib/i18n-supplement";
+import { dateLocale } from "@/lib/i18n";
 
 type Action = {
   id: number;
@@ -98,7 +98,7 @@ export function ActionsPageClient({ heroImage, heroAlt, defaultCover, initialAct
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <div>
                               <span className="rounded-full bg-site-surface px-3 py-1 text-xs font-semibold text-site-primary">
-                                {p.types[action.type] || action.type}
+                                {(p.types as Record<string, string>)[action.type] || action.type}
                               </span>
                               <h3 className="mt-2 font-serif text-xl font-bold">{action.title}</h3>
                             </div>

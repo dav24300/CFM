@@ -11,7 +11,7 @@ import {
   jsonNotFound,
   jsonSuccess,
   jsonUnauthorized,
-} from "@/lib/api-response";
+} from "@/infrastructure/http/api-response";
 
 function canHandleMissions(role: string | null | undefined): boolean {
   return role === "volunteer" || role === "coordinator";

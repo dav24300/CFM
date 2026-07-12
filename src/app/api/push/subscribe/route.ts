@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
-import { savePushSubscription, removePushSubscription } from "@/lib/push";
-import type { PushTopic } from "@/lib/types/v3";
-import { jsonError, jsonSuccess } from "@/lib/api-response";
+import { savePushSubscription, removePushSubscription } from "@/infrastructure/push/web-push.adapter";
+import type { PushTopic } from "@/domain/entities/v3";
+import { jsonError, jsonSuccess } from "@/infrastructure/http/api-response";
 import { parseOrBadRequest } from "@/lib/validators";
 import { pushSubscribeSchema, pushUnsubscribeSchema } from "@/lib/validators/public-api";
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { checkRateLimitDistributed, getClientIp } from "@/lib/rate-limit";
+import { checkRateLimitDistributed, getClientIp } from "@/infrastructure/rate-limit/memory";
 
 const LIMITED_PREFIXES = [
   "/api/contact",

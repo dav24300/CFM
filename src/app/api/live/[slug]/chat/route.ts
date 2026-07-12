@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { getLiveEventBySlug, getChatMessages, postLiveChatMessage } from "@/application/services/live.service";
-import { jsonData, jsonError, jsonNotFound, handleDomainError } from "@/lib/api-response";
+import { jsonData, jsonError, jsonNotFound, handleDomainError } from "@/infrastructure/http/api-response";
 
 export async function GET(
   _request: NextRequest,

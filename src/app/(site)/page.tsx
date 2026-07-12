@@ -3,13 +3,13 @@ import Image from "next/image";
 import { Heart, Briefcase, BookOpen, Leaf, Activity, Play, Quote } from "lucide-react";
 import { AXES } from "@/lib/constants";
 import { getSiteConfig } from "@/lib/site-config.server";
-import { getPublishedTestimonials } from "@/lib/db";
+import { getPublishedTestimonialsCached as getPublishedTestimonials } from "@/infrastructure/cache/content-cache";
 import { getActiveLiveEventCached } from "@/infrastructure/cache/live-cache";
 import {
-  getSiteMedia,
-  getResolvedLiveThumb,
-  getResolvedTestimonialPhoto,
-} from "@/lib/media.server";
+  getSiteMediaCached as getSiteMedia,
+  getResolvedLiveThumbCached as getResolvedLiveThumb,
+  getResolvedTestimonialPhotoCached as getResolvedTestimonialPhoto,
+} from "@/infrastructure/cache/media-cache";
 import { getTranslations } from "@/lib/i18n-server";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";

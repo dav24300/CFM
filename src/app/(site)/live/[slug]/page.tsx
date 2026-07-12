@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getLiveEventBySlugCached } from "@/infrastructure/cache/live-cache";
-import { getPollsForEvent } from "@/lib/live";
+import { getPollsForEvent } from "@/infrastructure/repositories/live.repository";
 import { LiveRoom } from "@/components/live/LiveRoom";
 import { getTranslations } from "@/lib/i18n-server";
 import { PushSubscribeButton } from "@/components/PushSubscribeButton";

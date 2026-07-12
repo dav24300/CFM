@@ -1,5 +1,5 @@
-import { getLiveEvents, getActiveLiveEvent } from "@/lib/live";
-import { jsonData } from "@/lib/api-response";
+import { getLiveEvents, getActiveLiveEvent } from "@/infrastructure/repositories/live.repository";
+import { jsonData } from "@/infrastructure/http/api-response";
 
 export async function GET() {
   const events = await getLiveEvents();

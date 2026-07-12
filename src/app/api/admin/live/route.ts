@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { requireAdminAccess } from "@/lib/admin-rest";
-import { getClientIp } from "@/lib/rate-limit";
+import { getClientIp } from "@/infrastructure/rate-limit/memory";
 import {
   createLiveEvent,
   setLiveEventStatus,
@@ -9,10 +9,10 @@ import {
   getPendingChatCount,
   updateLiveEventMedia,
   getPollsForEvent,
-} from "@/lib/live";
-import { sendPushToTopic } from "@/lib/push";
+} from "@/infrastructure/repositories/live.repository";
+import { sendPushToTopic } from "@/infrastructure/push/web-push.adapter";
 import { countPushSubscriptions } from "@/infrastructure/repositories/live.repository";
-import { jsonData, jsonError } from "@/lib/api-response";
+import { jsonData, jsonError } from "@/infrastructure/http/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
 import { parseOrBadRequest } from "@/lib/validators";
 import { adminLiveActionSchema } from "@/lib/validators/admin-api";

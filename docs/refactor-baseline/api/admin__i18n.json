@@ -4,6 +4,75 @@
   "body": {
     "base": {
       "en": {
+        "axesContent": {
+          "economique": {
+            "description": "Empowering women and widows through entrepreneurship and economic resources.",
+            "details": [
+              "Entrepreneurship training",
+              "Microcredit and mentoring",
+              "Women entrepreneurs network",
+              "Advocacy for fair access to aid"
+            ],
+            "title": "Economic"
+          },
+          "education": {
+            "description": "Ensuring access to education and training for children of military personnel.",
+            "details": [
+              "Schooling for orphans",
+              "Scholarships and academic support",
+              "Vocational training",
+              "Advocacy for inclusive education policies"
+            ],
+            "title": "Education"
+          },
+          "environnement": {
+            "description": "Improving living conditions in and around military camps and quarters.",
+            "details": [
+              "Decent housing conditions",
+              "Access to water and sanitation",
+              "Green spaces and quality of life",
+              "Sustainable development of military communities"
+            ],
+            "title": "Environment"
+          },
+          "sante": {
+            "description": "Sexual and reproductive health of women in military camp environments.",
+            "details": [
+              "Awareness and prevention",
+              "Access to reproductive healthcare",
+              "Advocacy for adapted services",
+              "Community health worker training"
+            ],
+            "title": "Health"
+          },
+          "social": {
+            "description": "Improving living conditions for spouses, widows, orphans and children of military personnel.",
+            "details": [
+              "Strengthened social protection",
+              "Support for widows and orphans",
+              "Psychological and community support",
+              "Recognition of family sacrifice"
+            ],
+            "title": "Social"
+          }
+        },
+        "common": {
+          "campaign": "Campaign",
+          "createAccountBtn": "Create my account",
+          "discover": "Discover",
+          "donationsRecorded": "Donations recorded",
+          "error": "Error",
+          "loading": "Loading...",
+          "logout": "Log out",
+          "passwordMismatch": "Passwords do not match",
+          "profileUpdated": "Profile updated.",
+          "save": "Save",
+          "saving": "Saving...",
+          "select": "Select",
+          "totalCdf": "Total CDF (completed)",
+          "totalUsd": "Total USD (completed)",
+          "viewPetitions": "View petitions"
+        },
         "donate": {
           "airtel": "Airtel Money",
           "amount": "Amount",
@@ -15,6 +84,57 @@
           "success": "Donation recorded successfully",
           "title": "Make a donation"
         },
+        "donateForm": {
+          "currency": "Currency",
+          "donorEmail": "Email (receipt)",
+          "donorName": "Name (optional)",
+          "processing": "Processing...",
+          "providerLabel": "Mobile Money provider",
+          "submitMobile": "Donate via Mobile Money",
+          "thanks": "Thank you for your donation!"
+        },
+        "footer": {
+          "about": "About us",
+          "actNow": "Take action now",
+          "advocacy": "Advocacy & studies",
+          "axes": "Our focus areas",
+          "contact": "Contact",
+          "copyright": "Non-profit",
+          "donate": "Make a donation",
+          "engage": "Get involved",
+          "legal": "Legal notice",
+          "live": "Join live",
+          "newsletter": "Newsletter",
+          "newsletterDesc": "Stay informed about our actions and campaigns.",
+          "petitions": "Sign a petition",
+          "press": "Press",
+          "privacy": "Privacy",
+          "privacyPolicy": "Privacy policy",
+          "quickLinks": "Quick links",
+          "quote": "Behind every soldier stands a family.",
+          "tagline": "Defending the rights of military dependents"
+        },
+        "forms": {
+          "accountType": "Account type",
+          "createMyAccount": "Create my account",
+          "familyLinks": "Family links",
+          "firstName": "First name",
+          "lastName": "Last name",
+          "links": {
+            "conjoint": "Spouse",
+            "enfant": "Child",
+            "orphelin": "Orphan",
+            "parent": "Parent",
+            "veuve": "Widow / Widower"
+          },
+          "militaryLink": "Link to military member",
+          "militaryName": "Military member's name",
+          "myDonations": "My donations",
+          "myHelpRequests": "My help requests",
+          "phone": "Phone",
+          "province": "Province",
+          "skills": "Skills"
+        },
         "member": {
           "dashboard": "My account",
           "donations": "My donations",
@@ -24,6 +144,20 @@
           "logout": "Logout",
           "pending": "Account pending approval",
           "register": "Register"
+        },
+        "membershipTypes": {
+          "benevole": {
+            "description": "To join the team and actively contribute to CFM's actions.",
+            "label": "Volunteer"
+          },
+          "famille": {
+            "description": "For spouses, children, widows and orphans of military personnel. Family link information required.",
+            "label": "Military family"
+          },
+          "soutien": {
+            "description": "For anyone wishing to support the cause without military family information.",
+            "label": "Supporter"
+          }
         },
         "nav": {
           "about": "About us",
@@ -48,6 +182,35 @@
             "title": "About us",
             "visionTitle": "Our vision"
           },
+          "actions": {
+            "allProvinces": "All provinces",
+            "empty": "No actions recorded for this selection.",
+            "heroAlt": "CFM actions in DRC",
+            "loading": "Loading...",
+            "mapAria": "Stylised map of DRC",
+            "mapSubtitle": "province(s) with recorded actions — 26 DRC provinces",
+            "mapTitle": "Actions map",
+            "subtitle": "Map of CFM actions across the 26 provinces of DRC.",
+            "title": "National & regional actions",
+            "types": {
+              "action": "Action",
+              "atelier": "Workshop",
+              "evenement": "Event",
+              "plaidoyer": "Advocacy"
+            }
+          },
+          "advocacy": {
+            "campaignsTitle": "Campaigns",
+            "contactBtn": "Contact us",
+            "ctaBody": "Contact our advocacy team for full reports.",
+            "ctaTitle": "Are you a decision-maker or institution?",
+            "downloadPdf": "Download report (PDF)",
+            "heroAlt": "CFM advocacy",
+            "newsTitle": "News & press releases",
+            "studiesTitle": "Studies & reports",
+            "subtitle": "Our analyses, conclusions and campaigns to influence national and international policy for military families.",
+            "title": "Advocacy & studies"
+          },
           "auth": {
             "back": "Back to login",
             "confirm": "Confirm password",
@@ -62,6 +225,11 @@
             "resetTitle": "New password",
             "submit": "Send reset link",
             "success": "If this email exists, a link has been sent."
+          },
+          "axes": {
+            "heroAlt": "CFM focus areas",
+            "subtitle": "CFM offers pragmatic solutions to permanently improve social, economic, environmental, educational and health outcomes for military dependents.",
+            "title": "Our focus areas"
           },
           "contact": {
             "country": "Country",
@@ -84,6 +252,25 @@
             "title": "Get involved with CFM",
             "typesTitle": "Membership types"
           },
+          "engageExtra": {
+            "annualReport": "Annual report available on request from the admin team.",
+            "createAccount": "Create account",
+            "demoPayment": "Demo mode: simulated payment. Set MOBILE_MONEY_MODE=production and PayDunya for production.",
+            "fund1": "Advocacy studies and reports",
+            "fund2": "Women and widows empowerment campaigns",
+            "fund3": "Support for vulnerable families",
+            "fund4": "Field actions in provinces",
+            "fundsTitle": "Use of funds",
+            "partnerBody": "Institutions, NGOs and companies: contact us to explore a partnership.",
+            "partnerBtn": "Propose a partnership",
+            "partnerTitle": "Become a partner",
+            "prodPayment": "Secure payment via PayDunya (Orange Money, M-Pesa, Airtel).",
+            "quickSignupDesc": "Password-free alternative — manually validated by CFM team.",
+            "quickSignupTitle": "Quick pre-registration (no account)",
+            "signIn": "Sign in",
+            "transparencyBody": "CFM is committed to full transparency with donors. Every contribution supports advocacy, studies and direct family support.",
+            "transparencyTitle": "Financial transparency"
+          },
           "home": {
             "axesTitle": "Our focus areas",
             "campaignsTitle": "Active campaigns",
@@ -102,6 +289,11 @@
             "newsletterSubtitle": "Receive our news and advocacy alerts.",
             "newsletterTitle": "Stay informed",
             "testimonialsTitle": "Testimonials"
+          },
+          "legal": {
+            "mentionsTitle": "Legal notice",
+            "privacySubtitle": "Protection of your personal data",
+            "privacyTitle": "Privacy policy"
           },
           "live": {
             "allEvents": "All events",
@@ -123,6 +315,57 @@
             "subtitle": "Follow our live streams and replays.",
             "title": "Live & events",
             "viewers": "viewers"
+          },
+          "memberArea": {
+            "accountActive": "Active account",
+            "accountPending": "Pending approval",
+            "confirmPassword": "Confirm password",
+            "dashboardHello": "Hello",
+            "donate": "Make a donation",
+            "editProfile": "Edit my profile",
+            "email": "Email",
+            "forgotLink": "Forgot password?",
+            "hasAccount": "Already registered?",
+            "loginBtn": "Sign in",
+            "loginLink": "Sign in",
+            "loginLoading": "Signing in...",
+            "loginSubtitle": "Sign in to your CFM account",
+            "loginTitle": "Member area",
+            "noAccount": "No account yet?",
+            "noDonations": "No donations.",
+            "noHelp": "No requests.",
+            "password": "Password",
+            "pendingBanner": "Your account is pending approval by the CFM team.",
+            "profileBack": "← My account",
+            "profileTitle": "My profile",
+            "registerBtn": "Create my account",
+            "registerLink": "Register",
+            "registerLoading": "Registering...",
+            "registerSubtitle": "Join the CFM community. Your account will be reviewed before activation.",
+            "registerSuccess": "Registration successful! Your account will be activated after review.",
+            "registerTitle": "Create an account",
+            "requestHelp": "Request help",
+            "volunteerBanner": "Volunteer area: access the limited dashboard.",
+            "volunteerDashboard": "Volunteer dashboard"
+          },
+          "news": {
+            "back": "← Advocacy & news",
+            "fallbackTitle": "News"
+          },
+          "press": {
+            "aboutCardDesc": "Non-profit founded in {year}, national and international advocacy.",
+            "aboutCardTitle": "About",
+            "contactBtn": "Contact us",
+            "contactPress": "Press contact",
+            "downloadPdf": "Download PDF",
+            "downloadRelease": "Download release (PDF)",
+            "learnMore": "Learn more",
+            "pressKitDesc": "CFM overview, key figures and visuals.",
+            "pressKitHint": "Place file at public/media/presse/dossier-presse.pdf",
+            "pressKitTitle": "Press kit",
+            "releasesTitle": "Press releases",
+            "subtitle": "Resources for journalists covering military families' rights in DRC.",
+            "title": "Press room"
           }
         },
         "petitions": {
@@ -138,9 +381,165 @@
           "subtitle": "Sign our petitions to strengthen advocacy for military families.",
           "success": "Thank you! Your signature has been recorded.",
           "title": "Petitions"
+        },
+        "ux": {
+          "about": {
+            "ctaEngage": "Join us",
+            "ctaTransparency": "View financial transparency"
+          },
+          "actions": {
+            "provinceHelp": "Need help in your province?",
+            "provinceHelpCta": "Request help"
+          },
+          "axes": {
+            "ctaActions": "See our field actions",
+            "ctaHelp": "Request help"
+          },
+          "formSuccess": {
+            "contactAck": "Your message has been sent.",
+            "contactDelay": "We will respond within 7 business days.",
+            "contactNext": "See our field actions",
+            "donationAck": "Thank you for your generosity!",
+            "donationDelay": "Your donation will be confirmed after payment processing.",
+            "donationNext": "View financial transparency",
+            "helpAck": "Your confidential request has been recorded.",
+            "helpDelay": "Our team will respond within 7 business days.",
+            "helpNext": "Create an account to track your request",
+            "membershipAck": "Your membership request has been recorded.",
+            "membershipDelay": "We will contact you shortly with next steps.",
+            "membershipNext": "Create an account for online tracking",
+            "petitionAck": "Thank you! Your signature has been recorded.",
+            "petitionDelay": "Every signature strengthens our advocacy.",
+            "petitionNext": "Create an account for upcoming mobilisations"
+          },
+          "helpInfo": {
+            "confidentiality": "This form is strictly confidential. Your data is only accessible to authorised staff.",
+            "delay": "Response time: maximum 7 business days.",
+            "memberFollowUp": "Create a member account to track your request from your private space.",
+            "title": "Before you fill in the form"
+          },
+          "memberDashboard": {
+            "citizenActionsBody": "Join current mobilisations and follow live events.",
+            "citizenActionsTitle": "Upcoming citizen actions",
+            "liveNow": "Live now",
+            "openPetitions": "Open petitions",
+            "viewLive": "Join live"
+          },
+          "memberPromo": {
+            "benefit1": "Track help requests confidentially",
+            "benefit2": "Receive live alerts and upcoming petitions",
+            "benefit3": "Centralise donations and participation",
+            "body": "Go further after your action: track your requests and stay informed about mobilisations.",
+            "cta": "Create account",
+            "title": "Why create a member account?"
+          },
+          "membershipCompare": {
+            "colAccount": "Member account",
+            "colFeature": "Criteria",
+            "colQuick": "Quick membership",
+            "ctaAccount": "Create account",
+            "ctaQuick": "Quick membership",
+            "rowAccountDelay": "Activation after review (24-72 h)",
+            "rowAccountFollowUp": "Dashboard, requests, donations, petitions",
+            "rowAccountGoal": "Private space, tracking and ongoing participation",
+            "rowDelay": "Timeline",
+            "rowFollowUp": "Follow-up",
+            "rowGoal": "Goal",
+            "rowQuickDelay": "Manual processing within 7 days",
+            "rowQuickFollowUp": "Contact by CFM team only",
+            "rowQuickGoal": "Membership request without password",
+            "title": "Which path should you choose?"
+          },
+          "news": {
+            "viewAdvocacy": "Back to advocacy",
+            "viewCampaign": "Sign related petition"
+          },
+          "nextAction": {
+            "getInvolved": "Join us",
+            "makeDonation": "Make a donation",
+            "signPetition": "Sign a petition",
+            "subtitle": "Turn your engagement into concrete impact for military families.",
+            "title": "Take the next step"
+          },
+          "plaidoyer": {
+            "viewPetitions": "View all petitions →"
+          },
+          "transparency": {
+            "impactBody": "Every contribution directly funds advocacy, studies and support for military families on the ground.",
+            "impactTitle": "Impact of your donations"
+          }
         }
       },
       "fr": {
+        "axesContent": {
+          "economique": {
+            "description": "Autonomisation des femmes et veuves par l'entrepreneuriat et l'accès aux ressources économiques.",
+            "details": [
+              "Formation à l'entrepreneuriat",
+              "Microcrédit et accompagnement",
+              "Réseau de femmes entrepreneures",
+              "Plaidoyer pour l'accès équitable aux aides"
+            ],
+            "title": "Économique"
+          },
+          "education": {
+            "description": "Garantir l'accès à l'éducation et à la formation pour les enfants de militaires.",
+            "details": [
+              "Scolarisation des orphelins",
+              "Bourses et soutien scolaire",
+              "Formation professionnelle",
+              "Plaidoyer pour des politiques éducatives inclusives"
+            ],
+            "title": "Éducation"
+          },
+          "environnement": {
+            "description": "Améliorer le cadre de vie dans et autour des camps et quartiers militaires.",
+            "details": [
+              "Conditions d'habitat décentes",
+              "Accès à l'eau et à l'assainissement",
+              "Espaces verts et qualité de vie",
+              "Développement durable des communautés militaires"
+            ],
+            "title": "Environnement"
+          },
+          "sante": {
+            "description": "Santé sexuelle et reproductive des femmes dans les milieux des camps militaires.",
+            "details": [
+              "Sensibilisation et prévention",
+              "Accès aux soins de santé reproductive",
+              "Plaidoyer pour des services adaptés",
+              "Formation des agents de santé communautaires"
+            ],
+            "title": "Santé"
+          },
+          "social": {
+            "description": "Améliorer les conditions de vie des conjoints, veuves, orphelins et enfants de militaires.",
+            "details": [
+              "Protection sociale renforcée",
+              "Accompagnement des veuves et orphelins",
+              "Soutien psychologique et communautaire",
+              "Reconnaissance du sacrifice familial"
+            ],
+            "title": "Social"
+          }
+        },
+        "common": {
+          "campaign": "Campagne",
+          "createAccountBtn": "Créer mon compte",
+          "discover": "Découvrir",
+          "donationsRecorded": "Dons enregistrés",
+          "error": "Erreur",
+          "loading": "Chargement...",
+          "logout": "Déconnexion",
+          "passwordMismatch": "Les mots de passe ne correspondent pas",
+          "profileUpdated": "Profil mis à jour.",
+          "save": "Enregistrer",
+          "saving": "Enregistrement...",
+          "select": "Sélectionner",
+          "totalCdf": "Total CDF (complétés)",
+          "totalUsd": "Total USD (complétés)",
+          "viewPetitions": "Voir les pétitions"
+        },
         "donate": {
           "airtel": "Airtel Money",
           "amount": "Montant",
@@ -152,6 +551,57 @@
           "success": "Don enregistré avec succès",
           "title": "Faire un don"
         },
+        "donateForm": {
+          "currency": "Devise",
+          "donorEmail": "Email (reçu)",
+          "donorName": "Nom (optionnel)",
+          "processing": "Traitement...",
+          "providerLabel": "Opérateur Mobile Money",
+          "submitMobile": "Donner via Mobile Money",
+          "thanks": "Merci pour votre don !"
+        },
+        "footer": {
+          "about": "Qui sommes-nous",
+          "actNow": "Agir maintenant",
+          "advocacy": "Plaidoyer & études",
+          "axes": "Nos axes",
+          "contact": "Contact",
+          "copyright": "ASBL",
+          "donate": "Faire un don",
+          "engage": "S'engager",
+          "legal": "Mentions légales",
+          "live": "Rejoindre le live",
+          "newsletter": "Newsletter",
+          "newsletterDesc": "Restez informé de nos actions et campagnes.",
+          "petitions": "Signer une pétition",
+          "press": "Presse",
+          "privacy": "Confidentialité",
+          "privacyPolicy": "Politique de confidentialité",
+          "quickLinks": "Liens rapides",
+          "quote": "Derrière chaque militaire, il y a une famille.",
+          "tagline": "Défendre les droits des dépendants des militaires"
+        },
+        "forms": {
+          "accountType": "Type de compte",
+          "createMyAccount": "Créer mon compte",
+          "familyLinks": "Liens familiaux",
+          "firstName": "Prénom",
+          "lastName": "Nom",
+          "links": {
+            "conjoint": "Conjoint(e)",
+            "enfant": "Enfant",
+            "orphelin": "Orphelin",
+            "parent": "Parent",
+            "veuve": "Veuve / Veuf"
+          },
+          "militaryLink": "Lien avec le militaire",
+          "militaryName": "Nom du militaire",
+          "myDonations": "Mes dons",
+          "myHelpRequests": "Mes demandes d'aide",
+          "phone": "Téléphone",
+          "province": "Province",
+          "skills": "Compétences"
+        },
         "member": {
           "dashboard": "Mon espace",
           "donations": "Mes dons",
@@ -161,6 +611,20 @@
           "logout": "Déconnexion",
           "pending": "Compte en attente de validation",
           "register": "Inscription"
+        },
+        "membershipTypes": {
+          "benevole": {
+            "description": "Pour rejoindre l'équipe et contribuer activement aux actions de CFM.",
+            "label": "Bénévole"
+          },
+          "famille": {
+            "description": "Pour les conjoints, enfants, veuves et orphelins de militaires. Informations sur le lien familial requises.",
+            "label": "Famille militaire"
+          },
+          "soutien": {
+            "description": "Pour toute personne souhaitant soutenir la cause sans informations sur un parent militaire.",
+            "label": "Soutien"
+          }
         },
         "nav": {
           "about": "Qui sommes-nous",
@@ -185,6 +649,35 @@
             "title": "Qui sommes-nous",
             "visionTitle": "Notre vision"
           },
+          "actions": {
+            "allProvinces": "Toutes les provinces",
+            "empty": "Aucune action enregistrée pour cette sélection.",
+            "heroAlt": "Actions CFM en RDC",
+            "loading": "Chargement...",
+            "mapAria": "Carte stylisée de la RDC",
+            "mapSubtitle": "province(s) avec des actions — 26 provinces RDC",
+            "mapTitle": "Carte des actions",
+            "subtitle": "Carte des actions de CFM à travers les 26 provinces de la RDC.",
+            "title": "Actions nationales & régionales",
+            "types": {
+              "action": "Action",
+              "atelier": "Atelier",
+              "evenement": "Événement",
+              "plaidoyer": "Plaidoyer"
+            }
+          },
+          "advocacy": {
+            "campaignsTitle": "Campagnes",
+            "contactBtn": "Nous contacter",
+            "ctaBody": "Contactez notre équipe plaidoyer pour accéder à nos rapports complets.",
+            "ctaTitle": "Vous êtes décideur ou institution ?",
+            "downloadPdf": "Télécharger le rapport (PDF)",
+            "heroAlt": "Plaidoyer CFM",
+            "newsTitle": "Actualités & communiqués",
+            "studiesTitle": "Études & rapports",
+            "subtitle": "Nos analyses, conclusions et campagnes pour influencer les politiques nationales et internationales en faveur des familles militaires.",
+            "title": "Plaidoyer & études"
+          },
           "auth": {
             "back": "Retour à la connexion",
             "confirm": "Confirmer le mot de passe",
@@ -199,6 +692,11 @@
             "resetTitle": "Nouveau mot de passe",
             "submit": "Envoyer le lien",
             "success": "Si cet email existe, un lien a été envoyé."
+          },
+          "axes": {
+            "heroAlt": "Axes d'action CFM",
+            "subtitle": "CFM propose des solutions pragmatiques pour améliorer de manière permanente le social, l'économie, l'environnement, l'éducation et la santé des dépendants des militaires.",
+            "title": "Nos axes d'action"
           },
           "contact": {
             "country": "Pays",
@@ -221,6 +719,25 @@
             "title": "S'engager avec CFM",
             "typesTitle": "Types d'adhésion"
           },
+          "engageExtra": {
+            "annualReport": "Rapport annuel disponible sur demande auprès de l'équipe administrative.",
+            "createAccount": "Créer un compte",
+            "demoPayment": "Mode démo : paiement simulé. Configurez MOBILE_MONEY_MODE=production et PayDunya pour la production.",
+            "fund1": "Études et rapports de plaidoyer",
+            "fund2": "Campagnes d'autonomisation des femmes et veuves",
+            "fund3": "Accompagnement des familles en situation de vulnérabilité",
+            "fund4": "Actions sur le terrain dans les provinces",
+            "fundsTitle": "Utilisation des fonds",
+            "partnerBody": "Institutions, ONG et entreprises : contactez-nous pour explorer un partenariat avec CFM.",
+            "partnerBtn": "Proposer un partenariat",
+            "partnerTitle": "Devenir partenaire",
+            "prodPayment": "Paiement sécurisé via PayDunya (Orange Money, M-Pesa, Airtel).",
+            "quickSignupDesc": "Alternative sans mot de passe — validée manuellement par l'équipe CFM.",
+            "quickSignupTitle": "Pré-inscription rapide (sans compte)",
+            "signIn": "Se connecter",
+            "transparencyBody": "CFM s'engage à une transparence totale envers ses donateurs. Chaque contribution est utilisée pour nos actions de plaidoyer, d'études et d'accompagnement direct des familles militaires.",
+            "transparencyTitle": "Transparence financière"
+          },
           "home": {
             "axesTitle": "Nos axes d'action",
             "campaignsTitle": "Campagnes en cours",
@@ -239,6 +756,11 @@
             "newsletterSubtitle": "Recevez nos actualités et alertes plaidoyer.",
             "newsletterTitle": "Restez informés",
             "testimonialsTitle": "Témoignages"
+          },
+          "legal": {
+            "mentionsTitle": "Mentions légales",
+            "privacySubtitle": "Protection de vos données personnelles",
+            "privacyTitle": "Politique de confidentialité"
           },
           "live": {
             "allEvents": "Tous les événements",
@@ -260,6 +782,57 @@
             "subtitle": "Suivez nos diffusions en direct et les replays.",
             "title": "Live & événements",
             "viewers": "spectateurs"
+          },
+          "memberArea": {
+            "accountActive": "Compte actif",
+            "accountPending": "En attente de validation",
+            "confirmPassword": "Confirmer le mot de passe",
+            "dashboardHello": "Bonjour",
+            "donate": "Faire un don",
+            "editProfile": "Modifier mon profil",
+            "email": "Email",
+            "forgotLink": "Mot de passe oublié ?",
+            "hasAccount": "Déjà inscrit ?",
+            "loginBtn": "Se connecter",
+            "loginLink": "Se connecter",
+            "loginLoading": "Connexion...",
+            "loginSubtitle": "Connectez-vous à votre compte CFM",
+            "loginTitle": "Espace membre",
+            "noAccount": "Pas encore de compte ?",
+            "noDonations": "Aucun don.",
+            "noHelp": "Aucune demande.",
+            "password": "Mot de passe",
+            "pendingBanner": "Votre compte est en attente de validation par l'équipe CFM.",
+            "profileBack": "← Mon espace",
+            "profileTitle": "Mon profil",
+            "registerBtn": "Créer mon compte",
+            "registerLink": "S'inscrire",
+            "registerLoading": "Inscription...",
+            "registerSubtitle": "Rejoignez la communauté CFM. Votre compte sera validé par l'équipe avant activation.",
+            "registerSuccess": "Inscription réussie ! Votre compte sera activé après validation par l'équipe CFM.",
+            "registerTitle": "Créer un compte",
+            "requestHelp": "Faire une demande",
+            "volunteerBanner": "Espace bénévole : accédez au tableau de bord limité.",
+            "volunteerDashboard": "Dashboard bénévole"
+          },
+          "news": {
+            "back": "← Plaidoyer & actualités",
+            "fallbackTitle": "Actualité"
+          },
+          "press": {
+            "aboutCardDesc": "ASBL fondée en {year}, plaidoyer national et international.",
+            "aboutCardTitle": "À propos",
+            "contactBtn": "Nous contacter",
+            "contactPress": "Contact presse",
+            "downloadPdf": "Télécharger le PDF",
+            "downloadRelease": "Télécharger le communiqué (PDF)",
+            "learnMore": "En savoir plus",
+            "pressKitDesc": "Présentation de CFM, chiffres clés et visuels.",
+            "pressKitHint": "Déposez le fichier dans public/media/presse/dossier-presse.pdf",
+            "pressKitTitle": "Dossier de presse",
+            "releasesTitle": "Communiqués de presse",
+            "subtitle": "Ressources pour les journalistes et médias couvrant les droits des familles militaires en RDC.",
+            "title": "Espace presse"
           }
         },
         "petitions": {
@@ -275,9 +848,165 @@
           "subtitle": "Signez nos pétitions pour renforcer le plaidoyer en faveur des familles militaires.",
           "success": "Merci ! Votre signature a été enregistrée.",
           "title": "Pétitions"
+        },
+        "ux": {
+          "about": {
+            "ctaEngage": "Adhérer",
+            "ctaTransparency": "Voir la transparence financière"
+          },
+          "actions": {
+            "provinceHelp": "Besoin d'aide dans votre province ?",
+            "provinceHelpCta": "Demander de l'aide"
+          },
+          "axes": {
+            "ctaActions": "Voir nos actions sur le terrain",
+            "ctaHelp": "Demander de l'aide"
+          },
+          "formSuccess": {
+            "contactAck": "Votre message a bien été envoyé.",
+            "contactDelay": "Nous vous répondrons sous 7 jours ouvrés.",
+            "contactNext": "Consulter nos actions sur le terrain",
+            "donationAck": "Merci pour votre générosité !",
+            "donationDelay": "Votre don sera confirmé après traitement du paiement.",
+            "donationNext": "Voir la transparence financière",
+            "helpAck": "Votre demande confidentielle a bien été enregistrée.",
+            "helpDelay": "Notre équipe vous répond sous 7 jours ouvrés.",
+            "helpNext": "Créer un compte pour suivre votre demande",
+            "membershipAck": "Votre demande d'adhésion a bien été enregistrée.",
+            "membershipDelay": "Nous vous contacterons sous peu pour la suite.",
+            "membershipNext": "Créer un compte pour un suivi en ligne",
+            "petitionAck": "Merci ! Votre signature a été enregistrée.",
+            "petitionDelay": "Chaque signature renforce notre plaidoyer.",
+            "petitionNext": "Créer un compte pour les prochaines mobilisations"
+          },
+          "helpInfo": {
+            "confidentiality": "Ce formulaire est strictement confidentiel. Vos données ne sont accessibles qu'à l'équipe autorisée.",
+            "delay": "Délai de réponse : 7 jours ouvrés maximum.",
+            "memberFollowUp": "Créez un compte membre pour suivre l'état de votre demande depuis votre espace privé.",
+            "title": "Avant de remplir le formulaire"
+          },
+          "memberDashboard": {
+            "citizenActionsBody": "Participez aux mobilisations en cours et suivez les événements live.",
+            "citizenActionsTitle": "Prochaines actions citoyennes",
+            "liveNow": "Live en cours",
+            "openPetitions": "Pétitions ouvertes",
+            "viewLive": "Rejoindre le live"
+          },
+          "memberPromo": {
+            "benefit1": "Suivre vos demandes d'aide en toute confidentialité",
+            "benefit2": "Recevoir les alertes live et les prochaines pétitions",
+            "benefit3": "Centraliser vos dons et votre participation",
+            "body": "Allez plus loin après votre action : suivez vos démarches et restez informé des mobilisations.",
+            "cta": "Créer un compte",
+            "title": "Pourquoi créer un compte membre ?"
+          },
+          "membershipCompare": {
+            "colAccount": "Compte membre",
+            "colFeature": "Critère",
+            "colQuick": "Adhésion rapide",
+            "ctaAccount": "Créer un compte",
+            "ctaQuick": "Adhésion rapide",
+            "rowAccountDelay": "Activation après validation (24-72 h)",
+            "rowAccountFollowUp": "Tableau de bord, demandes, dons, pétitions",
+            "rowAccountGoal": "Espace privé, suivi et participation continue",
+            "rowDelay": "Délai",
+            "rowFollowUp": "Suivi",
+            "rowGoal": "Objectif",
+            "rowQuickDelay": "Traitement manuel sous 7 jours",
+            "rowQuickFollowUp": "Contact par l'équipe CFM uniquement",
+            "rowQuickGoal": "Demande d'adhésion sans mot de passe",
+            "title": "Quel parcours choisir ?"
+          },
+          "news": {
+            "viewAdvocacy": "Retour au plaidoyer",
+            "viewCampaign": "Signer la pétition liée"
+          },
+          "nextAction": {
+            "getInvolved": "Adhérer",
+            "makeDonation": "Faire un don",
+            "signPetition": "Signer une pétition",
+            "subtitle": "Transformez votre engagement en impact concret pour les familles militaires.",
+            "title": "Passez à l'action"
+          },
+          "plaidoyer": {
+            "viewPetitions": "Voir toutes les pétitions →"
+          },
+          "transparency": {
+            "impactBody": "Chaque contribution finance directement le plaidoyer, les études et l'accompagnement des familles militaires sur le terrain.",
+            "impactTitle": "Impact de vos dons"
+          }
         }
       },
       "ln": {
+        "axesContent": {
+          "economique": {
+            "description": "Autonomisation des femmes et veuves par l'entrepreneuriat et l'accès aux ressources économiques.",
+            "details": [
+              "Formation à l'entrepreneuriat",
+              "Microcrédit et accompagnement",
+              "Réseau de femmes entrepreneures",
+              "Plaidoyer pour l'accès équitable aux aides"
+            ],
+            "title": "Économique"
+          },
+          "education": {
+            "description": "Garantir l'accès à l'éducation et à la formation pour les enfants de militaires.",
+            "details": [
+              "Scolarisation des orphelins",
+              "Bourses et soutien scolaire",
+              "Formation professionnelle",
+              "Plaidoyer pour des politiques éducatives inclusives"
+            ],
+            "title": "Éducation"
+          },
+          "environnement": {
+            "description": "Améliorer le cadre de vie dans et autour des camps et quartiers militaires.",
+            "details": [
+              "Conditions d'habitat décentes",
+              "Accès à l'eau et à l'assainissement",
+              "Espaces verts et qualité de vie",
+              "Développement durable des communautés militaires"
+            ],
+            "title": "Environnement"
+          },
+          "sante": {
+            "description": "Santé sexuelle et reproductive des femmes dans les milieux des camps militaires.",
+            "details": [
+              "Sensibilisation et prévention",
+              "Accès aux soins de santé reproductive",
+              "Plaidoyer pour des services adaptés",
+              "Formation des agents de santé communautaires"
+            ],
+            "title": "Santé"
+          },
+          "social": {
+            "description": "Améliorer les conditions de vie des conjoints, veuves, orphelins et enfants de militaires.",
+            "details": [
+              "Protection sociale renforcée",
+              "Accompagnement des veuves et orphelins",
+              "Soutien psychologique et communautaire",
+              "Reconnaissance du sacrifice familial"
+            ],
+            "title": "Social"
+          }
+        },
+        "common": {
+          "campaign": "Campagne",
+          "createAccountBtn": "Créer mon compte",
+          "discover": "Tala",
+          "donationsRecorded": "Dons enregistrés",
+          "error": "Erreur",
+          "loading": "Ezali kozela...",
+          "logout": "Kobima",
+          "passwordMismatch": "Les mots de passe ne correspondent pas",
+          "profileUpdated": "Profil mis à jour.",
+          "save": "Kobomba",
+          "saving": "Ezali kobomba...",
+          "select": "Sélectionner",
+          "totalCdf": "Total CDF (complétés)",
+          "totalUsd": "Total USD (complétés)",
+          "viewPetitions": "Tala ba pétitions"
+        },
         "donate": {
           "airtel": "Airtel Money",
           "amount": "Motango",
@@ -289,6 +1018,57 @@
           "success": "Don enregistré",
           "title": "Kopesa don"
         },
+        "donateForm": {
+          "currency": "Devise",
+          "donorEmail": "Email (reçu)",
+          "donorName": "Nom (optionnel)",
+          "processing": "Traitement...",
+          "providerLabel": "Opérateur Mobile Money",
+          "submitMobile": "Donner via Mobile Money",
+          "thanks": "Merci pour votre don !"
+        },
+        "footer": {
+          "about": "Biso nde bani",
+          "actNow": "Agir maintenant",
+          "advocacy": "Plaidoyer",
+          "axes": "Nos axes",
+          "contact": "Contact",
+          "copyright": "ASBL",
+          "donate": "Faire un don",
+          "engage": "Kosala elongo",
+          "legal": "Mentions légales",
+          "live": "Rejoindre le live",
+          "newsletter": "Newsletter",
+          "newsletterDesc": "Bozwa ba sango na biso.",
+          "petitions": "Signer une pétition",
+          "press": "Presse",
+          "privacy": "Confidentialité",
+          "privacyPolicy": "Politique de confidentialité",
+          "quickLinks": "Ba liens",
+          "quote": "Derrière chaque militaire, il y a une famille.",
+          "tagline": "Défendre les droits des dépendants des militaires"
+        },
+        "forms": {
+          "accountType": "Type de compte",
+          "createMyAccount": "Créer mon compte",
+          "familyLinks": "Liens familiaux",
+          "firstName": "Prénom",
+          "lastName": "Nom",
+          "links": {
+            "conjoint": "Conjoint(e)",
+            "enfant": "Enfant",
+            "orphelin": "Orphelin",
+            "parent": "Parent",
+            "veuve": "Veuve / Veuf"
+          },
+          "militaryLink": "Lien avec le militaire",
+          "militaryName": "Nom du militaire",
+          "myDonations": "Mes dons",
+          "myHelpRequests": "Mes demandes d'aide",
+          "phone": "Téléphone",
+          "province": "Province",
+          "skills": "Compétences"
+        },
         "member": {
           "dashboard": "Esika na ngai",
           "donations": "Ba dons na ngai",
@@ -298,6 +1078,20 @@
           "logout": "Kobima",
           "pending": "Compte ezali kozela",
           "register": "Komikoma"
+        },
+        "membershipTypes": {
+          "benevole": {
+            "description": "Pour rejoindre l'équipe et contribuer activement aux actions de CFM.",
+            "label": "Bénévole"
+          },
+          "famille": {
+            "description": "Pour les conjoints, enfants, veuves et orphelins de militaires. Informations sur le lien familial requises.",
+            "label": "Famille militaire"
+          },
+          "soutien": {
+            "description": "Pour toute personne souhaitant soutenir la cause sans informations sur un parent militaire.",
+            "label": "Soutien"
+          }
         },
         "nav": {
           "about": "Biso nde bani",
@@ -322,6 +1116,35 @@
             "title": "Biso nde bani",
             "visionTitle": "Vision na biso"
           },
+          "actions": {
+            "allProvinces": "Ba provinces nionso",
+            "empty": "Misala ezali te mpo na sélection oyo.",
+            "heroAlt": "Actions CFM en RDC",
+            "loading": "Ezali kozela...",
+            "mapAria": "Carte stylisée de la RDC",
+            "mapSubtitle": "province(s) avec des actions — 26 provinces RDC",
+            "mapTitle": "Carte des actions",
+            "subtitle": "Carte ya misala na CFM na 26 provinces.",
+            "title": "Misala na mboka mpe na bitúká",
+            "types": {
+              "action": "Action",
+              "atelier": "Atelier",
+              "evenement": "Événement",
+              "plaidoyer": "Plaidoyer"
+            }
+          },
+          "advocacy": {
+            "campaignsTitle": "Ba campagnes",
+            "contactBtn": "Nous contacter",
+            "ctaBody": "Contactez notre équipe plaidoyer pour accéder à nos rapports complets.",
+            "ctaTitle": "Vous êtes décideur ou institution ?",
+            "downloadPdf": "Télécharger le rapport (PDF)",
+            "heroAlt": "Plaidoyer CFM",
+            "newsTitle": "Ba actualités",
+            "studiesTitle": "Ba études & rapports",
+            "subtitle": "Nos analyses, conclusions et campagnes pour influencer les politiques nationales et internationales en faveur des familles militaires.",
+            "title": "Plaidoyer & ba études"
+          },
           "auth": {
             "back": "Zonga na connexion",
             "confirm": "Confirmer",
@@ -336,6 +1159,11 @@
             "resetTitle": "Mot de passe ya sika",
             "submit": "Tinda",
             "success": "Soki email ezali, lien etindami."
+          },
+          "axes": {
+            "heroAlt": "Bisika ya misala CFM",
+            "subtitle": "CFM epesaka ba solutions mpo na kobongisa social, économie, environnement, éducation mpe santé.",
+            "title": "Bisika ya misala"
           },
           "contact": {
             "country": "Mboka",
@@ -358,12 +1186,32 @@
             "title": "Kosala elongo na CFM",
             "typesTitle": "Ba types ya adhésion"
           },
+          "engageExtra": {
+            "annualReport": "Rapport annuel disponible sur demande auprès de l'équipe administrative.",
+            "createAccount": "Komikoma",
+            "demoPayment": "Mode démo : paiement simulé. Configurez MOBILE_MONEY_MODE=production et PayDunya pour la production.",
+            "fund1": "Études et rapports de plaidoyer",
+            "fund2": "Campagnes d'autonomisation des femmes et veuves",
+            "fund3": "Accompagnement des familles en situation de vulnérabilité",
+            "fund4": "Actions sur le terrain dans les provinces",
+            "fundsTitle": "Utilisation des fonds",
+            "partnerBody": "Institutions, ONG et entreprises : contactez-nous pour explorer un partenariat avec CFM.",
+            "partnerBtn": "Proposer un partenariat",
+            "partnerTitle": "Devenir partenaire",
+            "prodPayment": "Paiement sécurisé via PayDunya (Orange Money, M-Pesa, Airtel).",
+            "quickSignupDesc": "Alternative sans mot de passe — validée manuellement par l'équipe CFM.",
+            "quickSignupTitle": "Pré-inscription rapide (sans compte)",
+            "signIn": "Kokota",
+            "transparencyBody": "CFM s'engage à une transparence totale envers ses donateurs. Chaque contribution est utilisée pour nos actions de plaidoyer, d'études et d'accompagnement direct des familles militaires.",
+            "transparencyTitle": "Transparence financière"
+          },
           "home": {
             "axesTitle": "Bisika ya misala",
             "campaignsTitle": "Ba campagnes",
             "heroCtaAbout": "Lisolo na biso",
             "heroCtaEngage": "Kosala elongo",
             "heroCtaHelp": "Senga lisalisi",
+            "heroCtaLive": "Rejoindre le live",
             "heroQuote": "Na nsima ya mokonzi ya mboka, ezali libota oyo etikali na makila oyo etokaki na drapo.",
             "liveSectionCta": "Tala ba live",
             "liveSectionSubtitle": "Landela biso na temps réel.",
@@ -375,6 +1223,11 @@
             "newsletterSubtitle": "Bozwa ba actualités na biso.",
             "newsletterTitle": "Kozala na sango",
             "testimonialsTitle": "Ba témoignages"
+          },
+          "legal": {
+            "mentionsTitle": "Mentions légales",
+            "privacySubtitle": "Bokengi ya ba données na yo",
+            "privacyTitle": "Politique ya confidentialité"
           },
           "live": {
             "allEvents": "Ba événements nionso",
@@ -396,6 +1249,57 @@
             "subtitle": "Landela biso na temps réel.",
             "title": "Live & ba événements",
             "viewers": "bato balandaka"
+          },
+          "memberArea": {
+            "accountActive": "Compte actif",
+            "accountPending": "En attente de validation",
+            "confirmPassword": "Confirmer le mot de passe",
+            "dashboardHello": "Mbote",
+            "donate": "Faire un don",
+            "editProfile": "Modifier mon profil",
+            "email": "Email",
+            "forgotLink": "Mot de passe oublié ?",
+            "hasAccount": "Déjà inscrit ?",
+            "loginBtn": "Kokota",
+            "loginLink": "Se connecter",
+            "loginLoading": "Connexion...",
+            "loginSubtitle": "Kota na compte na yo",
+            "loginTitle": "Esika ya membres",
+            "noAccount": "Pas encore de compte ?",
+            "noDonations": "Aucun don.",
+            "noHelp": "Aucune demande.",
+            "password": "Mot de passe",
+            "pendingBanner": "Votre compte est en attente de validation par l'équipe CFM.",
+            "profileBack": "← Mon espace",
+            "profileTitle": "Profil na ngai",
+            "registerBtn": "Komikoma",
+            "registerLink": "S'inscrire",
+            "registerLoading": "Inscription...",
+            "registerSubtitle": "Rejoignez la communauté CFM. Votre compte sera validé par l'équipe avant activation.",
+            "registerSuccess": "Inscription réussie ! Votre compte sera activé après validation par l'équipe CFM.",
+            "registerTitle": "Komikoma",
+            "requestHelp": "Faire une demande",
+            "volunteerBanner": "Espace bénévole : accédez au tableau de bord limité.",
+            "volunteerDashboard": "Dashboard bénévole"
+          },
+          "news": {
+            "back": "← Plaidoyer & actualités",
+            "fallbackTitle": "Actualité"
+          },
+          "press": {
+            "aboutCardDesc": "ASBL fondée en {year}, plaidoyer national et international.",
+            "aboutCardTitle": "À propos",
+            "contactBtn": "Nous contacter",
+            "contactPress": "Contact presse",
+            "downloadPdf": "Télécharger le PDF",
+            "downloadRelease": "Télécharger le communiqué (PDF)",
+            "learnMore": "En savoir plus",
+            "pressKitDesc": "Présentation de CFM, chiffres clés et visuels.",
+            "pressKitHint": "Déposez le fichier dans public/media/presse/dossier-presse.pdf",
+            "pressKitTitle": "Dossier de presse",
+            "releasesTitle": "Ba communiqués",
+            "subtitle": "Ressources pour les journalistes et médias couvrant les droits des familles militaires en RDC.",
+            "title": "Espace presse"
           }
         },
         "petitions": {
@@ -411,9 +1315,165 @@
           "subtitle": "Signer ba pétitions na biso mpo na kokanga makambo ya familles militaires.",
           "success": "Matondi! Signature na yo enregistrée.",
           "title": "Ba pétitions"
+        },
+        "ux": {
+          "about": {
+            "ctaEngage": "Adhérer",
+            "ctaTransparency": "Voir la transparence financière"
+          },
+          "actions": {
+            "provinceHelp": "Besoin d'aide dans votre province ?",
+            "provinceHelpCta": "Demander de l'aide"
+          },
+          "axes": {
+            "ctaActions": "Voir nos actions sur le terrain",
+            "ctaHelp": "Demander de l'aide"
+          },
+          "formSuccess": {
+            "contactAck": "Votre message a bien été envoyé.",
+            "contactDelay": "Nous vous répondrons sous 7 jours ouvrés.",
+            "contactNext": "Consulter nos actions sur le terrain",
+            "donationAck": "Merci pour votre générosité !",
+            "donationDelay": "Votre don sera confirmé après traitement du paiement.",
+            "donationNext": "Voir la transparence financière",
+            "helpAck": "Votre demande confidentielle a bien été enregistrée.",
+            "helpDelay": "Notre équipe vous répond sous 7 jours ouvrés.",
+            "helpNext": "Créer un compte pour suivre votre demande",
+            "membershipAck": "Votre demande d'adhésion a bien été enregistrée.",
+            "membershipDelay": "Nous vous contacterons sous peu pour la suite.",
+            "membershipNext": "Créer un compte pour un suivi en ligne",
+            "petitionAck": "Merci ! Votre signature a été enregistrée.",
+            "petitionDelay": "Chaque signature renforce notre plaidoyer.",
+            "petitionNext": "Créer un compte pour les prochaines mobilisations"
+          },
+          "helpInfo": {
+            "confidentiality": "Ce formulaire est strictement confidentiel. Vos données ne sont accessibles qu'à l'équipe autorisée.",
+            "delay": "Délai de réponse : 7 jours ouvrés maximum.",
+            "memberFollowUp": "Créez un compte membre pour suivre l'état de votre demande depuis votre espace privé.",
+            "title": "Avant de remplir le formulaire"
+          },
+          "memberDashboard": {
+            "citizenActionsBody": "Participez aux mobilisations en cours et suivez les événements live.",
+            "citizenActionsTitle": "Prochaines actions citoyennes",
+            "liveNow": "Live en cours",
+            "openPetitions": "Pétitions ouvertes",
+            "viewLive": "Rejoindre le live"
+          },
+          "memberPromo": {
+            "benefit1": "Suivre vos demandes d'aide en toute confidentialité",
+            "benefit2": "Recevoir les alertes live et les prochaines pétitions",
+            "benefit3": "Centraliser vos dons et votre participation",
+            "body": "Allez plus loin après votre action : suivez vos démarches et restez informé des mobilisations.",
+            "cta": "Créer un compte",
+            "title": "Pourquoi créer un compte membre ?"
+          },
+          "membershipCompare": {
+            "colAccount": "Compte membre",
+            "colFeature": "Critère",
+            "colQuick": "Adhésion rapide",
+            "ctaAccount": "Créer un compte",
+            "ctaQuick": "Adhésion rapide",
+            "rowAccountDelay": "Activation après validation (24-72 h)",
+            "rowAccountFollowUp": "Tableau de bord, demandes, dons, pétitions",
+            "rowAccountGoal": "Espace privé, suivi et participation continue",
+            "rowDelay": "Délai",
+            "rowFollowUp": "Suivi",
+            "rowGoal": "Objectif",
+            "rowQuickDelay": "Traitement manuel sous 7 jours",
+            "rowQuickFollowUp": "Contact par l'équipe CFM uniquement",
+            "rowQuickGoal": "Demande d'adhésion sans mot de passe",
+            "title": "Quel parcours choisir ?"
+          },
+          "news": {
+            "viewAdvocacy": "Retour au plaidoyer",
+            "viewCampaign": "Signer la pétition liée"
+          },
+          "nextAction": {
+            "getInvolved": "Adhérer",
+            "makeDonation": "Faire un don",
+            "signPetition": "Signer une pétition",
+            "subtitle": "Transformez votre engagement en impact concret pour les familles militaires.",
+            "title": "Passez à l'action"
+          },
+          "plaidoyer": {
+            "viewPetitions": "Voir toutes les pétitions →"
+          },
+          "transparency": {
+            "impactBody": "Chaque contribution finance directement le plaidoyer, les études et l'accompagnement des familles militaires sur le terrain.",
+            "impactTitle": "Impact de vos dons"
+          }
         }
       },
       "sw": {
+        "axesContent": {
+          "economique": {
+            "description": "Empowering women and widows through entrepreneurship and economic resources.",
+            "details": [
+              "Entrepreneurship training",
+              "Microcredit and mentoring",
+              "Women entrepreneurs network",
+              "Advocacy for fair access to aid"
+            ],
+            "title": "Economic"
+          },
+          "education": {
+            "description": "Ensuring access to education and training for children of military personnel.",
+            "details": [
+              "Schooling for orphans",
+              "Scholarships and academic support",
+              "Vocational training",
+              "Advocacy for inclusive education policies"
+            ],
+            "title": "Education"
+          },
+          "environnement": {
+            "description": "Improving living conditions in and around military camps and quarters.",
+            "details": [
+              "Decent housing conditions",
+              "Access to water and sanitation",
+              "Green spaces and quality of life",
+              "Sustainable development of military communities"
+            ],
+            "title": "Environment"
+          },
+          "sante": {
+            "description": "Sexual and reproductive health of women in military camp environments.",
+            "details": [
+              "Awareness and prevention",
+              "Access to reproductive healthcare",
+              "Advocacy for adapted services",
+              "Community health worker training"
+            ],
+            "title": "Health"
+          },
+          "social": {
+            "description": "Improving living conditions for spouses, widows, orphans and children of military personnel.",
+            "details": [
+              "Strengthened social protection",
+              "Support for widows and orphans",
+              "Psychological and community support",
+              "Recognition of family sacrifice"
+            ],
+            "title": "Social"
+          }
+        },
+        "common": {
+          "campaign": "Campaign",
+          "createAccountBtn": "Create my account",
+          "discover": "Gundua",
+          "donationsRecorded": "Donations recorded",
+          "error": "Error",
+          "loading": "Inapakia...",
+          "logout": "Ondoka",
+          "passwordMismatch": "Passwords do not match",
+          "profileUpdated": "Profile updated.",
+          "save": "Hifadhi",
+          "saving": "Inahifadhi...",
+          "select": "Select",
+          "totalCdf": "Total CDF (completed)",
+          "totalUsd": "Total USD (completed)",
+          "viewPetitions": "Angalia petisheni"
+        },
         "donate": {
           "airtel": "Airtel Money",
           "amount": "Kiasi",
@@ -425,6 +1485,57 @@
           "success": "Mchango umerekodiwa",
           "title": "Toa mchango"
         },
+        "donateForm": {
+          "currency": "Currency",
+          "donorEmail": "Email (receipt)",
+          "donorName": "Name (optional)",
+          "processing": "Processing...",
+          "providerLabel": "Mobile Money provider",
+          "submitMobile": "Donate via Mobile Money",
+          "thanks": "Thank you for your donation!"
+        },
+        "footer": {
+          "about": "Sisi ni nani",
+          "actNow": "Take action now",
+          "advocacy": "Utetezi",
+          "axes": "Our focus areas",
+          "contact": "Contact",
+          "copyright": "Non-profit",
+          "donate": "Make a donation",
+          "engage": "Shiriki",
+          "legal": "Notisi ya kisheria",
+          "live": "Join live",
+          "newsletter": "Newsletter",
+          "newsletterDesc": "Pokea habari zetu.",
+          "petitions": "Sign a petition",
+          "press": "Press",
+          "privacy": "Privacy",
+          "privacyPolicy": "Sera ya faragha",
+          "quickLinks": "Viungo vya haraka",
+          "quote": "Behind every soldier stands a family.",
+          "tagline": "Defending the rights of military dependents"
+        },
+        "forms": {
+          "accountType": "Account type",
+          "createMyAccount": "Create my account",
+          "familyLinks": "Family links",
+          "firstName": "First name",
+          "lastName": "Last name",
+          "links": {
+            "conjoint": "Spouse",
+            "enfant": "Child",
+            "orphelin": "Orphan",
+            "parent": "Parent",
+            "veuve": "Widow / Widower"
+          },
+          "militaryLink": "Link to military member",
+          "militaryName": "Military member's name",
+          "myDonations": "My donations",
+          "myHelpRequests": "My help requests",
+          "phone": "Phone",
+          "province": "Province",
+          "skills": "Skills"
+        },
         "member": {
           "dashboard": "Akaunti yangu",
           "donations": "Michango yangu",
@@ -434,6 +1545,20 @@
           "logout": "Toka",
           "pending": "Akaunti inasubiri",
           "register": "Jisajili"
+        },
+        "membershipTypes": {
+          "benevole": {
+            "description": "To join the team and actively contribute to CFM's actions.",
+            "label": "Volunteer"
+          },
+          "famille": {
+            "description": "For spouses, children, widows and orphans of military personnel. Family link information required.",
+            "label": "Military family"
+          },
+          "soutien": {
+            "description": "For anyone wishing to support the cause without military family information.",
+            "label": "Supporter"
+          }
         },
         "nav": {
           "about": "Sisi ni nani",
@@ -458,6 +1583,35 @@
             "title": "Sisi ni nani",
             "visionTitle": "Maono yetu"
           },
+          "actions": {
+            "allProvinces": "Wilaya zote",
+            "empty": "Hakuna vitendo kwa chaguo hili.",
+            "heroAlt": "CFM actions in DRC",
+            "loading": "Inapakia...",
+            "mapAria": "Stylised map of DRC",
+            "mapSubtitle": "province(s) with recorded actions — 26 DRC provinces",
+            "mapTitle": "Actions map",
+            "subtitle": "Ramani ya vitendo vya CFM katika wilaya 26.",
+            "title": "Vitendo vya kitaifa na mikoa",
+            "types": {
+              "action": "Action",
+              "atelier": "Workshop",
+              "evenement": "Event",
+              "plaidoyer": "Advocacy"
+            }
+          },
+          "advocacy": {
+            "campaignsTitle": "Kampeni",
+            "contactBtn": "Contact us",
+            "ctaBody": "Contact our advocacy team for full reports.",
+            "ctaTitle": "Are you a decision-maker or institution?",
+            "downloadPdf": "Download report (PDF)",
+            "heroAlt": "CFM advocacy",
+            "newsTitle": "Habari",
+            "studiesTitle": "Masomo na ripoti",
+            "subtitle": "Our analyses, conclusions and campaigns to influence national and international policy for military families.",
+            "title": "Utetezi na masomo"
+          },
           "auth": {
             "back": "Rudi kuingia",
             "confirm": "Thibitisha",
@@ -472,6 +1626,11 @@
             "resetTitle": "Nenosiri jipya",
             "submit": "Tuma",
             "success": "Ikiwa barua pepe ipo, kiungo kimetumwa."
+          },
+          "axes": {
+            "heroAlt": "Maeneo ya CFM",
+            "subtitle": "CFM inatoa suluhisho za kuboresha hali ya kijamii, kiuchumi, mazingira, elimu na afya.",
+            "title": "Maeneo yetu"
           },
           "contact": {
             "country": "Nchi",
@@ -494,12 +1653,32 @@
             "title": "Shiriki na CFM",
             "typesTitle": "Aina za uanachama"
           },
+          "engageExtra": {
+            "annualReport": "Annual report available on request from the admin team.",
+            "createAccount": "Fungua akaunti",
+            "demoPayment": "Demo mode: simulated payment. Set MOBILE_MONEY_MODE=production and PayDunya for production.",
+            "fund1": "Advocacy studies and reports",
+            "fund2": "Women and widows empowerment campaigns",
+            "fund3": "Support for vulnerable families",
+            "fund4": "Field actions in provinces",
+            "fundsTitle": "Use of funds",
+            "partnerBody": "Institutions, NGOs and companies: contact us to explore a partnership.",
+            "partnerBtn": "Propose a partnership",
+            "partnerTitle": "Become a partner",
+            "prodPayment": "Secure payment via PayDunya (Orange Money, M-Pesa, Airtel).",
+            "quickSignupDesc": "Password-free alternative — manually validated by CFM team.",
+            "quickSignupTitle": "Quick pre-registration (no account)",
+            "signIn": "Ingia",
+            "transparencyBody": "CFM is committed to full transparency with donors. Every contribution supports advocacy, studies and direct family support.",
+            "transparencyTitle": "Financial transparency"
+          },
           "home": {
             "axesTitle": "Maeneo ya kazi",
             "campaignsTitle": "Kampeni",
             "heroCtaAbout": "Hadithi yetu",
             "heroCtaEngage": "Shiriki",
             "heroCtaHelp": "Omba msaada",
+            "heroCtaLive": "Rejoindre le live",
             "heroQuote": "Nyuma ya kila askari kuna familia iliyorithi damu iliyomwagwa chini ya bendera.",
             "liveSectionCta": "Tazama live",
             "liveSectionSubtitle": "Fuata matukio yetu.",
@@ -511,6 +1690,11 @@
             "newsletterSubtitle": "Pokea habari zetu.",
             "newsletterTitle": "Endelea kujua",
             "testimonialsTitle": "Ushuhuda"
+          },
+          "legal": {
+            "mentionsTitle": "Notisi ya kisheria",
+            "privacySubtitle": "Ulinzi wa data zako binafsi",
+            "privacyTitle": "Sera ya faragha"
           },
           "live": {
             "allEvents": "Matukio yote",
@@ -532,6 +1716,57 @@
             "subtitle": "Fuata matukio yetu moja kwa moja.",
             "title": "Moja kwa moja & matukio",
             "viewers": "watazamaji"
+          },
+          "memberArea": {
+            "accountActive": "Active account",
+            "accountPending": "Pending approval",
+            "confirmPassword": "Confirm password",
+            "dashboardHello": "Habari",
+            "donate": "Make a donation",
+            "editProfile": "Edit my profile",
+            "email": "Email",
+            "forgotLink": "Forgot password?",
+            "hasAccount": "Already registered?",
+            "loginBtn": "Ingia",
+            "loginLink": "Sign in",
+            "loginLoading": "Signing in...",
+            "loginSubtitle": "Ingia kwenye akaunti yako",
+            "loginTitle": "Eneo la wanachama",
+            "noAccount": "No account yet?",
+            "noDonations": "No donations.",
+            "noHelp": "No requests.",
+            "password": "Password",
+            "pendingBanner": "Your account is pending approval by the CFM team.",
+            "profileBack": "← My account",
+            "profileTitle": "Wasifu wangu",
+            "registerBtn": "Jisajili",
+            "registerLink": "Register",
+            "registerLoading": "Registering...",
+            "registerSubtitle": "Join the CFM community. Your account will be reviewed before activation.",
+            "registerSuccess": "Registration successful! Your account will be activated after review.",
+            "registerTitle": "Jisajili",
+            "requestHelp": "Request help",
+            "volunteerBanner": "Volunteer area: access the limited dashboard.",
+            "volunteerDashboard": "Volunteer dashboard"
+          },
+          "news": {
+            "back": "← Advocacy & news",
+            "fallbackTitle": "News"
+          },
+          "press": {
+            "aboutCardDesc": "Non-profit founded in {year}, national and international advocacy.",
+            "aboutCardTitle": "About",
+            "contactBtn": "Contact us",
+            "contactPress": "Press contact",
+            "downloadPdf": "Download PDF",
+            "downloadRelease": "Download release (PDF)",
+            "learnMore": "Learn more",
+            "pressKitDesc": "CFM overview, key figures and visuals.",
+            "pressKitHint": "Place file at public/media/presse/dossier-presse.pdf",
+            "pressKitTitle": "Press kit",
+            "releasesTitle": "Taarifa kwa vyombo vya habari",
+            "subtitle": "Resources for journalists covering military families' rights in DRC.",
+            "title": "Chumba cha habari"
           }
         },
         "petitions": {
@@ -547,6 +1782,93 @@
           "subtitle": "Saini maombi yetu kuimarisha utetezi wa familia za wanajeshi.",
           "success": "Asante! Saini yako imerekodiwa.",
           "title": "Maombi"
+        },
+        "ux": {
+          "about": {
+            "ctaEngage": "Join us",
+            "ctaTransparency": "View financial transparency"
+          },
+          "actions": {
+            "provinceHelp": "Need help in your province?",
+            "provinceHelpCta": "Request help"
+          },
+          "axes": {
+            "ctaActions": "See our field actions",
+            "ctaHelp": "Request help"
+          },
+          "formSuccess": {
+            "contactAck": "Your message has been sent.",
+            "contactDelay": "We will respond within 7 business days.",
+            "contactNext": "See our field actions",
+            "donationAck": "Thank you for your generosity!",
+            "donationDelay": "Your donation will be confirmed after payment processing.",
+            "donationNext": "View financial transparency",
+            "helpAck": "Your confidential request has been recorded.",
+            "helpDelay": "Our team will respond within 7 business days.",
+            "helpNext": "Create an account to track your request",
+            "membershipAck": "Your membership request has been recorded.",
+            "membershipDelay": "We will contact you shortly with next steps.",
+            "membershipNext": "Create an account for online tracking",
+            "petitionAck": "Thank you! Your signature has been recorded.",
+            "petitionDelay": "Every signature strengthens our advocacy.",
+            "petitionNext": "Create an account for upcoming mobilisations"
+          },
+          "helpInfo": {
+            "confidentiality": "This form is strictly confidential. Your data is only accessible to authorised staff.",
+            "delay": "Response time: maximum 7 business days.",
+            "memberFollowUp": "Create a member account to track your request from your private space.",
+            "title": "Before you fill in the form"
+          },
+          "memberDashboard": {
+            "citizenActionsBody": "Join current mobilisations and follow live events.",
+            "citizenActionsTitle": "Upcoming citizen actions",
+            "liveNow": "Live now",
+            "openPetitions": "Open petitions",
+            "viewLive": "Join live"
+          },
+          "memberPromo": {
+            "benefit1": "Track help requests confidentially",
+            "benefit2": "Receive live alerts and upcoming petitions",
+            "benefit3": "Centralise donations and participation",
+            "body": "Go further after your action: track your requests and stay informed about mobilisations.",
+            "cta": "Create account",
+            "title": "Why create a member account?"
+          },
+          "membershipCompare": {
+            "colAccount": "Member account",
+            "colFeature": "Criteria",
+            "colQuick": "Quick membership",
+            "ctaAccount": "Create account",
+            "ctaQuick": "Quick membership",
+            "rowAccountDelay": "Activation after review (24-72 h)",
+            "rowAccountFollowUp": "Dashboard, requests, donations, petitions",
+            "rowAccountGoal": "Private space, tracking and ongoing participation",
+            "rowDelay": "Timeline",
+            "rowFollowUp": "Follow-up",
+            "rowGoal": "Goal",
+            "rowQuickDelay": "Manual processing within 7 days",
+            "rowQuickFollowUp": "Contact by CFM team only",
+            "rowQuickGoal": "Membership request without password",
+            "title": "Which path should you choose?"
+          },
+          "news": {
+            "viewAdvocacy": "Back to advocacy",
+            "viewCampaign": "Sign related petition"
+          },
+          "nextAction": {
+            "getInvolved": "Join us",
+            "makeDonation": "Make a donation",
+            "signPetition": "Sign a petition",
+            "subtitle": "Turn your engagement into concrete impact for military families.",
+            "title": "Take the next step"
+          },
+          "plaidoyer": {
+            "viewPetitions": "View all petitions →"
+          },
+          "transparency": {
+            "impactBody": "Every contribution directly funds advocacy, studies and support for military families on the ground.",
+            "impactTitle": "Impact of your donations"
+          }
         }
       }
     },
@@ -558,10 +1880,10 @@
     ],
     "overrides": {
       "en": {
-        "nav.about": "About E2E e2e-1783836253954"
+        "nav.about": "About E2E e2e-1783843273604"
       },
       "fr": {
-        "nav.about": "À propos E2E e2e-1783836253954"
+        "nav.about": "À propos E2E e2e-1783843273604"
       }
     }
   }

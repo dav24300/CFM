@@ -12,7 +12,7 @@ import {
   jsonForbidden,
   jsonSuccess,
   jsonUnauthorized,
-} from "@/lib/api-response";
+} from "@/infrastructure/http/api-response";
 import { parseOrBadRequest } from "@/lib/validators";
 import { memberFamilyActionSchema } from "@/lib/validators/public-api";
 

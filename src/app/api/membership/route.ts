@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { submitMembership } from "@/application/services/contact.service";
-import { handleDomainError, jsonSuccess } from "@/lib/api-response";
+import { handleDomainError, jsonSuccess } from "@/infrastructure/http/api-response";
 import { parseOrBadRequest } from "@/lib/validators";
 import { membershipSchema } from "@/lib/validators/public-api";
 

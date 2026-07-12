@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { requireAdminAccess } from "@/lib/admin-rest";
 import { moderateLiveChatMessage } from "@/application/services/live.service";
-import { jsonError, jsonSuccess } from "@/lib/api-response";
+import { jsonError, jsonSuccess } from "@/infrastructure/http/api-response";
 
 export async function POST(request: NextRequest) {
   const auth = await requireAdminAccess();

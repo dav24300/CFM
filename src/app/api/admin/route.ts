@@ -6,24 +6,26 @@ import {
   adminUpdateStatus,
   adminDelete,
   getHelpRequestById,
-} from "@/lib/db";
+} from "@/infrastructure/repositories/content.repository";
 import { adminUpdateContent, updateContactStatus } from "@/infrastructure/repositories/content.repository";
 import { patchSiteSettings } from "@/infrastructure/repositories/settings.repository";
 import {
   activateUser,
   suspendUser,
+  addHelpRequestUpdate,
+} from "@/infrastructure/repositories/users.repository";
+import {
   adminApproveFamilyLink,
   adminRejectFamilyLink,
-  createPetition,
-  addHelpRequestUpdate,
-} from "@/lib/members";
+} from "@/infrastructure/repositories/family-links.repository";
+import { createPetition } from "@/infrastructure/repositories/petitions.repository";
 import {
   sendAccountActivatedEmail,
   sendHelpRequestUpdateEmail,
-} from "@/lib/email";
-import { sendPushToTopic } from "@/lib/push";
+} from "@/infrastructure/email/nodemailer.adapter";
+import { sendPushToTopic } from "@/infrastructure/push/web-push.adapter";
 import { logAdminAction } from "@/lib/admin-audit";
-import { getClientIp } from "@/lib/rate-limit";
+import { getClientIp } from "@/infrastructure/rate-limit/memory";
 import { parseOrBadRequest } from "@/lib/validators";
 import {
   adminActionSchema,
@@ -35,7 +37,7 @@ import {
   jsonForbidden,
   jsonSuccess,
   jsonUnauthorized,
-} from "@/lib/api-response";
+} from "@/infrastructure/http/api-response";
 
 /**
  * Matrice de rôles FAIL-CLOSED du god-endpoint (P2.3, politique iso-strict :

@@ -1,5 +1,5 @@
 import { getActionsCached } from "@/infrastructure/cache/content-cache";
-import { jsonData } from "@/lib/api-response";
+import { jsonData } from "@/infrastructure/http/api-response";
 
 export async function GET() {
   const actions = await getActionsCached();

@@ -1,4 +1,4 @@
-import { pngToSvgFallback } from "@/lib/infra/media-resolver";
+import { pngToSvgFallback } from "@/infrastructure/media/media-resolver";
 
 export const MEDIA = {
   hero: {

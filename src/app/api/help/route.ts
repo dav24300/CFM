@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { submitHelpRequest } from "@/application/services/contact.service";
-import { handleDomainError, jsonSuccess } from "@/lib/api-response";
+import { handleDomainError, jsonSuccess } from "@/infrastructure/http/api-response";
 
 export async function POST(request: NextRequest) {
   try {

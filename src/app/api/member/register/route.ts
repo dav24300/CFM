@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { registerMember } from "@/application/services/member.service";
-import { handleDomainErrorOrFallback, jsonSuccess } from "@/lib/api-response";
+import { handleDomainErrorOrFallback, jsonSuccess } from "@/infrastructure/http/api-response";
 import { parseOrBadRequest } from "@/lib/validators";
 import { memberRegisterSchema } from "@/lib/validators/public-api";
 

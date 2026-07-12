@@ -1,5 +1,5 @@
 import { logoutMember } from "@/application/services/member.service";
-import { jsonSuccess } from "@/lib/api-response";
+import { jsonSuccess } from "@/infrastructure/http/api-response";
 
 export async function POST() {
   await logoutMember();

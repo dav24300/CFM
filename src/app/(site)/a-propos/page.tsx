@@ -3,7 +3,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { getTranslations, getLocale } from "@/lib/i18n-server";
 import { getSiteConfig, getAboutTimeline } from "@/lib/site-config.server";
-import { getResolvedAboutMedia, getResolvedGallery, getResolvedNewsCover } from "@/lib/media.server";
+import {
+  getResolvedAboutMediaCached as getResolvedAboutMedia,
+  getResolvedGalleryCached as getResolvedGallery,
+  getResolvedNewsCoverCached as getResolvedNewsCover,
+} from "@/infrastructure/cache/media-cache";
 import { InteriorHero } from "@/components/ui/InteriorHero";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { ImageGallery } from "@/components/ui/ImageGallery";

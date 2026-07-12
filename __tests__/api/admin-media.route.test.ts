@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { UploadError } from "@/domain/media/upload-errors";
-import { jsonUnauthorized } from "@/lib/api-response";
+import { jsonUnauthorized } from "@/infrastructure/http/api-response";
 
 const mocked = vi.hoisted(() => ({
   getAdminAccess: vi.fn(),

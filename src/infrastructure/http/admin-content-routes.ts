@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { requireAdminAccess, requireAdminRole } from "@/lib/admin-rest";
 import { parseOrBadRequest, z } from "@/lib/validators";
-import { getAdminData } from "@/lib/db";
-import { jsonData, jsonNotFound, jsonSuccess } from "@/lib/api-response";
+import { getAdminData } from "@/infrastructure/repositories/content.repository";
+import { jsonData, jsonNotFound, jsonSuccess } from "@/infrastructure/http/api-response";
 import {
   applyZodPatch,
   createContentItem,

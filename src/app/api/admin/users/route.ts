@@ -1,5 +1,5 @@
-import { getAllUsers } from "@/lib/members";
-import { jsonData } from "@/lib/api-response";
+import { getAllUsers } from "@/infrastructure/repositories/users.repository";
+import { jsonData } from "@/infrastructure/http/api-response";
 import { requireAdminRole } from "@/lib/admin-rest";
 
 export async function GET() {

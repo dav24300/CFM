@@ -6,8 +6,8 @@ import {
   adminDeletePartner,
 } from "@/infrastructure/repositories/partners.repository";
 import { requireAdminAccess } from "@/lib/admin-rest";
-import { getClientIp } from "@/lib/rate-limit";
-import { jsonData, jsonNotFound, jsonSuccess } from "@/lib/api-response";
+import { getClientIp } from "@/infrastructure/rate-limit/memory";
+import { jsonData, jsonNotFound, jsonSuccess } from "@/infrastructure/http/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
 import { parseOrBadRequest } from "@/lib/validators";
 import {

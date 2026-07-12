@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getMemberSessionUserId, toPublicUser } from "@/lib/member-auth";
-import { getUserById } from "@/lib/members";
+import { getMemberSessionUserId, toPublicUser } from "@/infrastructure/auth/member-auth";
+import { getUserById } from "@/infrastructure/repositories/users.repository";
 import { MemberProfileForm } from "@/components/member/MemberProfileForm";
 import { getTranslations } from "@/lib/i18n-server";
 

@@ -7,7 +7,7 @@ import { InteriorHero } from "@/components/ui/InteriorHero";
 import { MediaCard } from "@/components/ui/MediaCard";
 import { LiveBadge } from "@/components/ui/LiveBadge";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
-import { getResolvedLiveThumb } from "@/lib/media.server";
+import { getResolvedLiveThumbCached as getResolvedLiveThumb } from "@/infrastructure/cache/media-cache";
 
 export async function generateMetadata() {
   const { t } = await getTranslations();

@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { requireAdminAccess } from "@/lib/admin-rest";
-import { jsonData, jsonNotFound, jsonSuccess } from "@/lib/api-response";
+import { jsonData, jsonNotFound, jsonSuccess } from "@/infrastructure/http/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
-import { getClientIp } from "@/lib/rate-limit";
+import { getClientIp } from "@/infrastructure/rate-limit/memory";
 import { assignMedia } from "@/application/services/media.service";
 import { adminMediaAssignSchema } from "@/lib/validators/admin-api";
 import { parseOrBadRequest } from "@/lib/validators";

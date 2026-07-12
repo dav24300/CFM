@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { activateUser, suspendUser } from "@/lib/members";
-import { jsonNotFound, jsonSuccess } from "@/lib/api-response";
+import { activateUser, suspendUser } from "@/infrastructure/repositories/users.repository";
+import { jsonNotFound, jsonSuccess } from "@/infrastructure/http/api-response";
 import { requireAdminRole } from "@/lib/admin-rest";
 import { parseOrBadRequest } from "@/lib/validators";
 import { adminUserActivateSchema } from "@/lib/validators/admin-api";

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminRole } from "@/lib/admin-rest";
-import { getPetitionById, getPetitionSignatures } from "@/lib/members";
-import { petitionSignaturesToCsv } from "@/lib/password-reset";
-import { jsonError } from "@/lib/api-response";
+import { getPetitionById, getPetitionSignatures } from "@/infrastructure/repositories/petitions.repository";
+import { petitionSignaturesToCsv } from "@/infrastructure/auth/password-reset";
+import { jsonError } from "@/infrastructure/http/api-response";
 
 export async function GET(
   request: NextRequest,

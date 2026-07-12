@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { adminCreate, adminDelete, adminUpdateContent } from "@/infrastructure/repositories/content.repository";
-import { getAdminData } from "@/lib/db";
-import { jsonData, jsonError, jsonNotFound, jsonSuccess } from "@/lib/api-response";
+import { getAdminData } from "@/infrastructure/repositories/content.repository";
+import { jsonData, jsonError, jsonNotFound, jsonSuccess } from "@/infrastructure/http/api-response";
 import type { z } from "zod";
 
 export type ContentTable =

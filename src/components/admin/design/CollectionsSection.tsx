@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/primitives/input";
 import { Button } from "@/components/ui/primitives/button";
 import { useAdminToast } from "@/components/admin/context/AdminToastContext";
 import { useMediaUpload } from "@/components/admin/hooks/useMediaUpload";
-import { AXIS_SLUGS, type GalleryItem } from "@/lib/site-media-config";
+import { AXIS_SLUGS, type GalleryItem } from "@/domain/media";
 import { AXES } from "@/lib/constants";
 
 const AXIS_LABELS: Record<string, string> = Object.fromEntries(

@@ -9,7 +9,7 @@ import {
   jsonError,
   jsonSuccess,
   jsonUnauthorized,
-} from "@/lib/api-response";
+} from "@/infrastructure/http/api-response";
 
 export async function GET() {
   const member = await getCurrentMember();

@@ -132,6 +132,336 @@
       "chatClosed": "Chat closed",
       "pollVote": "Vote",
       "pollVoted": "Thanks for voting!"
+    },
+    "axes": {
+      "title": "Our focus areas",
+      "subtitle": "CFM offers pragmatic solutions to permanently improve social, economic, environmental, educational and health outcomes for military dependents.",
+      "heroAlt": "CFM focus areas"
+    },
+    "actions": {
+      "title": "National & regional actions",
+      "subtitle": "Map of CFM actions across the 26 provinces of DRC.",
+      "heroAlt": "CFM actions in DRC",
+      "loading": "Loading...",
+      "empty": "No actions recorded for this selection.",
+      "mapTitle": "Actions map",
+      "mapSubtitle": "province(s) with recorded actions — 26 DRC provinces",
+      "mapAria": "Stylised map of DRC",
+      "allProvinces": "All provinces",
+      "types": {
+        "evenement": "Event",
+        "atelier": "Workshop",
+        "plaidoyer": "Advocacy",
+        "action": "Action"
+      }
+    },
+    "advocacy": {
+      "title": "Advocacy & studies",
+      "subtitle": "Our analyses, conclusions and campaigns to influence national and international policy for military families.",
+      "heroAlt": "CFM advocacy",
+      "studiesTitle": "Studies & reports",
+      "campaignsTitle": "Campaigns",
+      "newsTitle": "News & press releases",
+      "downloadPdf": "Download report (PDF)",
+      "ctaTitle": "Are you a decision-maker or institution?",
+      "ctaBody": "Contact our advocacy team for full reports.",
+      "contactBtn": "Contact us"
+    },
+    "press": {
+      "title": "Press room",
+      "subtitle": "Resources for journalists covering military families' rights in DRC.",
+      "pressKitTitle": "Press kit",
+      "pressKitDesc": "CFM overview, key figures and visuals.",
+      "downloadPdf": "Download PDF",
+      "pressKitHint": "Place file at public/media/presse/dossier-presse.pdf",
+      "contactPress": "Press contact",
+      "contactBtn": "Contact us",
+      "aboutCardTitle": "About",
+      "aboutCardDesc": "Non-profit founded in {year}, national and international advocacy.",
+      "learnMore": "Learn more",
+      "releasesTitle": "Press releases",
+      "downloadRelease": "Download release (PDF)"
+    },
+    "news": {
+      "back": "← Advocacy & news",
+      "fallbackTitle": "News"
+    },
+    "memberArea": {
+      "loginTitle": "Member area",
+      "loginSubtitle": "Sign in to your CFM account",
+      "registerTitle": "Create an account",
+      "registerSubtitle": "Join the CFM community. Your account will be reviewed before activation.",
+      "profileTitle": "My profile",
+      "profileBack": "← My account",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "loginBtn": "Sign in",
+      "loginLoading": "Signing in...",
+      "forgotLink": "Forgot password?",
+      "noAccount": "No account yet?",
+      "registerLink": "Register",
+      "hasAccount": "Already registered?",
+      "loginLink": "Sign in",
+      "registerBtn": "Create my account",
+      "registerLoading": "Registering...",
+      "registerSuccess": "Registration successful! Your account will be activated after review.",
+      "editProfile": "Edit my profile",
+      "dashboardHello": "Hello",
+      "accountActive": "Active account",
+      "accountPending": "Pending approval",
+      "pendingBanner": "Your account is pending approval by the CFM team.",
+      "volunteerBanner": "Volunteer area: access the limited dashboard.",
+      "volunteerDashboard": "Volunteer dashboard",
+      "noHelp": "No requests.",
+      "requestHelp": "Request help",
+      "noDonations": "No donations.",
+      "donate": "Make a donation"
+    },
+    "engageExtra": {
+      "createAccount": "Create account",
+      "signIn": "Sign in",
+      "quickSignupTitle": "Quick pre-registration (no account)",
+      "quickSignupDesc": "Password-free alternative — manually validated by CFM team.",
+      "transparencyTitle": "Financial transparency",
+      "transparencyBody": "CFM is committed to full transparency with donors. Every contribution supports advocacy, studies and direct family support.",
+      "fundsTitle": "Use of funds",
+      "fund1": "Advocacy studies and reports",
+      "fund2": "Women and widows empowerment campaigns",
+      "fund3": "Support for vulnerable families",
+      "fund4": "Field actions in provinces",
+      "annualReport": "Annual report available on request from the admin team.",
+      "partnerTitle": "Become a partner",
+      "partnerBody": "Institutions, NGOs and companies: contact us to explore a partnership.",
+      "partnerBtn": "Propose a partnership",
+      "demoPayment": "Demo mode: simulated payment. Set MOBILE_MONEY_MODE=production and PayDunya for production.",
+      "prodPayment": "Secure payment via PayDunya (Orange Money, M-Pesa, Airtel)."
+    },
+    "legal": {
+      "mentionsTitle": "Legal notice",
+      "privacyTitle": "Privacy policy",
+      "privacySubtitle": "Protection of your personal data"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "discover": "Discover",
+    "campaign": "Campaign",
+    "error": "Error",
+    "save": "Save",
+    "saving": "Saving...",
+    "donationsRecorded": "Donations recorded",
+    "totalUsd": "Total USD (completed)",
+    "totalCdf": "Total CDF (completed)",
+    "select": "Select",
+    "logout": "Log out",
+    "viewPetitions": "View petitions",
+    "profileUpdated": "Profile updated.",
+    "passwordMismatch": "Passwords do not match",
+    "createAccountBtn": "Create my account"
+  },
+  "footer": {
+    "tagline": "Defending the rights of military dependents",
+    "quote": "Behind every soldier stands a family.",
+    "quickLinks": "Quick links",
+    "about": "About us",
+    "advocacy": "Advocacy & studies",
+    "engage": "Get involved",
+    "privacy": "Privacy",
+    "contact": "Contact",
+    "newsletter": "Newsletter",
+    "newsletterDesc": "Stay informed about our actions and campaigns.",
+    "legal": "Legal notice",
+    "privacyPolicy": "Privacy policy",
+    "copyright": "Non-profit",
+    "actNow": "Take action now",
+    "live": "Join live",
+    "petitions": "Sign a petition",
+    "donate": "Make a donation",
+    "axes": "Our focus areas",
+    "press": "Press"
+  },
+  "ux": {
+    "nextAction": {
+      "title": "Take the next step",
+      "subtitle": "Turn your engagement into concrete impact for military families.",
+      "signPetition": "Sign a petition",
+      "makeDonation": "Make a donation",
+      "getInvolved": "Join us"
+    },
+    "membershipCompare": {
+      "title": "Which path should you choose?",
+      "colFeature": "Criteria",
+      "colAccount": "Member account",
+      "colQuick": "Quick membership",
+      "rowGoal": "Goal",
+      "rowAccountGoal": "Private space, tracking and ongoing participation",
+      "rowQuickGoal": "Membership request without password",
+      "rowDelay": "Timeline",
+      "rowAccountDelay": "Activation after review (24-72 h)",
+      "rowQuickDelay": "Manual processing within 7 days",
+      "rowFollowUp": "Follow-up",
+      "rowAccountFollowUp": "Dashboard, requests, donations, petitions",
+      "rowQuickFollowUp": "Contact by CFM team only",
+      "ctaAccount": "Create account",
+      "ctaQuick": "Quick membership"
+    },
+    "memberPromo": {
+      "title": "Why create a member account?",
+      "body": "Go further after your action: track your requests and stay informed about mobilisations.",
+      "benefit1": "Track help requests confidentially",
+      "benefit2": "Receive live alerts and upcoming petitions",
+      "benefit3": "Centralise donations and participation",
+      "cta": "Create account"
+    },
+    "formSuccess": {
+      "helpAck": "Your confidential request has been recorded.",
+      "helpDelay": "Our team will respond within 7 business days.",
+      "helpNext": "Create an account to track your request",
+      "contactAck": "Your message has been sent.",
+      "contactDelay": "We will respond within 7 business days.",
+      "contactNext": "See our field actions",
+      "membershipAck": "Your membership request has been recorded.",
+      "membershipDelay": "We will contact you shortly with next steps.",
+      "membershipNext": "Create an account for online tracking",
+      "donationAck": "Thank you for your generosity!",
+      "donationDelay": "Your donation will be confirmed after payment processing.",
+      "donationNext": "View financial transparency",
+      "petitionAck": "Thank you! Your signature has been recorded.",
+      "petitionDelay": "Every signature strengthens our advocacy.",
+      "petitionNext": "Create an account for upcoming mobilisations"
+    },
+    "helpInfo": {
+      "title": "Before you fill in the form",
+      "confidentiality": "This form is strictly confidential. Your data is only accessible to authorised staff.",
+      "delay": "Response time: maximum 7 business days.",
+      "memberFollowUp": "Create a member account to track your request from your private space."
+    },
+    "plaidoyer": {
+      "viewPetitions": "View all petitions →"
+    },
+    "actions": {
+      "provinceHelp": "Need help in your province?",
+      "provinceHelpCta": "Request help"
+    },
+    "axes": {
+      "ctaActions": "See our field actions",
+      "ctaHelp": "Request help"
+    },
+    "about": {
+      "ctaTransparency": "View financial transparency",
+      "ctaEngage": "Join us"
+    },
+    "transparency": {
+      "impactTitle": "Impact of your donations",
+      "impactBody": "Every contribution directly funds advocacy, studies and support for military families on the ground."
+    },
+    "memberDashboard": {
+      "citizenActionsTitle": "Upcoming citizen actions",
+      "citizenActionsBody": "Join current mobilisations and follow live events.",
+      "liveNow": "Live now",
+      "openPetitions": "Open petitions",
+      "viewLive": "Join live"
+    },
+    "news": {
+      "viewCampaign": "Sign related petition",
+      "viewAdvocacy": "Back to advocacy"
+    }
+  },
+  "membershipTypes": {
+    "famille": {
+      "label": "Military family",
+      "description": "For spouses, children, widows and orphans of military personnel. Family link information required."
+    },
+    "soutien": {
+      "label": "Supporter",
+      "description": "For anyone wishing to support the cause without military family information."
+    },
+    "benevole": {
+      "label": "Volunteer",
+      "description": "To join the team and actively contribute to CFM's actions."
+    }
+  },
+  "axesContent": {
+    "social": {
+      "title": "Social",
+      "description": "Improving living conditions for spouses, widows, orphans and children of military personnel.",
+      "details": [
+        "Strengthened social protection",
+        "Support for widows and orphans",
+        "Psychological and community support",
+        "Recognition of family sacrifice"
+      ]
+    },
+    "economique": {
+      "title": "Economic",
+      "description": "Empowering women and widows through entrepreneurship and economic resources.",
+      "details": [
+        "Entrepreneurship training",
+        "Microcredit and mentoring",
+        "Women entrepreneurs network",
+        "Advocacy for fair access to aid"
+      ]
+    },
+    "education": {
+      "title": "Education",
+      "description": "Ensuring access to education and training for children of military personnel.",
+      "details": [
+        "Schooling for orphans",
+        "Scholarships and academic support",
+        "Vocational training",
+        "Advocacy for inclusive education policies"
+      ]
+    },
+    "environnement": {
+      "title": "Environment",
+      "description": "Improving living conditions in and around military camps and quarters.",
+      "details": [
+        "Decent housing conditions",
+        "Access to water and sanitation",
+        "Green spaces and quality of life",
+        "Sustainable development of military communities"
+      ]
+    },
+    "sante": {
+      "title": "Health",
+      "description": "Sexual and reproductive health of women in military camp environments.",
+      "details": [
+        "Awareness and prevention",
+        "Access to reproductive healthcare",
+        "Advocacy for adapted services",
+        "Community health worker training"
+      ]
+    }
+  },
+  "donateForm": {
+    "currency": "Currency",
+    "providerLabel": "Mobile Money provider",
+    "donorName": "Name (optional)",
+    "donorEmail": "Email (receipt)",
+    "processing": "Processing...",
+    "submitMobile": "Donate via Mobile Money",
+    "thanks": "Thank you for your donation!"
+  },
+  "forms": {
+    "firstName": "First name",
+    "lastName": "Last name",
+    "phone": "Phone",
+    "province": "Province",
+    "accountType": "Account type",
+    "militaryLink": "Link to military member",
+    "militaryName": "Military member's name",
+    "skills": "Skills",
+    "createMyAccount": "Create my account",
+    "familyLinks": "Family links",
+    "myHelpRequests": "My help requests",
+    "myDonations": "My donations",
+    "links": {
+      "conjoint": "Spouse",
+      "enfant": "Child",
+      "veuve": "Widow / Widower",
+      "orphelin": "Orphan",
+      "parent": "Parent"
     }
   }
 }

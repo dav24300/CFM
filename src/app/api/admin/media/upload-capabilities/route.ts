@@ -1,5 +1,5 @@
 import { requireAdminAccess } from "@/lib/admin-rest";
-import { jsonData } from "@/lib/api-response";
+import { jsonData } from "@/infrastructure/http/api-response";
 import { isUploadStorageAvailable } from "@/infrastructure/media/file-storage.adapter";
 import { isSupabaseStorageEnabled } from "@/infrastructure/media/storage.factory";
 

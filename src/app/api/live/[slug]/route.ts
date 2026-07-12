@@ -1,6 +1,6 @@
-import { getLiveEventBySlug, incrementViewerCount } from "@/lib/live";
-import { getPollsForEvent } from "@/lib/live";
-import { jsonData, jsonError } from "@/lib/api-response";
+import { getLiveEventBySlug, incrementViewerCount } from "@/infrastructure/repositories/live.repository";
+import { getPollsForEvent } from "@/infrastructure/repositories/live.repository";
+import { jsonData, jsonError } from "@/infrastructure/http/api-response";
 
 export async function GET(
   _request: Request,

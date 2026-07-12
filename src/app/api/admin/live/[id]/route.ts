@@ -1,10 +1,10 @@
 import { NextRequest } from "next/server";
-import { getLiveEvents, updateLiveEvent } from "@/lib/live";
+import { getLiveEvents, updateLiveEvent } from "@/infrastructure/repositories/live.repository";
 import { requireAdminAccess } from "@/lib/admin-rest";
-import { getClientIp } from "@/lib/rate-limit";
+import { getClientIp } from "@/infrastructure/rate-limit/memory";
 import { parseOrBadRequest } from "@/lib/validators";
 import { adminLivePatchSchema } from "@/lib/validators/admin-api";
-import { jsonData, jsonNotFound, jsonSuccess } from "@/lib/api-response";
+import { jsonData, jsonNotFound, jsonSuccess } from "@/infrastructure/http/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
 
 type Params = { params: Promise<{ id: string }> };

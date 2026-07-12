@@ -1,9 +1,9 @@
 import { ActionsPageClient } from "@/components/actions/ActionsPageClient";
 import {
-  getActionsHeroImage,
-  getResolvedNewsCover,
-} from "@/lib/media.server";
-import { getActions } from "@/lib/db";
+  getActionsHeroImageCached as getActionsHeroImage,
+  getResolvedNewsCoverCached as getResolvedNewsCover,
+} from "@/infrastructure/cache/media-cache";
+import { getActionsCached as getActions } from "@/infrastructure/cache/content-cache";
 import { getTranslations } from "@/lib/i18n-server";
 
 export default async function ActionsPage() {

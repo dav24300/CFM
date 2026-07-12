@@ -26,7 +26,7 @@
     "media:placeholders": "node scripts/generate-media-placeholders.mjs",
     "backup:db": "bash scripts/backup-db.sh",
     "backup:pg": "node scripts/backup-restore-pg-test.mjs",
-    "export:i18n": "node scripts/export-i18n-json.mjs"
+    "i18n:check": "node scripts/check-i18n-completeness.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.18",

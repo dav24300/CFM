@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { closeLivePoll, getPollById, getPollVotes } from "@/lib/live";
+import { closeLivePoll, getPollById, getPollVotes } from "@/infrastructure/repositories/live.repository";
 import { requireAdminAccess } from "@/lib/admin-rest";
-import { jsonData, jsonNotFound, jsonSuccess } from "@/lib/api-response";
+import { jsonData, jsonNotFound, jsonSuccess } from "@/infrastructure/http/api-response";
 import { parseOrBadRequest } from "@/lib/validators";
 import { z } from "@/lib/validators";
 

@@ -5,8 +5,8 @@ import {
 } from "@/infrastructure/repositories/settings.repository";
 import { invalidateSettingsPatch } from "@/infrastructure/persistence/admin-mutation";
 import { requireAdminRole } from "@/lib/admin-rest";
-import { getClientIp } from "@/lib/rate-limit";
-import { jsonData, jsonError, jsonSuccess } from "@/lib/api-response";
+import { getClientIp } from "@/infrastructure/rate-limit/memory";
+import { jsonData, jsonError, jsonSuccess } from "@/infrastructure/http/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
 
 export async function GET() {

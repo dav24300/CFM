@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pngToSvgFallback, resolveMediaPathClient } from "@/lib/infra/media-resolver";
+import { pngToSvgFallback, resolveMediaPathClient } from "@/infrastructure/media/media-resolver";
 
 describe("media-resolver", () => {
   it("maps png assets to svg fallback", () => {

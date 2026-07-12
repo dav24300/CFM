@@ -1,6 +1,6 @@
 import { readAuditLogs } from "@/lib/admin-audit";
 import { requireAdminRole } from "@/lib/admin-rest";
-import { jsonData } from "@/lib/api-response";
+import { jsonData } from "@/infrastructure/http/api-response";
 
 export async function GET() {
   const auth = await requireAdminRole();

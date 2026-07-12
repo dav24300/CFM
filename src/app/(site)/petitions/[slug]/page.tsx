@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPetitionBySlug } from "@/lib/members";
+import { getPetitionBySlug } from "@/infrastructure/repositories/petitions.repository";
 import { PetitionSignForm } from "@/components/PetitionSignForm";
 import { getTranslations } from "@/lib/i18n-server";
 

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { submitContact } from "@/application/services/contact.service";
-import { handleDomainError, jsonMissingFields, jsonSuccess } from "@/lib/api-response";
+import { handleDomainError, jsonMissingFields, jsonSuccess } from "@/infrastructure/http/api-response";
 import { parseOrBadRequest } from "@/lib/validators";
 import { contactSchema } from "@/lib/validators/public-api";
 
