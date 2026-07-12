@@ -51,7 +51,7 @@ export default async function AboutPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-site-primary">
                 Notre histoire
               </p>
-              <h2 className="mt-3.5 font-serif text-[clamp(26px,3.5vw,38px)] font-medium leading-[1.12] text-site-ink">
+              <h2 className="mt-3.5 font-serif text-h3 font-medium leading-[1.12] text-site-ink">
                 D’un vécu au combat de toute une communauté
               </h2>
               <p className="mt-5 text-[17px] leading-[1.75] text-site-muted">
@@ -70,13 +70,13 @@ export default async function AboutPage() {
       </section>
 
       {/* Parcours */}
-      <section className="border-y border-site-hairline bg-site-surface py-[88px]">
+      <section className="border-y border-site-hairline bg-site-surface py-section">
         <div className="mx-auto max-w-site px-6">
           <ScrollReveal>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-site-primary">
               Notre parcours
             </p>
-            <h2 className="mb-11 mt-3.5 font-serif text-[clamp(26px,3.5vw,38px)] font-medium leading-[1.1] text-site-ink">
+            <h2 className="mb-11 mt-3.5 font-serif text-h3 font-medium leading-[1.1] text-site-ink">
               De {site.founded} à aujourd’hui
             </h2>
           </ScrollReveal>
@@ -130,13 +130,13 @@ export default async function AboutPage() {
       </section>
 
       {/* Vision + En bref */}
-      <section className="border-t border-site-hairline bg-site-surface py-[88px]">
+      <section className="border-t border-site-hairline bg-site-surface py-section">
         <div className="mx-auto grid max-w-site gap-11 px-6 lg:grid-cols-[1.5fr_1fr]">
           <ScrollReveal>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-site-primary">
               Notre vision
             </p>
-            <h2 className="mt-3.5 font-serif text-[clamp(26px,3.5vw,38px)] font-medium leading-[1.12] text-site-ink">
+            <h2 className="mt-3.5 font-serif text-h3 font-medium leading-[1.12] text-site-ink">
               Un plaidoyer permanent, national et international
             </h2>
             <p className="mt-5 max-w-[56ch] text-[17px] leading-[1.75] text-site-muted">
@@ -177,10 +177,10 @@ export default async function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="mx-auto max-w-site px-6 py-[88px]">
+      <section className="mx-auto max-w-site px-6 py-section">
         <ScrollReveal>
           <div className="border border-site-hairline px-10 py-14 text-center">
-            <h2 className="mx-auto max-w-[20ch] font-serif text-[clamp(28px,4vw,42px)] font-medium leading-[1.1] text-site-ink">
+            <h2 className="mx-auto max-w-[20ch] font-serif text-h2 font-medium leading-[1.1] text-site-ink">
               Engagez-vous à nos côtés
             </h2>
             <div className="mt-7 flex flex-wrap justify-center gap-3">

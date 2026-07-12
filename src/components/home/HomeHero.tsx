@@ -203,7 +203,7 @@ export function HomeHero({
             ))}
           </h1>
           <p
-            className="mt-[22px] max-w-[56ch] text-[clamp(16px,2vw,19px)] leading-[1.55] text-white/90"
+            className="mt-[22px] max-w-[56ch] text-lead leading-[1.55] text-white/90"
             style={revealStyle(0.8)}
           >
             {subtitle}
