@@ -69,7 +69,6 @@ type Props = {
 export function PortalShell({ name, initials, initialRole, children }: Props) {
   const pathname = usePathname();
   const router = useRouter();
-  const [role, setRole] = useState<PortalRole>(initialRole);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [lang, setLang] = useState("FR");
 
@@ -88,7 +87,7 @@ export function PortalShell({ name, initials, initialRole, children }: Props) {
     router.push("/");
   }
 
-  const visibleNav = NAV.filter((n) => !n.roleOnly || n.roleOnly === role);
+  const visibleNav = NAV.filter((n) => !n.roleOnly || n.roleOnly === initialRole);
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -128,7 +127,7 @@ export function PortalShell({ name, initials, initialRole, children }: Props) {
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-semibold text-white">{name}</span>
             <span className="mt-0.5 block text-[11px] font-medium text-site-light">
-              {PORTAL_ROLE_LABELS[role]}
+              {PORTAL_ROLE_LABELS[initialRole]}
             </span>
           </span>
           <ChevronRight className="h-[15px] w-[15px] text-white/50" aria-hidden />
@@ -163,22 +162,10 @@ export function PortalShell({ name, initials, initialRole, children }: Props) {
         </nav>
 
         <div className="border-t border-white/10 px-[22px] py-4">
-          <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.05em] text-white/45">
-            Rôle (démo)
-          </label>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value as PortalRole)}
-            className="w-full border border-white/15 bg-site-navy px-2.5 py-2 text-[13px] font-medium text-white"
-          >
-            <option value="famille">Famille militaire</option>
-            <option value="benevole">Bénévole</option>
-            <option value="coordinateur">Coordinateur provincial</option>
-          </select>
           <button
             type="button"
             onClick={logout}
-            className="mt-3.5 flex items-center gap-2.5 text-[13px] font-medium text-white/60 hover:text-white"
+            className="flex items-center gap-2.5 text-[13px] font-medium text-white/60 hover:text-white"
           >
             <LogOut className="h-4 w-4" aria-hidden />
             Déconnexion
@@ -236,7 +223,7 @@ export function PortalShell({ name, initials, initialRole, children }: Props) {
         </header>
 
         <main className="flex-1 bg-site-surface">
-          <PortalRoleContext.Provider value={role}>{children}</PortalRoleContext.Provider>
+          <PortalRoleContext.Provider value={initialRole}>{children}</PortalRoleContext.Provider>
         </main>
       </div>
     </div>

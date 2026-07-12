@@ -108,7 +108,7 @@ export async function sendAccountActivatedEmail(to: string, firstName: string) {
       "Compte activé",
       `<p>Bonjour ${firstName},</p>
        <p>Votre compte membre CFM est maintenant <strong>actif</strong>.</p>
-       <p><a href="${baseUrl}/membre/tableau-de-bord" style="color:#c9a227">Accéder à mon espace</a></p>`
+       <p><a href="${baseUrl}/portail" style="color:#14418a">Accéder à mon espace</a></p>`
     ),
   });
 }
