@@ -232,12 +232,27 @@ export function listOrphanUploadFiles(
   return fromDisk;
 }
 
+// Mémoïsation au niveau process : les fichiers de public/ (et les objets de
+// storage distant résolus) sont immuables au runtime, donc un même chemin n'a
+// besoin d'être vérifié qu'une seule fois. Évite un fs.existsSync (ou un
+// exists() storage) synchrone par image à chaque rendu RSC. La fonction reste
+// SYNCHRONE pour ne pas propager une cascade async à travers tous les resolvers.
+const fileExistsCache = new Map<string, boolean>();
+
 export function publicFileExists(publicPath: string): boolean {
+  const cached = fileExistsCache.get(publicPath);
+  if (cached !== undefined) return cached;
+
+  let result: boolean;
   if (publicPath.startsWith("http://") || publicPath.startsWith("https://")) {
-    return getMediaStorage().exists(publicPath);
+    result = getMediaStorage().exists(publicPath);
+  } else {
+    const full = path.join(process.cwd(), "public", publicPath.replace(/^\//, ""));
+    result = fs.existsSync(full);
   }
-  const full = path.join(process.cwd(), "public", publicPath.replace(/^\//, ""));
-  return fs.existsSync(full);
+
+  fileExistsCache.set(publicPath, result);
+  return result;
 }
 
 export function isUploadStorageAvailable(): boolean {
