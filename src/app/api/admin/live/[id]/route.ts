@@ -12,6 +12,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
   const auth = await requireAdminAccess();
   if (!auth.ok) return auth.response;
   const id = parseInt((await params).id, 10);
+  if (!Number.isFinite(id)) return jsonNotFound("Événement introuvable");
   const events = await getLiveEvents();
   const event = events.find((e) => e.id === id);
   if (!event) return jsonNotFound("Événement introuvable");
@@ -26,6 +27,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (!parsed.ok) return parsed.response;
 
   const id = parseInt((await params).id, 10);
+  if (!Number.isFinite(id)) return jsonNotFound("Événement introuvable");
   const event = await updateLiveEvent(id, parsed.data);
   if (!event) return jsonNotFound("Événement introuvable");
 

@@ -35,6 +35,7 @@ export async function GET(
   if (!auth.ok) return auth.response;
 
   const pollId = parseInt((await params).id, 10);
+  if (!Number.isFinite(pollId)) return jsonNotFound("Sondage introuvable");
   const poll = await getPollById(pollId);
   if (!poll) return jsonNotFound("Sondage introuvable");
 
@@ -65,6 +66,7 @@ export async function PATCH(
   if (!parsed.ok) return parsed.response;
 
   const pollId = parseInt((await params).id, 10);
+  if (!Number.isFinite(pollId)) return jsonNotFound("Sondage introuvable");
   if (parsed.data.active === 0) {
     const poll = await closeLivePoll(pollId);
     if (!poll) return jsonNotFound("Sondage introuvable");

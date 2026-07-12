@@ -17,7 +17,9 @@ export async function GET(
   if (!auth.ok) return auth.response;
 
   const { id } = await params;
-  const petition = await getPetitionById(parseInt(id, 10));
+  const petitionId = parseInt(id, 10);
+  if (!Number.isFinite(petitionId)) return jsonNotFound("Pétition introuvable");
+  const petition = await getPetitionById(petitionId);
   if (!petition) return jsonNotFound("Pétition introuvable");
   return jsonData({ petition });
 }
@@ -34,7 +36,9 @@ export async function PATCH(
   if (!parsed.ok) return parsed.response;
 
   const { id } = await params;
-  const ok = await updatePetition(parseInt(id, 10), parsed.data);
+  const petitionId = parseInt(id, 10);
+  if (!Number.isFinite(petitionId)) return jsonNotFound("Pétition introuvable");
+  const ok = await updatePetition(petitionId, parsed.data);
   if (!ok) return jsonNotFound("Pétition introuvable");
   return jsonSuccess();
 }
@@ -47,7 +51,9 @@ export async function DELETE(
   if (!auth.ok) return auth.response;
 
   const { id } = await params;
-  const ok = await deletePetition(parseInt(id, 10));
+  const petitionId = parseInt(id, 10);
+  if (!Number.isFinite(petitionId)) return jsonNotFound("Pétition introuvable");
+  const ok = await deletePetition(petitionId);
   if (!ok) return jsonNotFound("Pétition introuvable");
   return jsonSuccess();
 }

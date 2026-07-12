@@ -26,6 +26,7 @@ export async function PATCH(
 
   const { id } = await params;
   const donationId = parseInt(id, 10);
+  if (!Number.isFinite(donationId)) return jsonNotFound("Don introuvable");
   const { send_receipt, ...patch } = parsed.data;
   const updated = await adminUpdateDonation(donationId, patch);
   if (!updated) return jsonNotFound("Don introuvable");

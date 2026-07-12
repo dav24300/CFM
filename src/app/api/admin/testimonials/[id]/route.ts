@@ -37,6 +37,6 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
   const auth = await requireAdminRole();
   if (!auth.ok) return auth.response;
   const id = parseContentId((await params).id);
-  if (id === null) return auth.response;
+  if (id === null) return jsonNotFound("ID invalide");
   return deleteContentItem("testimonials", id);
 }

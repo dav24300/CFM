@@ -15,6 +15,7 @@ export async function GET(
 
   const { id } = await params;
   const newsId = parseInt(id, 10);
+  if (!Number.isFinite(newsId)) return jsonNotFound("Actualité introuvable");
   const { news } = await getAdminData();
   const item = news.find((n) => n.id === newsId);
   if (!item) return jsonNotFound("Actualité introuvable");
@@ -34,6 +35,7 @@ export async function PATCH(
 
   const { id } = await params;
   const newsId = parseInt(id, 10);
+  if (!Number.isFinite(newsId)) return jsonNotFound("Actualité introuvable");
   const found = await updateNewsItem(newsId, parsed.data);
 
   if (!found) return jsonNotFound("Actualité introuvable");
@@ -49,6 +51,7 @@ export async function DELETE(
 
   const { id } = await params;
   const newsId = parseInt(id, 10);
+  if (!Number.isFinite(newsId)) return jsonNotFound("Actualité introuvable");
   try {
     await adminDelete("news", newsId);
     return jsonSuccess();

@@ -13,6 +13,7 @@ export async function DELETE(
 
   const { id } = await params;
   const subscriberId = parseInt(id, 10);
+  if (!Number.isFinite(subscriberId)) return jsonNotFound("Abonné introuvable");
   const ok = await deleteNewsletterSubscriber(subscriberId);
   if (!ok) return jsonNotFound("Abonné introuvable");
 
