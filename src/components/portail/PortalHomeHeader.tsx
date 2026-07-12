@@ -43,7 +43,7 @@ export function PortalHomeHeader({
     <>
       <div className="mb-[22px] flex flex-wrap items-center justify-between gap-3.5">
         <div>
-          <h1 className="font-serif text-[clamp(24px,3vw,32px)] font-medium leading-[1.1] text-site-ink">
+          <h1 className="font-serif text-h4 font-medium leading-[1.1] text-site-ink">
             Bonjour, {firstName} 👋
           </h1>
           <p className="mt-1.5 text-sm text-site-muted-2">

@@ -18,7 +18,7 @@ export function PortalPage({
       <div className="mx-auto max-w-portal">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="font-serif text-[clamp(22px,2.6vw,30px)] font-medium leading-[1.1] text-site-ink">
+            <h1 className="font-serif text-h4 font-medium leading-[1.1] text-site-ink">
               {title}
             </h1>
             {subtitle && <p className="mt-1.5 text-sm text-site-muted-2">{subtitle}</p>}

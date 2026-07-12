@@ -56,7 +56,7 @@ export function HomeStats({ stats }: { stats: Stat[] }) {
               i === stats.length - 1 ? "sm:border-r-0" : ""
             }`}
           >
-            <div className="font-serif text-[clamp(40px,5vw,52px)] font-medium leading-none text-site-primary">
+            <div className="font-serif text-h1 font-medium leading-none text-site-primary">
               {typeof s.value === "number" ? <CountUp target={s.value} /> : s.text}
             </div>
             <div className="mt-2 text-[13px] font-medium uppercase tracking-[0.04em] text-site-muted-2">

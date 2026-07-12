@@ -211,7 +211,7 @@ export default async function HomePage() {
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-site-primary">
                 {locale === "en" ? "Live & events" : "Live & événements"}
               </p>
-              <h2 className="mt-3.5 font-serif text-[clamp(26px,4vw,40px)] font-medium leading-[1.1] text-site-ink">
+              <h2 className="mt-3.5 font-serif text-h2 font-medium leading-[1.1] text-site-ink">
                 {activeLive?.title ?? "FIKIN 2025 — Rassemblement des familles militaires"}
               </h2>
               <p className="mt-[18px] max-w-[50ch] text-[17px] leading-[1.7] text-site-muted">
@@ -298,7 +298,7 @@ export default async function HomePage() {
           <ScrollReveal>
             <div className="grid items-center gap-14 lg:grid-cols-2">
               <div>
-                <h2 className="font-serif text-[clamp(30px,4.5vw,48px)] font-medium leading-[1.06] text-site-ink">
+                <h2 className="font-serif text-h1 font-medium leading-[1.06] text-site-ink">
                   {locale === "en" ? "Join the movement" : "Rejoignez le mouvement"}
                 </h2>
                 <p className="mt-[18px] max-w-[48ch] text-[17px] leading-[1.65] text-site-muted">

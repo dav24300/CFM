@@ -12,7 +12,7 @@ export default function NotFound() {
       <p className="font-mono text-xs font-semibold uppercase tracking-[0.16em] text-site-primary">
         Erreur 404
       </p>
-      <h1 className="mt-3 font-serif text-[clamp(28px,5vw,44px)] font-medium leading-tight text-site-ink">
+      <h1 className="mt-3 font-serif text-h1 font-medium leading-tight text-site-ink">
         Page introuvable
       </h1>
       <p className="mt-4 max-w-md text-[16px] leading-relaxed text-site-muted">

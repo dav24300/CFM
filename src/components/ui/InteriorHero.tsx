@@ -180,7 +180,7 @@ export function InteriorHero({
         )}
 
         <h1
-          className="max-w-[20ch] font-serif text-[clamp(36px,5.5vw,60px)] font-medium leading-[1.05] tracking-[-0.015em] text-white"
+          className="max-w-[20ch] font-serif text-display font-medium leading-[1.05] tracking-[-0.015em] text-white"
           style={reveal(0.35)}
         >
           {title}
