@@ -112,7 +112,7 @@ export default async function AboutPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-site-light">
               FIKIN 2025 — un moment fondateur
             </p>
-            <h2 className="mt-3.5 max-w-[24ch] font-serif text-[clamp(24px,3.2vw,34px)] font-medium leading-[1.15] text-white">
+            <h2 className="mt-3.5 max-w-[24ch] font-serif text-h4 font-medium leading-[1.15] text-white">
               Le jour où les familles militaires ont fait entendre leur voix
             </h2>
             <p className="mt-[18px] max-w-[70ch] text-base leading-[1.7] text-white/80">

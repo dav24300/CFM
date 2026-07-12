@@ -30,7 +30,7 @@ export default function AppError({
       <p className="font-mono text-xs font-semibold uppercase tracking-[0.16em] text-site-danger">
         Erreur
       </p>
-      <h1 className="mt-3 font-serif text-[clamp(24px,4vw,36px)] font-medium leading-tight text-site-ink">
+      <h1 className="mt-3 font-serif text-h3 font-medium leading-tight text-site-ink">
         Une erreur est survenue
       </h1>
       <p className="mt-4 max-w-md text-[15px] leading-relaxed text-site-muted">

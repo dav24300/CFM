@@ -183,7 +183,7 @@ export function HomeHero({
           >
             {kicker}
           </p>
-          <h1 className="font-serif text-[clamp(40px,6vw,66px)] font-medium leading-[1.03] tracking-[-0.015em] text-white">
+          <h1 className="font-serif text-display font-medium leading-[1.03] tracking-[-0.015em] text-white">
             {LINE_1.map((w, i) => (
               <span key={w} className="inline-block" style={revealStyle(DELAYS_1[i])}>
                 {w}
