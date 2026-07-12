@@ -16,6 +16,14 @@ vi.mock("@/lib/db", () => ({
   adminCreate: mocked.adminCreate,
 }));
 
+// P2.4 : la factory de routes passe par le repository (createContentItem),
+// plus par le ré-export @/lib/db — on mocke la source directe.
+vi.mock("@/infrastructure/repositories/content.repository", () => ({
+  adminCreate: mocked.adminCreate,
+  adminDelete: vi.fn(),
+  adminUpdateContent: vi.fn(),
+}));
+
 import { GET, POST } from "@/app/api/admin/news/route";
 
 describe("/api/admin/news route", () => {

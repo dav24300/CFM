@@ -7,6 +7,7 @@ import {
 } from "@/infrastructure/auth/admin-auth";
 import { logAdminAction } from "@/lib/admin-audit";
 import { jsonError, jsonUnauthorized } from "@/lib/api-response";
+import { getClientIp } from "@/lib/rate-limit";
 
 function attachSessionCookie(response: NextResponse, token: string): NextResponse {
   response.cookies.set(
@@ -37,7 +38,7 @@ function wantsHtmlRedirect(request: NextRequest): boolean {
 export async function POST(request: NextRequest) {
   try {
     const password = await readPassword(request);
-    const ip = request.headers.get("x-forwarded-for");
+    const ip = getClientIp(request);
     const htmlFlow = wantsHtmlRedirect(request);
 
     if (!verifyPassword(password)) {

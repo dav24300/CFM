@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { adminUpdateDonation } from "@/infrastructure/repositories/donations.repository";
 import { sendDonationReceiptEmail } from "@/infrastructure/email/nodemailer.adapter";
 import { requireAdminAccess } from "@/lib/admin-rest";
+import { getClientIp } from "@/lib/rate-limit";
 import { jsonError, jsonNotFound, jsonSuccess } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
 import { z } from "@/lib/validators";
@@ -26,6 +27,7 @@ export async function PATCH(
 
   const { id } = await params;
   const donationId = parseInt(id, 10);
+  if (!Number.isFinite(donationId)) return jsonNotFound("Don introuvable");
   const { send_receipt, ...patch } = parsed.data;
   const updated = await adminUpdateDonation(donationId, patch);
   if (!updated) return jsonNotFound("Don introuvable");
@@ -55,7 +57,7 @@ export async function PATCH(
     action: "patch",
     target: String(donationId),
     status: "success",
-    ip: request.headers.get("x-forwarded-for"),
+    ip: getClientIp(request),
   });
 
   return jsonSuccess();

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { getLiveEvents, updateLiveEvent } from "@/lib/live";
 import { requireAdminAccess } from "@/lib/admin-rest";
+import { getClientIp } from "@/lib/rate-limit";
 import { parseOrBadRequest } from "@/lib/validators";
 import { adminLivePatchSchema } from "@/lib/validators/admin-api";
 import { jsonData, jsonNotFound, jsonSuccess } from "@/lib/api-response";
@@ -12,6 +13,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
   const auth = await requireAdminAccess();
   if (!auth.ok) return auth.response;
   const id = parseInt((await params).id, 10);
+  if (!Number.isFinite(id)) return jsonNotFound("Événement introuvable");
   const events = await getLiveEvents();
   const event = events.find((e) => e.id === id);
   if (!event) return jsonNotFound("Événement introuvable");
@@ -26,6 +28,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (!parsed.ok) return parsed.response;
 
   const id = parseInt((await params).id, 10);
+  if (!Number.isFinite(id)) return jsonNotFound("Événement introuvable");
   const event = await updateLiveEvent(id, parsed.data);
   if (!event) return jsonNotFound("Événement introuvable");
 
@@ -35,7 +38,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     action: "patch",
     target: String(id),
     status: "success",
-    ip: request.headers.get("x-forwarded-for"),
+    ip: getClientIp(request),
   });
 
   return jsonData({ event });

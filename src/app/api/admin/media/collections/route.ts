@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
-import { getAdminAccess } from "@/lib/admin-access";
-import { jsonData, jsonError, jsonSuccess, jsonUnauthorized } from "@/lib/api-response";
+import { requireAdminAccess } from "@/lib/admin-rest";
+import { jsonData, jsonError, jsonSuccess } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
+import { getClientIp } from "@/lib/rate-limit";
 import {
   getMediaCollections,
   patchMediaCollection,
@@ -15,13 +16,14 @@ import {
 import { parseOrBadRequest } from "@/lib/validators";
 
 export async function GET() {
-  if (!(await getAdminAccess())) return jsonUnauthorized();
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
   return jsonData(getMediaCollections());
 }
 
 export async function PUT(request: NextRequest) {
-  const access = await getAdminAccess();
-  if (!access) return jsonUnauthorized();
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
 
   const body = await request.json();
   const parsed = parseOrBadRequest(adminMediaCollectionsPutSchema, body);
@@ -30,19 +32,19 @@ export async function PUT(request: NextRequest) {
   saveMediaCollections(parsed.data);
 
   await logAdminAction({
-    actorType: access,
+    actorType: auth.access,
     endpoint: "/api/admin/media/collections",
     action: "put",
     status: "success",
-    ip: request.headers.get("x-forwarded-for") || null,
+    ip: getClientIp(request),
   });
 
   return jsonSuccess();
 }
 
 export async function PATCH(request: NextRequest) {
-  const access = await getAdminAccess();
-  if (!access) return jsonUnauthorized();
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
 
   const body = await request.json();
   const parsed = parseOrBadRequest(adminMediaCollectionsPatchSchema, body);
@@ -51,20 +53,20 @@ export async function PATCH(request: NextRequest) {
   patchMediaCollection(parsed.data);
 
   await logAdminAction({
-    actorType: access,
+    actorType: auth.access,
     endpoint: "/api/admin/media/collections",
     action: "patch",
     target: parsed.data.type || "collection",
     status: "success",
-    ip: request.headers.get("x-forwarded-for") || null,
+    ip: getClientIp(request),
   });
 
   return jsonSuccess();
 }
 
 export async function DELETE(request: NextRequest) {
-  const access = await getAdminAccess();
-  if (!access) return jsonUnauthorized();
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
 
   const { searchParams } = new URL(request.url);
   const sort = Number(searchParams.get("sort"));
@@ -73,12 +75,12 @@ export async function DELETE(request: NextRequest) {
   removeFikinItem(sort);
 
   await logAdminAction({
-    actorType: access,
+    actorType: auth.access,
     endpoint: "/api/admin/media/collections",
     action: "delete",
     target: String(sort),
     status: "success",
-    ip: request.headers.get("x-forwarded-for") || null,
+    ip: getClientIp(request),
   });
 
   return jsonSuccess();

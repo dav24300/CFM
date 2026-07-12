@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
-import { getAdminAccess } from "@/lib/admin-access";
-import { jsonData, jsonError, jsonSuccess, jsonUnauthorized } from "@/lib/api-response";
+import { requireAdminAccess } from "@/lib/admin-rest";
+import { jsonData, jsonError, jsonSuccess } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
+import { getClientIp } from "@/lib/rate-limit";
 import {
   cleanupOrphanUploads,
   deleteLibraryAsset,
@@ -12,7 +13,8 @@ import { adminMediaLibraryPatchSchema } from "@/lib/validators/admin-api";
 import { parseOrBadRequest } from "@/lib/validators";
 
 export async function GET(request: NextRequest) {
-  if (!(await getAdminAccess())) return jsonUnauthorized();
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
 
   const { searchParams } = new URL(request.url);
   const usagePath = searchParams.get("usage");
@@ -20,8 +22,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const access = await getAdminAccess();
-  if (!access) return jsonUnauthorized();
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
 
   const body = await request.json();
   const parsed = parseOrBadRequest(adminMediaLibraryPatchSchema, body);
@@ -34,20 +36,20 @@ export async function PATCH(request: NextRequest) {
   });
 
   await logAdminAction({
-    actorType: access,
+    actorType: auth.access,
     endpoint: "/api/admin/media/library",
     action: "patch_meta",
     target: parsed.data.path,
     status: "success",
-    ip: request.headers.get("x-forwarded-for") || null,
+    ip: getClientIp(request),
   });
 
   return jsonSuccess();
 }
 
 export async function DELETE(request: NextRequest) {
-  const access = await getAdminAccess();
-  if (!access) return jsonUnauthorized();
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
 
   const { searchParams } = new URL(request.url);
   const assetPath = searchParams.get("path");
@@ -62,8 +64,8 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const access = await getAdminAccess();
-  if (!access) return jsonUnauthorized();
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
 
   const body = await request.json();
   if (body.action !== "cleanup_orphans") {
@@ -73,12 +75,12 @@ export async function POST(request: NextRequest) {
   const result = await cleanupOrphanUploads();
 
   await logAdminAction({
-    actorType: access,
+    actorType: auth.access,
     endpoint: "/api/admin/media/library",
     action: "cleanup_orphans",
     target: String(result.count),
     status: "success",
-    ip: request.headers.get("x-forwarded-for") || null,
+    ip: getClientIp(request),
   });
 
   return jsonData(result);

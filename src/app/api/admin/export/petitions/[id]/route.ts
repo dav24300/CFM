@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminAccess } from "@/lib/admin-access";
+import { requireAdminRole } from "@/lib/admin-rest";
 import { getPetitionById, getPetitionSignatures } from "@/lib/members";
 import { petitionSignaturesToCsv } from "@/lib/password-reset";
-import { jsonError, jsonForbidden, jsonUnauthorized } from "@/lib/api-response";
+import { jsonError } from "@/lib/api-response";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const access = await getAdminAccess();
-  if (!access) return jsonUnauthorized();
-  if (access !== "admin") return jsonForbidden();
+  const auth = await requireAdminRole();
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
   const petitionId = parseInt(id, 10);

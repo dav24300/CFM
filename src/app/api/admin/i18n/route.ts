@@ -7,6 +7,7 @@ import {
 } from "@/infrastructure/repositories/settings.repository";
 import { invalidateI18nCache } from "@/infrastructure/cache/invalidate-i18n";
 import { requireAdminAccess } from "@/lib/admin-rest";
+import { getClientIp } from "@/lib/rate-limit";
 import { jsonData, jsonError, jsonSuccess } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
 
@@ -57,7 +58,7 @@ export async function PATCH(request: NextRequest) {
     action: "patch",
     target: `${locale}:${key}`,
     status: "success",
-    ip: request.headers.get("x-forwarded-for"),
+    ip: getClientIp(request),
   });
 
   return jsonSuccess();

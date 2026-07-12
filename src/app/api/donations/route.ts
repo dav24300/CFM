@@ -1,17 +1,26 @@
 import { NextRequest } from "next/server";
 import { processDonation } from "@/application/services/donation.service";
 import { handleDomainError, jsonError, jsonSuccess } from "@/lib/api-response";
+import { parseOrBadRequest } from "@/lib/validators";
+import { donationCreateSchema } from "@/lib/validators/public-api";
 
 export async function POST(request: NextRequest) {
+  const parsed = parseOrBadRequest(
+    donationCreateSchema,
+    await request.json().catch(() => null),
+    "Champs invalides"
+  );
+  if (!parsed.ok) return parsed.response;
+
   try {
-    const body = await request.json();
-    const { amount, provider, phone } = body;
-
-    if (!amount || amount < 1 || !provider || !phone) {
-      return jsonError("Champs invalides", 400);
-    }
-
-    const result = await processDonation(body);
+    // null ⇒ undefined : le service applique déjà ses fallbacks (`|| "USD"`,
+    // `|| member?.email`) sur toute valeur falsy — comportement identique.
+    const result = await processDonation({
+      ...parsed.data,
+      currency: parsed.data.currency ?? undefined,
+      donor_name: parsed.data.donor_name ?? undefined,
+      donor_email: parsed.data.donor_email ?? undefined,
+    });
 
     if (result.mode === "demo") {
       return jsonSuccess({
