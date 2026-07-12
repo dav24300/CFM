@@ -26,7 +26,7 @@ export default async function SiteLayout({
         isAuthenticated={Boolean(userId)}
         memberArea={t.member.dashboard}
       />
-      <main className="min-h-screen bg-site-surface page-enter">{children}</main>
+      <main id="main-content" className="min-h-screen bg-site-surface page-enter">{children}</main>
       <Footer locale={locale} />
     </>
   );
