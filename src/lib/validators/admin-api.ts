@@ -154,3 +154,64 @@ export const adminMediaAssignSchema = z.object({
   field: z.string().min(1),
   path: z.string().min(1),
 });
+
+// ── God-endpoint POST /api/admin (P2.3) ─────────────────────────────────────
+// Schéma discriminé sur `action` : toute action inconnue est rejetée en 400
+// (fail-closed — l'ancien dispatch if/else ignorait silencieusement).
+
+const ADMIN_CONTENT_TABLES = [
+  "news",
+  "studies",
+  "campaigns",
+  "actions",
+  "testimonials",
+  "press_releases",
+] as const;
+
+const adminActionId = z.coerce.number().int().positive();
+/** Données de formulaire admin : structure validée en aval par les builders. */
+const adminLooseData = z.record(z.string(), z.unknown());
+
+export const adminActionSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("create"),
+    table: z.enum([...ADMIN_CONTENT_TABLES, "petitions"]),
+    data: adminLooseData,
+  }),
+  z.object({
+    action: z.literal("update_content"),
+    table: z.enum(ADMIN_CONTENT_TABLES),
+    id: adminActionId,
+    data: adminLooseData,
+  }),
+  z.object({
+    action: z.literal("update_status"),
+    table: z.enum(["memberships", "help_requests"]),
+    id: adminActionId,
+    data: z.object({ status: z.string().min(1) }),
+  }),
+  z.object({ action: z.literal("activate_user"), id: adminActionId }),
+  z.object({ action: z.literal("suspend_user"), id: adminActionId }),
+  z.object({ action: z.literal("approve_family_link"), id: adminActionId }),
+  z.object({ action: z.literal("reject_family_link"), id: adminActionId }),
+  z.object({
+    action: z.literal("contact_update"),
+    id: adminActionId,
+    data: z.object({ status: z.enum(["new", "read", "archived"]) }),
+  }),
+  z.object({
+    action: z.literal("help_update"),
+    id: adminActionId,
+    data: z.object({ status: z.string().min(1), note: z.string().optional() }),
+  }),
+  z.object({ action: z.literal("petition_signatures_mark_read") }),
+  z.object({
+    action: z.literal("delete"),
+    table: z.enum(ADMIN_CONTENT_TABLES),
+    id: adminActionId,
+  }),
+  z.object({ action: z.literal("reject_membership"), id: adminActionId }),
+]);
+
+export type AdminActionPayload = z.infer<typeof adminActionSchema>;
+export type AdminActionName = AdminActionPayload["action"];

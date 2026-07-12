@@ -23,6 +23,11 @@ import {
 } from "@/lib/email";
 import { sendPushToTopic } from "@/lib/push";
 import { logAdminAction } from "@/lib/admin-audit";
+import { parseOrBadRequest } from "@/lib/validators";
+import {
+  adminActionSchema,
+  type AdminActionName,
+} from "@/lib/validators/admin-api";
 import {
   jsonData,
   jsonError,
@@ -31,14 +36,28 @@ import {
   jsonUnauthorized,
 } from "@/lib/api-response";
 
-// Actions à fort impact réservées à l'admin fondateur (jamais au rôle volunteer).
-const ADMIN_ONLY_ACTIONS = new Set([
-  "activate_user",
-  "suspend_user",
-  "delete",
-  "approve_family_link",
-  "reject_family_link",
-]);
+/**
+ * Matrice de rôles FAIL-CLOSED du god-endpoint (P2.3, politique iso-strict :
+ * reproduit exactement les droits volunteer constatés avant refactor).
+ * L'exhaustivité du Record sur l'union AdminActionName garantit à la
+ * compilation qu'aucune nouvelle action ne peut être ajoutée au schéma sans
+ * déclarer explicitement son niveau d'accès.
+ * "volunteer" = accessible aux deux rôles ; "admin" = admin fondateur seul.
+ */
+const ACTION_ACCESS: Record<AdminActionName, "admin" | "volunteer"> = {
+  create: "volunteer",
+  update_content: "volunteer",
+  update_status: "volunteer",
+  contact_update: "volunteer",
+  help_update: "volunteer",
+  petition_signatures_mark_read: "volunteer",
+  reject_membership: "volunteer",
+  activate_user: "admin",
+  suspend_user: "admin",
+  approve_family_link: "admin",
+  reject_family_link: "admin",
+  delete: "admin",
+};
 
 export async function GET() {
   if (!(await getAdminAccess())) {
@@ -60,98 +79,118 @@ export async function POST(request: NextRequest) {
     return jsonUnauthorized();
   }
 
+  const parsed = parseOrBadRequest(
+    adminActionSchema,
+    await request.json().catch(() => null),
+    "Action inconnue ou champs invalides"
+  );
+  if (!parsed.ok) return parsed.response;
+  const payload = parsed.data;
+  const table = "table" in payload ? payload.table : undefined;
+  const id = "id" in payload ? payload.id : undefined;
+  const auditTarget = table || "unknown";
+
+  if (ACTION_ACCESS[payload.action] === "admin" && access !== "admin") {
+    await logAdminAction({
+      actorType: access,
+      endpoint: "/api/admin",
+      action: `${payload.action}:forbidden`,
+      target: String(id ?? auditTarget),
+      status: "denied",
+      ip: request.headers.get("x-forwarded-for") || null,
+    });
+    return jsonForbidden();
+  }
+
   try {
-    const body = await request.json();
-    const { table, action, data, id } = body;
-    const auditTarget = table || "unknown";
-
-    if (ADMIN_ONLY_ACTIONS.has(action) && access !== "admin") {
-      await logAdminAction({
-        actorType: access,
-        endpoint: "/api/admin",
-        action: `${action}:forbidden`,
-        target: String(id ?? auditTarget),
-        status: "denied",
-        ip: request.headers.get("x-forwarded-for") || null,
-      });
-      return jsonForbidden();
-    }
-
-    if (action === "create" && table) {
-      const contentTables = [
-        "news",
-        "studies",
-        "campaigns",
-        "actions",
-        "testimonials",
-        "press_releases",
-      ];
-      if (contentTables.includes(table)) {
-        await adminCreate(table, data);
-      } else if (table === "petitions") {
-        await createPetition({
-          title: data.title,
-          description: data.description,
-          content: data.content,
-          goal: parseInt(data.goal, 10) || 100,
-        });
+    switch (payload.action) {
+      case "create": {
+        if (payload.table === "petitions") {
+          const data = payload.data as Record<string, string>;
+          await createPetition({
+            title: data.title,
+            description: data.description,
+            content: data.content,
+            goal: parseInt(data.goal, 10) || 100,
+          });
+        } else {
+          await adminCreate(payload.table, payload.data as Record<string, string>);
+        }
+        break;
       }
-    } else if (action === "update_content" && table && id) {
-      const ok = await adminUpdateContent(table, id, data);
-      if (!ok) return jsonError("Élément introuvable", 404);
-    } else if (action === "update_status") {
-      if (table === "memberships" || table === "help_requests") {
-        await adminUpdateStatus(table, id, data.status);
-      }
-    } else if (action === "activate_user" && id) {
-      const user = await activateUser(id);
-      if (user) {
-        await sendAccountActivatedEmail(user.email, user.first_name);
-      }
-    } else if (action === "suspend_user" && id) {
-      await suspendUser(id);
-    } else if (action === "approve_family_link" && id) {
-      await adminApproveFamilyLink(id);
-    } else if (action === "reject_family_link" && id) {
-      await adminRejectFamilyLink(id);
-    } else if (action === "contact_update" && id) {
-      const ok = await updateContactStatus(id, data.status);
-      if (!ok) return jsonError("Message introuvable", 404);
-    } else if (action === "help_update" && id) {
-      await addHelpRequestUpdate({
-        help_request_id: id,
-        status: data.status,
-        note: data.note,
-        updated_by: access === "volunteer" ? "bénévole" : "admin",
-      });
-      const req = await getHelpRequestById(id);
-      if (req?.email) {
-        await sendHelpRequestUpdateEmail(
-          req.email as string,
-          req.first_name as string,
-          data.status,
-          data.note || ""
+      case "update_content": {
+        const ok = await adminUpdateContent(
+          payload.table,
+          payload.id,
+          payload.data as Record<string, string | number | null>
         );
+        if (!ok) return jsonError("Élément introuvable", 404);
+        break;
       }
-      await sendPushToTopic("help", {
-        title: "Mise à jour dossier CFM",
-        body: `Statut : ${data.status}`,
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/membre/tableau-de-bord`,
-      });
-    } else if (action === "petition_signatures_mark_read") {
-      await patchSiteSettings({
-        petition_signatures_seen_at: new Date().toISOString(),
-      });
-    } else if (action === "delete" && id && table) {
-      await adminDelete(table, id);
-    } else if (action === "reject_membership" && id) {
-      await adminUpdateStatus("memberships", id, "rejected");
+      case "update_status":
+        await adminUpdateStatus(payload.table, payload.id, payload.data.status);
+        break;
+      case "activate_user": {
+        const user = await activateUser(payload.id);
+        if (user) {
+          await sendAccountActivatedEmail(user.email, user.first_name);
+        }
+        break;
+      }
+      case "suspend_user":
+        await suspendUser(payload.id);
+        break;
+      case "approve_family_link":
+        await adminApproveFamilyLink(payload.id);
+        break;
+      case "reject_family_link":
+        await adminRejectFamilyLink(payload.id);
+        break;
+      case "contact_update": {
+        const ok = await updateContactStatus(payload.id, payload.data.status);
+        if (!ok) return jsonError("Message introuvable", 404);
+        break;
+      }
+      case "help_update": {
+        await addHelpRequestUpdate({
+          help_request_id: payload.id,
+          status: payload.data.status,
+          note: payload.data.note ?? "",
+          updated_by: access === "volunteer" ? "bénévole" : "admin",
+        });
+        const req = await getHelpRequestById(payload.id);
+        if (req?.email) {
+          await sendHelpRequestUpdateEmail(
+            req.email as string,
+            req.first_name as string,
+            payload.data.status,
+            payload.data.note || ""
+          );
+        }
+        await sendPushToTopic("help", {
+          title: "Mise à jour dossier CFM",
+          body: `Statut : ${payload.data.status}`,
+          url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/membre/tableau-de-bord`,
+        });
+        break;
+      }
+      case "petition_signatures_mark_read":
+        await patchSiteSettings({
+          petition_signatures_seen_at: new Date().toISOString(),
+        });
+        break;
+      case "delete":
+        await adminDelete(payload.table, payload.id);
+        break;
+      case "reject_membership":
+        await adminUpdateStatus("memberships", payload.id, "rejected");
+        break;
     }
 
     await logAdminAction({
       actorType: access,
       endpoint: "/api/admin",
-      action: `${action}:${table || "none"}`,
+      action: `${payload.action}:${table || "none"}`,
       target: String(id ?? auditTarget),
       status: "success",
       ip: request.headers.get("x-forwarded-for") || null,
