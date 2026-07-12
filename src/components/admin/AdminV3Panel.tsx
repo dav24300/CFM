@@ -45,7 +45,7 @@ type ChatMsg = {
   created_at?: string;
 };
 
-type LiveEvent = {
+export type AdminLiveEvent = {
   id: number;
   title: string;
   slug: string;
@@ -58,13 +58,15 @@ type LiveEvent = {
   youtube_id?: string | null;
   description?: string;
 };
+type LiveEvent = AdminLiveEvent;
 
 type PendingCount = { eventId: number; count: number };
 
-type Props = {
-  initialEvents: LiveEvent[];
+export type AdminV3PanelProps = {
+  initialEvents: AdminLiveEvent[];
   onReload: () => void;
 };
+type Props = AdminV3PanelProps;
 
 export function AdminV3Panel({ initialEvents, onReload }: Props) {
   const [events, setEvents] = useState(initialEvents);

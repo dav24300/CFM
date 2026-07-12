@@ -1,19 +1,22 @@
 export type AdminAccess = "admin" | "volunteer";
 
-export type AdminSection =
-  | "overview"
-  | "inbox"
-  | "content"
-  | "territory"
-  | "community"
-  | "donations"
-  | "live"
-  | "design"
-  | "identity"
-  | "pages"
-  | "i18n"
-  | "partners"
-  | "audit";
+export const ADMIN_SECTIONS = [
+  "overview",
+  "inbox",
+  "content",
+  "territory",
+  "community",
+  "donations",
+  "live",
+  "design",
+  "identity",
+  "pages",
+  "i18n",
+  "partners",
+  "audit",
+] as const;
+
+export type AdminSection = (typeof ADMIN_SECTIONS)[number];
 
 export type AdminStats = {
   news: number;
