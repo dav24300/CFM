@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { deleteNewsletterSubscriber } from "@/infrastructure/repositories/content.repository";
 import { requireAdminAccess } from "@/lib/admin-rest";
+import { getClientIp } from "@/lib/rate-limit";
 import { jsonNotFound, jsonSuccess } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
 
@@ -23,7 +24,7 @@ export async function DELETE(
     action: "delete",
     target: String(subscriberId),
     status: "success",
-    ip: _request.headers.get("x-forwarded-for"),
+    ip: getClientIp(_request),
   });
 
   return jsonSuccess();

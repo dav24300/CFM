@@ -1,12 +1,11 @@
 import { NextRequest } from "next/server";
-import { getAdminAccess } from "@/lib/admin-access";
+import { requireAdminAccess } from "@/lib/admin-rest";
 import { moderateLiveChatMessage } from "@/application/services/live.service";
-import { jsonError, jsonSuccess, jsonUnauthorized } from "@/lib/api-response";
+import { jsonError, jsonSuccess } from "@/lib/api-response";
 
 export async function POST(request: NextRequest) {
-  if (!(await getAdminAccess())) {
-    return jsonUnauthorized();
-  }
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
 
   const { messageId, status } = await request.json();
   if (!messageId || !["approved", "rejected"].includes(status)) {

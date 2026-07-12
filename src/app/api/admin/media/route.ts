@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
-import { getAdminAccess } from "@/lib/admin-access";
-import { jsonData, jsonError, jsonSuccess, jsonUnauthorized } from "@/lib/api-response";
+import { requireAdminAccess } from "@/lib/admin-rest";
+import { jsonData, jsonError, jsonSuccess } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
+import { getClientIp } from "@/lib/rate-limit";
 import {
   getMediaState,
   patchMediaSettings,
@@ -12,13 +13,14 @@ import { jsonUploadError } from "@/infrastructure/http/upload-response";
 export const maxDuration = 120;
 
 export async function GET() {
-  if (!(await getAdminAccess())) return jsonUnauthorized();
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
   return jsonData(getMediaState());
 }
 
 export async function POST(request: NextRequest) {
-  const access = await getAdminAccess();
-  if (!access) return jsonUnauthorized();
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
 
   const started = Date.now();
 
@@ -41,12 +43,12 @@ export async function POST(request: NextRequest) {
 
     try {
       await logAdminAction({
-        actorType: access,
+        actorType: auth.access,
         endpoint: "/api/admin/media",
         action: "upload",
         target: settingKey || result.path,
         status: "success",
-        ip: request.headers.get("x-forwarded-for") || null,
+        ip: getClientIp(request),
         metadata: {
           mime: file.type,
           size: file.size,
@@ -62,11 +64,11 @@ export async function POST(request: NextRequest) {
     return jsonData(result);
   } catch (err) {
     await logAdminAction({
-      actorType: access,
+      actorType: auth.access,
       endpoint: "/api/admin/media",
       action: "upload",
       status: "error",
-      ip: request.headers.get("x-forwarded-for") || null,
+      ip: getClientIp(request),
       metadata: {
         durationMs: Date.now() - started,
         message: err instanceof Error ? err.message : "unknown",
@@ -77,8 +79,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const access = await getAdminAccess();
-  if (!access) return jsonUnauthorized();
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
 
   try {
     const body = await request.json();
@@ -86,11 +88,11 @@ export async function PATCH(request: NextRequest) {
     if (body.action === "reset_hero") {
       patchMediaSettings({ action: "reset_hero" });
       await logAdminAction({
-        actorType: access,
+        actorType: auth.access,
         endpoint: "/api/admin/media",
         action: "reset_hero",
         status: "success",
-        ip: request.headers.get("x-forwarded-for") || null,
+        ip: getClientIp(request),
       });
       return jsonSuccess();
     }
@@ -98,11 +100,11 @@ export async function PATCH(request: NextRequest) {
     patchMediaSettings(body);
 
     await logAdminAction({
-      actorType: access,
+      actorType: auth.access,
       endpoint: "/api/admin/media",
       action: "patch",
       status: "success",
-      ip: request.headers.get("x-forwarded-for") || null,
+      ip: getClientIp(request),
     });
     return jsonData({ ok: true });
   } catch {

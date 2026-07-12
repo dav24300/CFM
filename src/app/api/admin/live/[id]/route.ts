@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { getLiveEvents, updateLiveEvent } from "@/lib/live";
 import { requireAdminAccess } from "@/lib/admin-rest";
+import { getClientIp } from "@/lib/rate-limit";
 import { parseOrBadRequest } from "@/lib/validators";
 import { adminLivePatchSchema } from "@/lib/validators/admin-api";
 import { jsonData, jsonNotFound, jsonSuccess } from "@/lib/api-response";
@@ -37,7 +38,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     action: "patch",
     target: String(id),
     status: "success",
-    ip: request.headers.get("x-forwarded-for"),
+    ip: getClientIp(request),
   });
 
   return jsonData({ event });

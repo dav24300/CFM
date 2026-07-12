@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { getAdminAccess } from "@/lib/admin-access";
+import { requireAdminAccess } from "@/lib/admin-rest";
+import { getClientIp } from "@/lib/rate-limit";
 import {
   createLiveEvent,
   setLiveEventStatus,
@@ -11,18 +12,12 @@ import {
 } from "@/lib/live";
 import { sendPushToTopic } from "@/lib/push";
 import { countPushSubscriptions } from "@/infrastructure/repositories/live.repository";
-import {
-  jsonData,
-  jsonError,
-  jsonUnauthorized,
-} from "@/lib/api-response";
+import { jsonData, jsonError } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
 
 export async function GET() {
-  const access = await getAdminAccess();
-  if (!access) {
-    return jsonUnauthorized();
-  }
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
   const events = await getLiveEvents();
   const pending = await Promise.all(
     events.map(async (e) => ({
@@ -34,16 +29,16 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const access = await getAdminAccess();
-  if (!access) {
+  const auth = await requireAdminAccess();
+  if (!auth.ok) {
     await logAdminAction({
       actorType: "unknown",
       endpoint: "/api/admin/live",
       action: "unauthorized",
       status: "denied",
-      ip: request.headers.get("x-forwarded-for") || null,
+      ip: getClientIp(request),
     });
-    return jsonUnauthorized();
+    return auth.response;
   }
 
   const body = await request.json();
@@ -73,12 +68,12 @@ export async function POST(request: NextRequest) {
     });
     if (!event) return jsonError("Événement introuvable", 404);
     await logAdminAction({
-      actorType: access,
+      actorType: auth.access,
       endpoint: "/api/admin/live",
       action: "set_thumbnail",
       target: String(body.id),
       status: "success",
-      ip: request.headers.get("x-forwarded-for") || null,
+      ip: getClientIp(request),
     });
     return jsonData({ event });
   }
@@ -97,7 +92,7 @@ export async function POST(request: NextRequest) {
       action: "create",
       target: event.slug,
       status: "success",
-      ip: request.headers.get("x-forwarded-for") || null,
+      ip: getClientIp(request),
     });
     return jsonData({ event });
   }
@@ -118,7 +113,7 @@ export async function POST(request: NextRequest) {
       action: "set_status",
       target: String(body.id),
       status: "success",
-      ip: request.headers.get("x-forwarded-for") || null,
+      ip: getClientIp(request),
       metadata: { status: body.status },
     });
     return jsonData({ event });
@@ -136,7 +131,7 @@ export async function POST(request: NextRequest) {
       action: "send_push",
       target: String(body.topic),
       status: "success",
-      ip: request.headers.get("x-forwarded-for") || null,
+      ip: getClientIp(request),
     });
     return jsonData(result);
   }

@@ -5,6 +5,7 @@ import {
 } from "@/infrastructure/repositories/settings.repository";
 import { invalidateSettingsPatch } from "@/infrastructure/persistence/admin-mutation";
 import { requireAdminRole } from "@/lib/admin-rest";
+import { getClientIp } from "@/lib/rate-limit";
 import { jsonData, jsonError, jsonSuccess } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
 
@@ -32,7 +33,7 @@ export async function PATCH(request: NextRequest) {
     endpoint: "/api/admin/settings",
     action: "patch",
     status: "success",
-    ip: request.headers.get("x-forwarded-for"),
+    ip: getClientIp(request),
   });
 
   return jsonSuccess();

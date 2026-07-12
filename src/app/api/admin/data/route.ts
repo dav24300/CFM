@@ -1,4 +1,4 @@
-import { getAdminAccess } from "@/lib/admin-access";
+import { requireAdminRole } from "@/lib/admin-rest";
 import { getAdminData } from "@/lib/db";
 import {
   getAllUsers,
@@ -8,13 +8,12 @@ import {
   getPetitionSignatures,
   getUserById,
 } from "@/lib/members";
-import { jsonData, jsonForbidden, jsonUnauthorized } from "@/lib/api-response";
+import { jsonData } from "@/lib/api-response";
 
 export async function GET() {
-  const access = await getAdminAccess();
-  if (!access) return jsonUnauthorized();
   // Dump complet (PII membres, dons, signatures) : réservé à l'admin, jamais volunteer.
-  if (access !== "admin") return jsonForbidden();
+  const auth = await requireAdminRole();
+  if (!auth.ok) return auth.response;
 
   const base = await getAdminData();
   const seenAtRaw = String((base as { site_settings?: Record<string, string> }).site_settings?.petition_signatures_seen_at || "");

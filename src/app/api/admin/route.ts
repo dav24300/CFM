@@ -23,6 +23,7 @@ import {
 } from "@/lib/email";
 import { sendPushToTopic } from "@/lib/push";
 import { logAdminAction } from "@/lib/admin-audit";
+import { getClientIp } from "@/lib/rate-limit";
 import { parseOrBadRequest } from "@/lib/validators";
 import {
   adminActionSchema,
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
       endpoint: "/api/admin",
       action: "unauthorized",
       status: "denied",
-      ip: request.headers.get("x-forwarded-for") || null,
+      ip: getClientIp(request),
     });
     return jsonUnauthorized();
   }
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
       action: `${payload.action}:forbidden`,
       target: String(id ?? auditTarget),
       status: "denied",
-      ip: request.headers.get("x-forwarded-for") || null,
+      ip: getClientIp(request),
     });
     return jsonForbidden();
   }
@@ -193,7 +194,7 @@ export async function POST(request: NextRequest) {
       action: `${payload.action}:${table || "none"}`,
       target: String(id ?? auditTarget),
       status: "success",
-      ip: request.headers.get("x-forwarded-for") || null,
+      ip: getClientIp(request),
     });
     return jsonSuccess();
   } catch (err) {
@@ -203,7 +204,7 @@ export async function POST(request: NextRequest) {
       endpoint: "/api/admin",
       action: "exception",
       status: "error",
-      ip: request.headers.get("x-forwarded-for") || null,
+      ip: getClientIp(request),
       metadata: { message: err instanceof Error ? err.message : "unknown" },
     });
     return jsonError("Erreur serveur", 500);

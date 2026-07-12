@@ -1,10 +1,11 @@
-import { getAdminAccess } from "@/lib/admin-access";
-import { jsonData, jsonUnauthorized } from "@/lib/api-response";
+import { requireAdminAccess } from "@/lib/admin-rest";
+import { jsonData } from "@/lib/api-response";
 import { isUploadStorageAvailable } from "@/infrastructure/media/file-storage.adapter";
 import { isSupabaseStorageEnabled } from "@/infrastructure/media/storage.factory";
 
 export async function GET() {
-  if (!(await getAdminAccess())) return jsonUnauthorized();
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
   return jsonData({
     storageAvailable: isUploadStorageAvailable(),
     storageBackend: isSupabaseStorageEnabled() ? "supabase" : "local",

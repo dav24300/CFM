@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getLiveEventBySlug, getPollsForEvent, createLivePoll } from "@/lib/live";
-import { getAdminAccess } from "@/lib/admin-access";
-import { jsonData, jsonError, jsonNotFound, jsonUnauthorized } from "@/lib/api-response";
+import { requireAdminAccess } from "@/lib/admin-rest";
+import { jsonData, jsonError, jsonNotFound } from "@/lib/api-response";
 
 export async function GET(
   _request: NextRequest,
@@ -19,9 +19,8 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  if (!(await getAdminAccess())) {
-    return jsonUnauthorized();
-  }
+  const auth = await requireAdminAccess();
+  if (!auth.ok) return auth.response;
 
   const { slug } = await params;
   const event = await getLiveEventBySlug(slug);

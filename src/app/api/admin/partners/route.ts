@@ -6,6 +6,7 @@ import {
   adminDeletePartner,
 } from "@/infrastructure/repositories/partners.repository";
 import { requireAdminAccess } from "@/lib/admin-rest";
+import { getClientIp } from "@/lib/rate-limit";
 import { jsonData, jsonNotFound, jsonSuccess } from "@/lib/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
 
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
     action: "create",
     target: String(partner.id),
     status: "success",
-    ip: request.headers.get("x-forwarded-for"),
+    ip: getClientIp(request),
   });
 
   return jsonData({ partner });
@@ -63,7 +64,7 @@ export async function PATCH(request: NextRequest) {
     action: "patch",
     target: String(id),
     status: "success",
-    ip: request.headers.get("x-forwarded-for"),
+    ip: getClientIp(request),
   });
 
   return jsonSuccess();
@@ -85,7 +86,7 @@ export async function DELETE(request: NextRequest) {
     action: "delete",
     target: String(id),
     status: "success",
-    ip: request.headers.get("x-forwarded-for"),
+    ip: getClientIp(request),
   });
 
   return jsonSuccess();
