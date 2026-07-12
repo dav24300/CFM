@@ -28,9 +28,11 @@ type Props = {
   site: SiteConfig;
   nav: NavLabels;
   memberLogin: string;
+  isAuthenticated: boolean;
+  memberArea: string;
 };
 
-export function Header({ locale, site, nav, memberLogin }: Props) {
+export function Header({ locale, site, nav, memberLogin, isAuthenticated, memberArea }: Props) {
   const [open, setOpen] = useState(false);
   const [axesOpen, setAxesOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -131,12 +133,12 @@ export function Header({ locale, site, nav, memberLogin }: Props) {
           <span className="mx-1 h-5 w-px bg-site-hairline" aria-hidden />
           <LocaleSwitcher current={locale} />
           <Link
-            href="/membre/connexion"
+            href={isAuthenticated ? "/portail" : "/membre/connexion"}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-site-muted transition hover:text-site-primary"
-            aria-label={memberLogin}
+            aria-label={isAuthenticated ? memberArea : memberLogin}
           >
             <User className="h-4 w-4" aria-hidden />
-            <span className="hidden xl:inline">{nav.member}</span>
+            <span className="hidden xl:inline">{isAuthenticated ? memberArea : nav.member}</span>
           </Link>
           <Link
             href="/contact#aide"
@@ -201,8 +203,11 @@ export function Header({ locale, site, nav, memberLogin }: Props) {
             <MobileLink href="/a-propos" onClick={() => setOpen(false)}>
               {nav.about}
             </MobileLink>
-            <MobileLink href="/membre/connexion" onClick={() => setOpen(false)}>
-              {nav.member}
+            <MobileLink
+              href={isAuthenticated ? "/portail" : "/membre/connexion"}
+              onClick={() => setOpen(false)}
+            >
+              {isAuthenticated ? memberArea : nav.member}
             </MobileLink>
             <div className="mt-3 flex items-center justify-between">
               <LocaleSwitcher current={locale} />

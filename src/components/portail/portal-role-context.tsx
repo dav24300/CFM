@@ -5,7 +5,7 @@ import type { PortalRole } from "@/lib/portal-role";
 
 export const PortalRoleContext = createContext<PortalRole>("famille");
 
-/** Rôle "portail" courant (piloté par le sélecteur démo de la coquille). */
+/** Rôle "portail" courant (fourni par le serveur — rôle de session, non modifiable côté client). */
 export function usePortalRole(): PortalRole {
   return useContext(PortalRoleContext);
 }

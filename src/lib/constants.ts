@@ -128,15 +128,4 @@ export const MEMBERSHIP_TYPES = [
   },
 ];
 
-export const NAV_LINKS = [
-  { href: "/", label: "Accueil" },
-  { href: "/a-propos", label: "Qui sommes-nous" },
-  { href: "/axes", label: "Nos axes" },
-  { href: "/plaidoyer", label: "Plaidoyer" },
-  { href: "/actions", label: "Actions" },
-  { href: "/petitions", label: "Pétitions" },
-  { href: "/live", label: "Live" },
-  { href: "/s-engager", label: "S'engager" },
-  { href: "/presse", label: "Presse" },
-  { href: "/contact", label: "Contact" },
-];
+// NAV_LINKS supprimé (mort) — Header et Footer déclarent leurs liens en propre.

@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
         await sendPushToTopic("help", {
           title: "Mise à jour dossier CFM",
           body: `Statut : ${payload.data.status}`,
-          url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/membre/tableau-de-bord`,
+          url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/portail`,
         });
         break;
       }

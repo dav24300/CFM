@@ -29,7 +29,7 @@ export function MemberLoginForm() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
-        router.push("/membre/tableau-de-bord");
+        router.push("/portail");
         router.refresh();
       });
     } catch {
