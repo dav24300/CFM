@@ -173,14 +173,14 @@ export default async function AxisDetailPage({ params }: Props) {
       </div>
 
       {/* Enjeu + impact */}
-      <section className="mx-auto max-w-site px-6 py-[88px]">
+      <section className="mx-auto max-w-site px-6 py-section">
         <ScrollReveal>
           <div className="grid items-start gap-16 lg:grid-cols-[1.4fr_1fr]">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-site-primary">
                 L’enjeu
               </p>
-              <h2 className="mt-3.5 font-serif text-[clamp(26px,3.5vw,38px)] font-medium leading-[1.12] text-site-ink">
+              <h2 className="mt-3.5 font-serif text-h3 font-medium leading-[1.12] text-site-ink">
                 {content.enjeuTitle}
               </h2>
               {content.enjeuBody.map((para, i) => (
@@ -209,14 +209,14 @@ export default async function AxisDetailPage({ params }: Props) {
       </section>
 
       {/* Priorités */}
-      <section className="border-y border-site-hairline bg-site-surface py-[88px]">
+      <section className="border-y border-site-hairline bg-site-surface py-section">
         <div className="mx-auto max-w-site px-6">
           <ScrollReveal>
             <div className="max-w-[620px]">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-site-primary">
                 Nos priorités
               </p>
-              <h2 className="mt-3.5 font-serif text-[clamp(26px,3.5vw,38px)] font-medium leading-[1.1] text-site-ink">
+              <h2 className="mt-3.5 font-serif text-h3 font-medium leading-[1.1] text-site-ink">
                 Ce que nous faisons sur cet axe
               </h2>
             </div>
@@ -239,10 +239,10 @@ export default async function AxisDetailPage({ params }: Props) {
       </section>
 
       {/* Sur le terrain */}
-      <section className="mx-auto max-w-site px-6 py-[88px]">
+      <section className="mx-auto max-w-site px-6 py-section">
         <ScrollReveal>
           <div className="mb-8 flex flex-wrap items-end justify-between gap-5">
-            <h2 className="font-serif text-[clamp(26px,3.5vw,38px)] font-medium leading-[1.1] text-site-ink">
+            <h2 className="font-serif text-h3 font-medium leading-[1.1] text-site-ink">
               Sur le terrain
             </h2>
             <Link
@@ -307,7 +307,7 @@ export default async function AxisDetailPage({ params }: Props) {
       </section>
 
       {/* Galerie (emplacements média) */}
-      <section className="mx-auto max-w-site px-6 pb-[88px]">
+      <section className="mx-auto max-w-site px-6 pb-section">
         <ScrollReveal>
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.16em] text-site-primary">
             Galerie
@@ -330,7 +330,7 @@ export default async function AxisDetailPage({ params }: Props) {
       </section>
 
       {/* Citation fondateur */}
-      <section className="bg-site-deep py-[88px] text-white">
+      <section className="bg-site-deep py-section text-white">
         <div className="mx-auto max-w-[900px] px-6 text-center">
           <Quote className="mx-auto mb-2 h-[38px] w-[38px] text-site-light" aria-hidden />
           <p className="mx-auto max-w-[28ch] font-serif text-[32px] font-normal italic leading-[1.35] text-white">
@@ -343,10 +343,10 @@ export default async function AxisDetailPage({ params }: Props) {
       </section>
 
       {/* CTA triple */}
-      <section className="mx-auto max-w-site px-6 py-[88px]">
+      <section className="mx-auto max-w-site px-6 py-section">
         <ScrollReveal>
           <div className="border border-site-hairline px-10 py-14 text-center">
-            <h2 className="mx-auto max-w-[20ch] font-serif text-[clamp(28px,4vw,42px)] font-medium leading-[1.1] text-site-ink">
+            <h2 className="mx-auto max-w-[20ch] font-serif text-h2 font-medium leading-[1.1] text-site-ink">
               Agissez pour les familles militaires
             </h2>
             <p className="mx-auto mt-4 max-w-[52ch] text-[17px] leading-[1.6] text-site-muted">

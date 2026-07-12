@@ -193,7 +193,7 @@ export function InteriorHero({
 
         {subtitle && (
           <p
-            className="mt-5 max-w-[64ch] text-[clamp(16px,2vw,19px)] leading-[1.55] text-white/85"
+            className="mt-5 max-w-[64ch] text-lead leading-[1.55] text-white/85"
             style={reveal(0.55)}
           >
             {subtitle}
