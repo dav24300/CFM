@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Plus, HandHeart, Activity } from "lucide-react";
+import { ButtonLink } from "@/components/ui/patterns/button-link";
 import { usePortalRole } from "@/components/portail/portal-role-context";
 
 const CTA: Record<string, { href: string; label: string }> = {
@@ -49,13 +50,10 @@ export function PortalHomeHeader({
             Voici les dernières nouvelles de la communauté CFM.
           </p>
         </div>
-        <Link
-          href={cta.href}
-          className="inline-flex items-center gap-2 bg-site-primary px-[18px] py-3 text-sm font-semibold text-white transition hover:bg-site-primary-dark"
-        >
+        <ButtonLink href={cta.href} className="gap-2 px-[18px] py-3 text-sm">
           <Plus className="h-4 w-4" aria-hidden />
           {cta.label}
-        </Link>
+        </ButtonLink>
       </div>
 
       {role === "benevole" && (
