@@ -90,10 +90,15 @@ const config: Config = {
       boxShadow: {
         "site-hover": "0 18px 40px rgba(20, 40, 90, 0.13)",
         "admin-drawer": "-16px 0 48px rgba(12, 14, 18, 0.14)",
+        // Échelle d'élévation admin (vars résolues clair/sombre dans globals.css).
+        "admin-rest": "var(--admin-shadow-rest)",
+        "admin-raised": "var(--admin-shadow-raised)",
+        "admin-overlay": "var(--admin-shadow-overlay)",
       },
       borderRadius: {
         admin: "8px",
-        "admin-ctrl": "7px",
+        "admin-card": "14px",
+        "admin-ctrl": "10px",
       },
       maxWidth: {
         site: "1240px",
@@ -108,6 +113,11 @@ const config: Config = {
         h2: "clamp(28px,4vw,42px)",
         h1: "clamp(30px,4.5vw,48px)",
         display: "clamp(36px,5.5vw,58px)",
+        // Rampe typo admin (Space Grotesk via font-display) — dashboard dense.
+        "admin-display": "clamp(26px,2.4vw,32px)",
+        "admin-h1": "22px",
+        "admin-h2": "17px",
+        "admin-h3": "14px",
       },
       // Rythme vertical des sections (auparavant en px arbitraires).
       spacing: {

@@ -41,13 +41,13 @@
   --admin-muted: 107 112 118;
   --admin-muted-2: 139 144 153;
   --admin-border: 230 232 236;
-  --admin-accent: 18 125 115;
-  --admin-accent-dark: 14 107 98;
+  --admin-accent: 59 91 254;
+  --admin-accent-dark: 43 68 214;
   --admin-deep: 18 50 95;
   --admin-warn-fg: 183 121 31;
   --admin-warn-bg: 254 243 226;
-  --admin-ok-fg: 18 125 115;
-  --admin-ok-bg: 227 243 240;
+  --admin-ok-fg: 22 163 74;
+  --admin-ok-bg: 220 252 231;
   --admin-info-fg: 37 99 170;
   --admin-info-bg: 231 239 250;
   --admin-danger-fg: 192 54 44;
@@ -109,7 +109,7 @@
   --control-muted: rgb(var(--admin-muted));
   --control-border: rgb(var(--admin-border));
   --control-border-strong: rgb(var(--admin-accent));
-  --control-radius: 8px;
+  --control-radius: 10px;
   --control-ring: rgb(var(--admin-accent) / 0.3);
   --control-ring-offset: #ffffff;
   --control-danger: rgb(var(--admin-danger-fg));
@@ -135,6 +135,10 @@
   --control-skeleton: rgb(var(--admin-ink) / 0.08);
   --control-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
   --control-scrim: rgba(9, 11, 15, 0.8);
+  /* — Élévation admin (aéré, ombres douces diffuses) — */
+  --admin-shadow-rest: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --admin-shadow-raised: 0 4px 12px rgba(16, 24, 40, 0.08), 0 2px 4px rgba(16, 24, 40, 0.05);
+  --admin-shadow-overlay: 0 16px 40px rgba(16, 24, 40, 0.16), 0 4px 10px rgba(16, 24, 40, 0.08);
 }
 
 /* Thème sombre — ADMIN uniquement (classe .dark posée sur le wrapper .theme-admin) */
@@ -147,13 +151,13 @@
   --admin-muted: 154 168 186;
   --admin-muted-2: 140 151 165;
   --admin-border: 51 56 66;
-  --admin-accent: 22 152 140;
-  --admin-accent-dark: 18 125 115;
+  --admin-accent: 124 147 255;
+  --admin-accent-dark: 90 116 235;
   --admin-deep: 30 54 92;
   --admin-warn-fg: 224 162 78;
   --admin-warn-bg: 42 33 18;
-  --admin-ok-fg: 60 194 148;
-  --admin-ok-bg: 18 36 30;
+  --admin-ok-fg: 74 222 128;
+  --admin-ok-bg: 20 43 30;
   --admin-info-fg: 130 178 226;
   --admin-info-bg: 20 32 44;
   --admin-danger-fg: 240 119 110;
@@ -161,6 +165,10 @@
   /* control tokens en couleur pleine (non dérivés d'un canal) */
   --control-bg: #1b1e24;
   --control-ring-offset: #14161b;
+  /* Élévation sombre : l'ombre disparaît → hairline clair + ombre profonde */
+  --admin-shadow-rest: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --admin-shadow-raised: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 8px 20px rgba(0, 0, 0, 0.5);
+  --admin-shadow-overlay: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 20px 48px rgba(0, 0, 0, 0.6);
 }
 
 @layer base {
