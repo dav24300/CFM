@@ -179,7 +179,7 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
             <button
               type="button"
               onClick={() => openEditor(null)}
-              className="rounded-admin-ctrl bg-admin-accent px-3 py-1 text-sm font-semibold text-white"
+              className="rounded-admin-ctrl bg-admin-accent px-3 py-1 text-sm font-semibold text-admin-accent-fg"
             >
               + Nouveau live
             </button>

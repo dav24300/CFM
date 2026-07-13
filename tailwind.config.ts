@@ -55,6 +55,7 @@ const config: Config = {
           border: "rgb(var(--admin-border) / <alpha-value>)",
           accent: "rgb(var(--admin-accent) / <alpha-value>)",
           "accent-dark": "rgb(var(--admin-accent-dark) / <alpha-value>)",
+          "accent-fg": "rgb(var(--admin-accent-fg) / <alpha-value>)",
           deep: "rgb(var(--admin-deep) / <alpha-value>)",
           "warn-fg": "rgb(var(--admin-warn-fg) / <alpha-value>)",
           "warn-bg": "rgb(var(--admin-warn-bg) / <alpha-value>)",
