@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   ChevronUp,
@@ -122,6 +122,22 @@ export function DataTable<T extends Record<string, unknown>>({
     [filtered, selected, rowKey]
   );
 
+  // Réconcilie la sélection avec les données : purge les clés disparues (après
+  // suppression groupée p.ex.) pour que compteur et barre suivent la réalité.
+  useEffect(() => {
+    setSelected((prev) => {
+      if (prev.size === 0) return prev;
+      const live = new Set(data.map(rowKey));
+      let changed = false;
+      const next = new Set<string | number>();
+      prev.forEach((k) => {
+        if (live.has(k)) next.add(k);
+        else changed = true;
+      });
+      return changed ? next : prev;
+    });
+  }, [data, rowKey]);
+
   function toggleSort(key: string) {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     else {
@@ -151,7 +167,7 @@ export function DataTable<T extends Record<string, unknown>>({
   const showSearch = searchKeys.length > 0;
   const showChips = Boolean(filterChips && filterChips.length);
   const showHeaderBand = Boolean(title || showSearch || showChips || toolbar);
-  const bulkActive = selectable && bulkActions && selected.size > 0;
+  const bulkActive = selectable && bulkActions && selectedRows.length > 0;
 
   return (
     <div className="space-y-3">
@@ -160,8 +176,8 @@ export function DataTable<T extends Record<string, unknown>>({
         {bulkActive ? (
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-admin-border bg-admin-accent/[0.07] px-4 py-2.5 animate-admin-pop-in motion-reduce:animate-none">
             <div className="flex items-center gap-2 text-[13px] font-medium text-admin-ink">
-              <span className="font-display font-bold text-admin-accent">{selected.size}</span>
-              sélectionné{selected.size > 1 ? "s" : ""}
+              <span className="font-display font-bold text-admin-accent">{selectedRows.length}</span>
+              sélectionné{selectedRows.length > 1 ? "s" : ""}
               <button
                 type="button"
                 onClick={() => setSelected(new Set())}
@@ -249,36 +265,49 @@ export function DataTable<T extends Record<string, unknown>>({
                     />
                   </th>
                 )}
-                {columns.map((col) => (
-                  <th
-                    key={col.key}
-                    className={cn(
-                      "sticky top-0 z-10 border-b border-admin-border bg-admin-bg px-4 py-3 font-semibold",
-                      col.className
-                    )}
-                  >
-                    {col.sortable ? (
-                      <button
-                        type="button"
-                        onClick={() => toggleSort(col.key)}
-                        className="group inline-flex items-center gap-1 transition-colors hover:text-admin-ink"
-                      >
-                        {col.header}
-                        {sortKey === col.key ? (
-                          sortDir === "asc" ? (
-                            <ChevronUp className="h-3.5 w-3.5 text-admin-accent" />
+                {columns.map((col) => {
+                  const sorted = sortKey === col.key;
+                  return (
+                    <th
+                      key={col.key}
+                      aria-sort={
+                        col.sortable
+                          ? sorted
+                            ? sortDir === "asc"
+                              ? "ascending"
+                              : "descending"
+                            : "none"
+                          : undefined
+                      }
+                      className={cn(
+                        "sticky top-0 z-10 border-b border-admin-border bg-admin-bg px-4 py-3 font-semibold",
+                        col.className
+                      )}
+                    >
+                      {col.sortable ? (
+                        <button
+                          type="button"
+                          onClick={() => toggleSort(col.key)}
+                          aria-label={`Trier par ${col.header}${sorted ? (sortDir === "asc" ? " (croissant)" : " (décroissant)") : ""}`}
+                          className="group inline-flex items-center gap-1 transition-colors hover:text-admin-ink"
+                        >
+                          {col.header}
+                          {sorted ? (
+                            sortDir === "asc" ? (
+                              <ChevronUp className="h-3.5 w-3.5 text-admin-accent" aria-hidden />
+                            ) : (
+                              <ChevronDown className="h-3.5 w-3.5 text-admin-accent" aria-hidden />
+                            )
                           ) : (
-                            <ChevronDown className="h-3.5 w-3.5 text-admin-accent" />
-                          )
-                        ) : (
-                          <ChevronsUpDown className="h-3.5 w-3.5 opacity-40 transition-opacity group-hover:opacity-70" />
-                        )}
-                      </button>
-                    ) : (
-                      col.header
-                    )}
-                  </th>
-                ))}
+                            <ChevronsUpDown className="h-3.5 w-3.5 opacity-40 transition-opacity group-hover:opacity-70" aria-hidden />
+                          )}
+                        </button>
+                      ) : (
+                        col.header
+                      )}
+                    </th>
+                  );
+                })}
                 {hasActionsCol && (
                   <th className="sticky top-0 z-10 border-b border-admin-border bg-admin-bg px-4 py-3 text-right font-semibold">
                     Actions

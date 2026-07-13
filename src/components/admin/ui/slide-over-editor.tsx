@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/primitives/textarea";
 import { NativeSelect } from "@/components/ui/primitives/native-select";
 import { Label } from "@/components/ui/primitives/label";
 import { MediaPicker } from "@/components/admin/ui/media-picker";
+import { useFocusTrap } from "@/components/admin/ui/use-focus-trap";
 import { PROVINCES_RDC } from "@/lib/constants";
 import { cn } from "@/lib/utils/cn";
 
@@ -67,13 +68,16 @@ export function SlideOverEditor({
   preview,
 }: Props) {
   const reduced = useReducedMotion();
+  const panelRef = useFocusTrap<HTMLDivElement>(open);
   const [values, setValues] = useState<Values>(initialValues ?? {});
   const [saving, setSaving] = useState(false);
   const [pickingField, setPickingField] = useState<string | null>(null);
 
-  // Réinitialise le formulaire à chaque ouverture / changement d'entité.
+  // Réinitialise le formulaire à chaque ouverture / changement d'entité,
+  // et nettoie l'état du sélecteur de média à la fermeture (évite l'auto-réouverture).
   useEffect(() => {
     if (open) setValues(initialValues ?? {});
+    else setPickingField(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, JSON.stringify(initialValues ?? {})]);
 
@@ -126,10 +130,12 @@ export function SlideOverEditor({
         {open && (
           <motion.div
             key="so-panel"
+            ref={panelRef}
             role="dialog"
             aria-modal="true"
             aria-label={title}
-            className="fixed inset-y-0 right-0 z-[90] flex h-full w-[min(640px,96vw)] flex-col bg-admin-bg shadow-admin-drawer"
+            tabIndex={-1}
+            className="fixed inset-y-0 right-0 z-[90] flex h-full w-[min(640px,96vw)] flex-col bg-admin-bg shadow-admin-drawer focus:outline-none"
             transition={{ type: "tween", duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
             {...panelMotion}
           >

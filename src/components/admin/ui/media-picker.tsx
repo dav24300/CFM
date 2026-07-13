@@ -43,7 +43,7 @@ export function MediaPicker({ open, onClose, onSelect, title = "Choisir un médi
     : items;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
       <div className="flex max-h-[85vh] w-full max-w-3xl flex-col rounded-xl bg-admin-surface shadow-xl">
         <div className="flex items-center justify-between border-b p-4">
           <h3 className="font-semibold text-admin-ink">{title}</h3>

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/primitives/button";
+import { useFocusTrap } from "@/components/admin/ui/use-focus-trap";
 
 type Props = {
   open: boolean;
@@ -25,6 +26,7 @@ export function ConfirmDialog({
   onCancel,
 }: Props) {
   const reduced = useReducedMotion();
+  const cardRef = useFocusTrap<HTMLDivElement>(open);
 
   // Fermeture au clavier (Échap) → annulation.
   useEffect(() => {
@@ -49,11 +51,13 @@ export function ConfirmDialog({
           transition={{ duration: 0.15 }}
         >
           <motion.div
+            ref={cardRef}
             role="alertdialog"
             aria-modal="true"
             aria-label={title}
+            tabIndex={-1}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md rounded-admin-card border border-admin-border bg-admin-surface p-6 shadow-admin-overlay"
+            className="w-full max-w-md rounded-admin-card border border-admin-border bg-admin-surface p-6 shadow-admin-overlay focus:outline-none"
             initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 8 }}
             animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: 6 }}
