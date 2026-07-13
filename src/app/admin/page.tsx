@@ -19,16 +19,19 @@ export default async function AdminLoginPage({ searchParams }: Props) {
   const showError = error === "1";
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-xl bg-admin-surface p-8 shadow-lg">
-        <div className="flex items-center justify-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-admin-deep text-admin-accent">
-            <Shield className="h-6 w-6" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
+      {/* Glow d'accent discret en fond */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_45%_at_50%_0%,rgb(var(--admin-accent)/0.12),transparent_70%)]"
+      />
+      <div className="relative w-full max-w-md rounded-admin-card border border-admin-border bg-admin-surface p-8 shadow-admin-overlay">
+        <div className="flex flex-col items-center text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-admin-card bg-admin-accent text-admin-accent-fg shadow-admin-rest">
+            <Shield className="h-7 w-7" />
           </div>
-          <div>
-            <h1 className="font-display text-xl font-bold text-admin-ink">{SITE.sigle} Admin</h1>
-            <p className="text-sm text-admin-muted">Tableau de bord bénévole</p>
-          </div>
+          <h1 className="mt-4 font-display text-admin-h1 font-bold text-admin-ink">{SITE.sigle} Admin</h1>
+          <p className="mt-1 text-sm text-admin-muted">Console de gestion — accès réservé</p>
         </div>
 
         {/* Formulaire HTML natif : fonctionne même si les chunks Next.js (_next/static) ne chargent pas */}
@@ -51,6 +54,10 @@ export default async function AdminLoginPage({ searchParams }: Props) {
             Se connecter
           </Button>
         </form>
+
+        <p className="mt-6 text-center text-[11.5px] text-admin-muted-2">
+          Espace sécurisé · {SITE.name}
+        </p>
       </div>
     </div>
   );

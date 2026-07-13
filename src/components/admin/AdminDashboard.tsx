@@ -7,6 +7,7 @@ import { Spinner } from "@/components/ui/primitives/spinner";
 import { AdminToastProvider } from "@/components/admin/context/AdminToastContext";
 import { AdminSidebar } from "@/components/admin/layout/AdminSidebar";
 import { AdminHeader } from "@/components/admin/layout/AdminHeader";
+import { PanelTransition } from "@/components/admin/ui/PanelTransition";
 import { AdminOverview } from "@/components/admin/overview/AdminOverview";
 import { loadAdminBundle } from "@/components/admin/hooks/useAdminApi";
 import { ADMIN_SECTIONS } from "@/components/admin/types";
@@ -151,6 +152,7 @@ function DashboardShell({ access }: Props) {
         />
         <div className="flex min-w-0 flex-1 flex-col">
           <AdminHeader
+            section={section}
             access={access}
             stats={stats}
             onRefresh={load}
@@ -160,8 +162,8 @@ function DashboardShell({ access }: Props) {
           />
           <main id="main-content" className="flex-1 overflow-auto p-6">
             {loadError ? (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-                <p className="text-sm text-red-800">
+              <div className="mx-auto max-w-md rounded-admin-card border border-admin-danger-fg/25 bg-admin-danger-bg p-6 text-center shadow-admin-rest">
+                <p className="text-sm text-admin-danger-fg">
                   Impossible de charger le tableau de bord. Vérifiez la connexion au serveur puis réessayez.
                 </p>
                 <button
@@ -177,13 +179,15 @@ function DashboardShell({ access }: Props) {
                 <Spinner className="h-8 w-8" />
               </div>
             ) : data && stats ? (
-              <DashboardBody
-                section={section}
-                stats={stats}
-                data={data}
-                liveEvents={liveEvents}
-                onReload={load}
-              />
+              <PanelTransition activeKey={section}>
+                <DashboardBody
+                  section={section}
+                  stats={stats}
+                  data={data}
+                  liveEvents={liveEvents}
+                  onReload={load}
+                />
+              </PanelTransition>
             ) : null}
           </main>
         </div>

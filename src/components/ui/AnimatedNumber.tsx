@@ -4,7 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 
 /** Compteur animé (count-up) déclenché à l'entrée dans le viewport. */
-export function AnimatedNumber({ value, className }: { value: number; className?: string }) {
+export function AnimatedNumber({
+  value,
+  className,
+  format,
+}: {
+  value: number;
+  className?: string;
+  format?: (n: number) => string;
+}) {
   const reduced = useReducedMotion();
   const ref = useRef<HTMLSpanElement>(null);
   const [display, setDisplay] = useState(reduced ? value : 0);
@@ -43,7 +51,7 @@ export function AnimatedNumber({ value, className }: { value: number; className?
 
   return (
     <span ref={ref} className={className}>
-      {display}
+      {format ? format(display) : display}
     </span>
   );
 }
