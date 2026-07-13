@@ -46,12 +46,12 @@ export function LiveEventCard({
         </div>
         <div className="flex flex-wrap gap-2">
           {ev.status === "scheduled" && (
-            <button type="button" onClick={() => onSetStatus(ev.id, "live")} className="rounded bg-red-600 px-2 py-1 text-xs text-white">
+            <button type="button" onClick={() => onSetStatus(ev.id, "live")} className="rounded bg-admin-danger-fg px-2 py-1 text-xs text-white">
               Démarrer live
             </button>
           )}
           {ev.status === "live" && (
-            <button type="button" onClick={() => onSetStatus(ev.id, "ended")} className="rounded bg-gray-600 px-2 py-1 text-xs text-white">
+            <button type="button" onClick={() => onSetStatus(ev.id, "ended")} className="rounded bg-admin-deep px-2 py-1 text-xs text-white">
               Terminer
             </button>
           )}

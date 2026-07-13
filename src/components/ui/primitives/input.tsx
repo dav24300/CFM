@@ -10,7 +10,7 @@ const inputVariants = cva(
         default: "border-[var(--control-border)] focus:border-[var(--control-border-strong)]",
         error:
           "border-[var(--control-danger)] focus:border-[var(--control-danger)] focus:ring-[var(--control-danger-ring)]",
-        success: "border-site-success focus:border-site-success",
+        success: "border-[var(--control-success)] focus:border-[var(--control-success)]",
         footer:
           "border-0 bg-white/10 text-white placeholder:text-gray-400 focus:ring-[var(--control-ring)]",
       },

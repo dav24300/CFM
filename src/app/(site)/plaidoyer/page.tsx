@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ButtonLink } from "@/components/ui/patterns/button-link";
 import { FileText, Megaphone } from "lucide-react";
 import { AnchorButton } from "@/components/ui/patterns/button-link";
 import {
@@ -139,13 +140,13 @@ export default async function PlaidoyerPage() {
           <div className="bg-site-deep px-10 py-12 text-center text-white">
             <h2 className="font-serif text-2xl font-medium text-site-light">{p.ctaTitle}</h2>
             <p className="mt-2 text-white/70">{p.ctaBody}</p>
-            <Link
+            <ButtonLink
               href="/contact"
-              className="mt-6 inline-block bg-site-primary px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-site-primary-dark"
+              className="mt-6 px-7 py-3.5 text-sm"
               data-cta="cta_aide"
             >
               {p.contactBtn}
-            </Link>
+            </ButtonLink>
           </div>
         </ScrollReveal>
       </div>

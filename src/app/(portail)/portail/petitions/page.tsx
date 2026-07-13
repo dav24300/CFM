@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getActivePetitionsCached } from "@/infrastructure/cache/petitions-cache";
+import { ButtonLink } from "@/components/ui/patterns/button-link";
 import { PortalPage, PortalEmpty } from "@/components/portail/PortalPage";
 
 export const metadata: Metadata = { title: "Portail — Pétitions" };
@@ -31,13 +31,13 @@ export default async function PortailPetitionsPage() {
                     <div className="h-2 bg-site-primary" style={{ width: `${progress}%` }} />
                   </div>
                 </div>
-                <Link
+                <ButtonLink
                   href={`/petitions/${p.slug}`}
-                  className="mt-5 self-start bg-site-primary px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-site-primary-dark"
+                  className="mt-5 self-start px-4 py-2.5 text-[13px]"
                   data-cta="cta_petition"
                 >
                   Signer la pétition
-                </Link>
+                </ButtonLink>
               </article>
             );
           })}

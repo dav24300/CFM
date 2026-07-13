@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils/cn";
 const alertVariants = cva("rounded-lg border px-4 py-3 text-sm", {
   variants: {
     variant: {
-      info: "border-site-primary/20 bg-site-surface text-site-ink",
-      success: "border-green-200 bg-green-50 text-green-800",
-      warning: "border-amber-200 bg-amber-50 text-amber-900",
-      error: "border-red-200 bg-red-50 text-red-800",
+      info: "border-[var(--control-info-border)] bg-[var(--control-info-bg)] text-[var(--control-info-fg)]",
+      success: "border-[var(--control-success-border)] bg-[var(--control-success-bg)] text-[var(--control-success-fg)]",
+      warning: "border-[var(--control-warn-border)] bg-[var(--control-warn-bg)] text-[var(--control-warn-fg)]",
+      error: "border-[var(--control-error-border)] bg-[var(--control-error-bg)] text-[var(--control-error-fg)]",
     },
   },
   defaultVariants: {

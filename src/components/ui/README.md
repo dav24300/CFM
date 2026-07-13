@@ -14,7 +14,7 @@ primitives/   → Button, Input, Textarea, Label, Badge, Alert, Spinner, Skeleto
 ui/*.tsx      → Composants média & layout (HeroMedia, MediaCard, …)
 ```
 
-**Règle** : importer les primitives par leur chemin (`@/components/ui/primitives/button`) ou via le barrel `@/components/ui`. Ne pas importer Radix directement hors `primitives/`.
+**Règle** : importer les primitives et patterns par leur chemin (`@/components/ui/primitives/button`, `@/components/ui/patterns/form-field`). Le barrel `@/components/ui` a été **supprimé** — l'import est verrouillé par la règle ESLint `no-restricted-imports`. Ne pas importer Radix directement hors `primitives/`.
 
 ## Primitives
 
@@ -32,7 +32,11 @@ ui/*.tsx      → Composants média & layout (HeroMedia, MediaCard, …)
 ## Exemples
 
 ```tsx
-import { Button, FormField, Input, Alert, EmptyState } from "@/components/ui";
+import { Button } from "@/components/ui/primitives/button";
+import { Input } from "@/components/ui/primitives/input";
+import { Alert } from "@/components/ui/primitives/alert";
+import { FormField } from "@/components/ui/patterns/form-field";
+import { EmptyState } from "@/components/ui/patterns/empty-state";
 import { useAsyncAction } from "@/lib/hooks/use-async-action";
 
 function MyForm() {

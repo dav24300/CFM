@@ -99,7 +99,7 @@ export default async function HomePage() {
       />
 
       {/* Section 3 — Mission */}
-      <section className="mx-auto max-w-site px-6 py-[104px]">
+      <section className="mx-auto max-w-site px-6 py-section-lg">
         <div className="grid items-center gap-16 lg:grid-cols-2">
           <ScrollReveal direction="left">
             <div className="media-frame relative aspect-[4/3]">
@@ -117,7 +117,7 @@ export default async function HomePage() {
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-site-primary">
                 {locale === "en" ? "Our mission" : "Notre mission"}
               </p>
-              <h2 className="mt-3.5 font-serif text-[clamp(28px,4vw,42px)] font-medium leading-[1.08] text-site-ink">
+              <h2 className="mt-3.5 font-serif text-h2 font-medium leading-[1.08] text-site-ink">
                 Derrière chaque uniforme, un visage de famille
               </h2>
               <p className="mt-5 max-w-[52ch] text-[17px] leading-[1.7] text-site-muted">
@@ -137,14 +137,14 @@ export default async function HomePage() {
       </section>
 
       {/* Section 4 — Axes */}
-      <section className="border-y border-site-hairline bg-site-surface py-[104px]">
+      <section className="border-y border-site-hairline bg-site-surface py-section-lg">
         <div className="mx-auto max-w-site px-6">
           <ScrollReveal>
             <div className="max-w-[640px]">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-site-primary">
                 {locale === "en" ? "Our areas of action" : "Nos axes d'action"}
               </p>
-              <h2 className="mt-3.5 font-serif text-[clamp(28px,4vw,42px)] font-medium leading-[1.1] text-site-ink">
+              <h2 className="mt-3.5 font-serif text-h2 font-medium leading-[1.1] text-site-ink">
                 Cinq domaines, un même combat
               </h2>
               <p className="mt-4 text-[17px] leading-[1.6] text-site-muted">
@@ -182,7 +182,7 @@ export default async function HomePage() {
       </section>
 
       {/* Section 5 — Live */}
-      <section className="mx-auto max-w-site px-6 py-[104px]">
+      <section className="mx-auto max-w-site px-6 py-section-lg">
         <ScrollReveal>
           <div className="grid items-center gap-14 lg:grid-cols-2">
             <Link
@@ -211,7 +211,7 @@ export default async function HomePage() {
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-site-primary">
                 {locale === "en" ? "Live & events" : "Live & événements"}
               </p>
-              <h2 className="mt-3.5 font-serif text-[clamp(26px,4vw,40px)] font-medium leading-[1.1] text-site-ink">
+              <h2 className="mt-3.5 font-serif text-h2 font-medium leading-[1.1] text-site-ink">
                 {activeLive?.title ?? "FIKIN 2025 — Rassemblement des familles militaires"}
               </h2>
               <p className="mt-[18px] max-w-[50ch] text-[17px] leading-[1.7] text-site-muted">
@@ -232,14 +232,14 @@ export default async function HomePage() {
       </section>
 
       {/* Section 6 — Témoignages */}
-      <section className="bg-site-deep py-[104px] text-white">
+      <section className="bg-site-deep py-section-lg text-white">
         <div className="mx-auto max-w-site px-6">
           <ScrollReveal>
             <div className="max-w-[640px]">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-site-light">
                 {locale === "en" ? "Testimonials" : "Témoignages"}
               </p>
-              <h2 className="mt-3.5 font-serif text-[clamp(28px,4vw,42px)] font-medium leading-[1.1] text-white">
+              <h2 className="mt-3.5 font-serif text-h2 font-medium leading-[1.1] text-white">
                 {locale === "en" ? "Voices that can no longer be ignored" : "Des voix qu'on ne peut plus ignorer"}
               </h2>
             </div>
@@ -293,12 +293,12 @@ export default async function HomePage() {
       </section>
 
       {/* Section 7 — CTA + Newsletter */}
-      <section className="py-[104px]">
+      <section className="py-section-lg">
         <div className="mx-auto max-w-site px-6">
           <ScrollReveal>
             <div className="grid items-center gap-14 lg:grid-cols-2">
               <div>
-                <h2 className="font-serif text-[clamp(30px,4.5vw,48px)] font-medium leading-[1.06] text-site-ink">
+                <h2 className="font-serif text-h1 font-medium leading-[1.06] text-site-ink">
                   {locale === "en" ? "Join the movement" : "Rejoignez le mouvement"}
                 </h2>
                 <p className="mt-[18px] max-w-[48ch] text-[17px] leading-[1.65] text-site-muted">

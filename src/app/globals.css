@@ -72,11 +72,31 @@
   --control-border: var(--site-hairline);
   --control-border-strong: var(--site-primary);
   --control-radius: 0px;
-  --control-ring: rgba(20, 65, 138, 0.3);
+  --control-ring: rgba(20, 65, 138, 0.55);
   --control-ring-offset: #ffffff;
   --control-danger: var(--site-danger);
   --control-danger-ring: rgba(192, 54, 44, 0.3);
   --control-success: var(--site-success);
+  /* — Feedback (Alert/Badge/Skeleton) : valeurs site = rendu actuel → byte-identique — */
+  --control-accent-soft: var(--site-pale);
+  --control-chip-solid: var(--site-deep);
+  --control-chip-solid-fg: #ffffff;
+  --control-live: var(--site-live);
+  --control-success-fg: #166534;
+  --control-success-bg: #f0fdf4;
+  --control-success-border: #bbf7d0;
+  --control-warn-fg: #78350f;
+  --control-warn-bg: #fffbeb;
+  --control-warn-border: #fde68a;
+  --control-error-fg: #991b1b;
+  --control-error-bg: #fef2f2;
+  --control-error-border: #fecaca;
+  --control-info-fg: var(--site-ink);
+  --control-info-bg: var(--site-surface);
+  --control-info-border: rgba(20, 65, 138, 0.2);
+  --control-skeleton: rgba(11, 26, 56, 0.1);
+  --control-shadow: 0 18px 40px rgba(20, 40, 90, 0.13);
+  --control-scrim: rgba(11, 26, 56, 0.95);
 }
 
 .theme-admin {
@@ -90,11 +110,31 @@
   --control-border: rgb(var(--admin-border));
   --control-border-strong: rgb(var(--admin-accent));
   --control-radius: 8px;
-  --control-ring: rgba(18, 125, 115, 0.3);
+  --control-ring: rgb(var(--admin-accent) / 0.3);
   --control-ring-offset: #ffffff;
   --control-danger: rgb(var(--admin-danger-fg));
-  --control-danger-ring: rgba(192, 54, 44, 0.3);
+  --control-danger-ring: rgb(var(--admin-danger-fg) / 0.3);
   --control-success: rgb(var(--admin-ok-fg));
+  /* — Feedback : dérivés des canaux admin → suivent automatiquement le sombre — */
+  --control-accent-soft: rgb(var(--admin-accent) / 0.12);
+  --control-chip-solid: rgb(var(--admin-sidebar));
+  --control-chip-solid-fg: #ffffff;
+  --control-live: var(--site-live);
+  --control-success-fg: rgb(var(--admin-ok-fg));
+  --control-success-bg: rgb(var(--admin-ok-bg));
+  --control-success-border: rgb(var(--admin-ok-fg) / 0.35);
+  --control-warn-fg: rgb(var(--admin-warn-fg));
+  --control-warn-bg: rgb(var(--admin-warn-bg));
+  --control-warn-border: rgb(var(--admin-warn-fg) / 0.35);
+  --control-error-fg: rgb(var(--admin-danger-fg));
+  --control-error-bg: rgb(var(--admin-danger-bg));
+  --control-error-border: rgb(var(--admin-danger-fg) / 0.35);
+  --control-info-fg: rgb(var(--admin-info-fg));
+  --control-info-bg: rgb(var(--admin-info-bg));
+  --control-info-border: rgb(var(--admin-info-fg) / 0.35);
+  --control-skeleton: rgb(var(--admin-ink) / 0.08);
+  --control-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+  --control-scrim: rgba(9, 11, 15, 0.8);
 }
 
 /* Thème sombre — ADMIN uniquement (classe .dark posée sur le wrapper .theme-admin) */
@@ -105,7 +145,7 @@
   --admin-sidebar-active: 30 33 40;
   --admin-ink: 231 233 238;
   --admin-muted: 154 168 186;
-  --admin-muted-2: 122 133 148;
+  --admin-muted-2: 140 151 165;
   --admin-border: 51 56 66;
   --admin-accent: 22 152 140;
   --admin-accent-dark: 18 125 115;

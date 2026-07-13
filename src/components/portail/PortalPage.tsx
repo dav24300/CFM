@@ -18,7 +18,7 @@ export function PortalPage({
       <div className="mx-auto max-w-portal">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="font-serif text-[clamp(22px,2.6vw,30px)] font-medium leading-[1.1] text-site-ink">
+            <h1 className="font-serif text-h4 font-medium leading-[1.1] text-site-ink">
               {title}
             </h1>
             {subtitle && <p className="mt-1.5 text-sm text-site-muted-2">{subtitle}</p>}
@@ -35,9 +35,9 @@ const PILL: Record<string, string> = {
   new: "bg-site-pale text-site-primary",
   pending: "bg-site-warn-bg text-site-warn-fg",
   in_progress: "bg-site-info-bg text-site-info-fg",
-  treated: "bg-site-ok-bg text-site-success",
-  completed: "bg-site-ok-bg text-site-success",
-  approved: "bg-site-ok-bg text-site-success",
+  treated: "bg-site-ok-bg text-[var(--control-success-fg)]",
+  completed: "bg-site-ok-bg text-[var(--control-success-fg)]",
+  approved: "bg-site-ok-bg text-[var(--control-success-fg)]",
   failed: "bg-site-danger-bg text-site-danger",
   rejected: "bg-site-danger-bg text-site-danger",
 };

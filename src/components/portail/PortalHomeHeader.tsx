@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Plus, HandHeart, Activity } from "lucide-react";
+import { ButtonLink } from "@/components/ui/patterns/button-link";
 import { usePortalRole } from "@/components/portail/portal-role-context";
 
 const CTA: Record<string, { href: string; label: string }> = {
@@ -42,20 +43,17 @@ export function PortalHomeHeader({
     <>
       <div className="mb-[22px] flex flex-wrap items-center justify-between gap-3.5">
         <div>
-          <h1 className="font-serif text-[clamp(24px,3vw,32px)] font-medium leading-[1.1] text-site-ink">
+          <h1 className="font-serif text-h4 font-medium leading-[1.1] text-site-ink">
             Bonjour, {firstName} 👋
           </h1>
           <p className="mt-1.5 text-sm text-site-muted-2">
             Voici les dernières nouvelles de la communauté CFM.
           </p>
         </div>
-        <Link
-          href={cta.href}
-          className="inline-flex items-center gap-2 bg-site-primary px-[18px] py-3 text-sm font-semibold text-white transition hover:bg-site-primary-dark"
-        >
+        <ButtonLink href={cta.href} className="gap-2 px-[18px] py-3 text-sm">
           <Plus className="h-4 w-4" aria-hidden />
           {cta.label}
-        </Link>
+        </ButtonLink>
       </div>
 
       {role === "benevole" && (

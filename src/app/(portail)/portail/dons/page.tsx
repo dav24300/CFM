@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ButtonLink } from "@/components/ui/patterns/button-link";
 import { getMemberDashboard } from "@/application/services/member.service";
 import { PortalPage, PortalStatusPill, PortalEmpty } from "@/components/portail/PortalPage";
 
@@ -25,13 +25,13 @@ export default async function PortailDonsPage() {
       title="Dons & reçus"
       subtitle="Historique de vos contributions à CFM."
       action={
-        <Link
+        <ButtonLink
           href="/s-engager#don"
-          className="bg-site-primary px-[18px] py-2.5 text-sm font-semibold text-white transition hover:bg-site-primary-dark"
+          className="px-[18px] py-2.5 text-sm"
           data-cta="cta_don"
         >
           Faire un don
-        </Link>
+        </ButtonLink>
       }
     >
       {data.donations.length === 0 ? (
