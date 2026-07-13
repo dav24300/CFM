@@ -183,7 +183,7 @@ export function HomeHero({
           >
             {kicker}
           </p>
-          <h1 className="font-serif text-[clamp(40px,6vw,66px)] font-medium leading-[1.03] tracking-[-0.015em] text-white">
+          <h1 className="font-serif text-display font-medium leading-[1.03] tracking-[-0.015em] text-white">
             {LINE_1.map((w, i) => (
               <span key={w} className="inline-block" style={revealStyle(DELAYS_1[i])}>
                 {w}
@@ -203,7 +203,7 @@ export function HomeHero({
             ))}
           </h1>
           <p
-            className="mt-[22px] max-w-[56ch] text-[clamp(16px,2vw,19px)] leading-[1.55] text-white/90"
+            className="mt-[22px] max-w-[56ch] text-lead leading-[1.55] text-white/90"
             style={revealStyle(0.8)}
           >
             {subtitle}

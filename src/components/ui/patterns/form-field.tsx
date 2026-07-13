@@ -46,12 +46,12 @@ export function FormField({
       </Label>
       {child}
       {hint && (
-        <p id={hintId} className="text-xs text-site-muted">
+        <p id={hintId} className="text-xs text-[var(--control-muted)]">
           {hint}
         </p>
       )}
       {error && (
-        <p id={errorId} className="text-sm text-red-600" role="alert">
+        <p id={errorId} className="text-sm text-[var(--control-danger)]" role="alert">
           {error}
         </p>
       )}

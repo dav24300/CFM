@@ -9,6 +9,7 @@
     "start": "node scripts/start-standalone.mjs",
     "import-media": "node scripts/import-cfm-images.mjs",
     "lint": "next lint",
+    "lint:controls": "node scripts/lint-raw-controls.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",

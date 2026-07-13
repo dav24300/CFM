@@ -1,3 +1,16 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "@/components/ui",
+            "message": "Barrel supprimé : importez les primitives par leur chemin (@/components/ui/primitives/* ou @/components/ui/patterns/*)."
+          }
+        ]
+      }
+    ]
+  }
 }

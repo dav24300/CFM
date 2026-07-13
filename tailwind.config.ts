@@ -99,6 +99,21 @@ const config: Config = {
         site: "1240px",
         portal: "1140px",
       },
+      // Échelle typographique — clamp fluides récurrents. Valeur = taille seule
+      // (le line-height reste piloté par les classes leading-* → byte-identique).
+      fontSize: {
+        lead: "clamp(16px,2vw,19px)",
+        h4: "clamp(22px,2.8vw,32px)",
+        h3: "clamp(26px,3.5vw,38px)",
+        h2: "clamp(28px,4vw,42px)",
+        h1: "clamp(30px,4.5vw,48px)",
+        display: "clamp(36px,5.5vw,58px)",
+      },
+      // Rythme vertical des sections (auparavant en px arbitraires).
+      spacing: {
+        section: "88px",
+        "section-lg": "104px",
+      },
     },
   },
   plugins: [],

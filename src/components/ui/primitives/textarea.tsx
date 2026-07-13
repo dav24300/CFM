@@ -10,7 +10,7 @@ const textareaVariants = cva(
         default: "border-[var(--control-border)] focus:border-[var(--control-border-strong)]",
         error:
           "border-[var(--control-danger)] focus:border-[var(--control-danger)] focus:ring-[var(--control-danger-ring)]",
-        success: "border-site-success focus:border-site-success",
+        success: "border-[var(--control-success)] focus:border-[var(--control-success)]",
       },
     },
     defaultVariants: {
@@ -43,7 +43,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           {...props}
         />
         {showCount && maxLength && (
-          <p id={countId} className="text-right text-xs text-site-muted" aria-live="polite">
+          <p id={countId} className="text-right text-xs text-[var(--control-muted)]" aria-live="polite">
             {length}/{maxLength}
           </p>
         )}

@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils/cn";
 
-const skeletonVariants = cva("animate-pulse bg-site-deep/10", {
+const skeletonVariants = cva("animate-pulse bg-[var(--control-skeleton)]", {
   variants: {
     variant: {
       text: "h-4 w-full rounded",

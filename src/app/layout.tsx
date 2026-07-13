@@ -96,6 +96,12 @@ export default async function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className="theme-site font-sans bg-white text-site-ink antialiased">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:bg-[var(--control-accent)] focus:px-4 focus:py-2 focus:font-semibold focus:text-[var(--control-accent-fg)] focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          Aller au contenu principal
+        </a>
         <I18nProvider locale={locale} messages={t}>
           <PWARegister />
           {children}
