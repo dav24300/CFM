@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/primitives/button";
+import { Input } from "@/components/ui/primitives/input";
+import { Textarea } from "@/components/ui/primitives/textarea";
+import { NativeSelect } from "@/components/ui/primitives/native-select";
+import { Label } from "@/components/ui/primitives/label";
 import { MediaPicker } from "@/components/admin/ui/media-picker";
 import { PROVINCES_RDC } from "@/lib/constants";
 import { cn } from "@/lib/utils/cn";
@@ -47,7 +52,8 @@ type Props = {
 
 /**
  * Éditeur en tiroir droit (slide-over) piloté par une config de champs.
- * Réutilise MediaPicker (image), AdminToast côté appelant. cf. Admin.dc.html.
+ * Animé (framer-motion, respecte useReducedMotion). Champs routés sur les
+ * primitives Input/Textarea/NativeSelect/Label. Réutilise MediaPicker (image).
  */
 export function SlideOverEditor({
   open,
@@ -60,6 +66,7 @@ export function SlideOverEditor({
   submitLabel = "Enregistrer",
   preview,
 }: Props) {
+  const reduced = useReducedMotion();
   const [values, setValues] = useState<Values>(initialValues ?? {});
   const [saving, setSaving] = useState(false);
   const [pickingField, setPickingField] = useState<string | null>(null);
@@ -80,8 +87,6 @@ export function SlideOverEditor({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  if (!open) return null;
-
   function set(name: string, value: unknown) {
     setValues((v) => ({ ...v, [name]: value }));
   }
@@ -99,74 +104,96 @@ export function SlideOverEditor({
     }
   }
 
+  const panelMotion = reduced
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
+    : { initial: { x: "100%" }, animate: { x: 0 }, exit: { x: "100%" } };
+
   return (
-    <div className="fixed inset-0 z-[90] flex justify-end">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        className="relative flex h-full w-[min(640px,96vw)] flex-col bg-admin-bg shadow-admin-drawer"
-      >
-        {/* En-tête */}
-        <div className="flex items-center justify-between border-b border-admin-border bg-admin-surface px-6 py-4">
-          <h2 className="font-display text-lg font-semibold text-admin-ink">{title}</h2>
-          <button
-            type="button"
+    <>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="so-backdrop"
+            className="fixed inset-0 z-[90] bg-black/40 backdrop-blur-sm"
             onClick={onClose}
-            className="rounded-admin-ctrl p-1.5 text-admin-muted hover:bg-admin-bg hover:text-admin-ink"
-            aria-label="Fermer"
+            aria-hidden
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          />
+        )}
+        {open && (
+          <motion.div
+            key="so-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
+            className="fixed inset-y-0 right-0 z-[90] flex h-full w-[min(640px,96vw)] flex-col bg-admin-bg shadow-admin-drawer"
+            transition={{ type: "tween", duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+            {...panelMotion}
           >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        {/* Corps */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {preview && (
-            <div className="mb-6 rounded-admin border border-admin-border bg-admin-surface p-4">
-              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-admin-muted">
-                Aperçu
-              </div>
-              {preview(values)}
+            {/* En-tête */}
+            <div className="flex items-center justify-between border-b border-admin-border bg-admin-surface px-6 py-4">
+              <h2 className="font-display text-lg font-semibold text-admin-ink">{title}</h2>
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-admin-ctrl p-1.5 text-admin-muted transition-colors hover:bg-admin-bg hover:text-admin-ink"
+                aria-label="Fermer"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
-          )}
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {fields.map((f) => (
-              <div key={f.name} className={cn(f.colSpan === 1 ? "" : "sm:col-span-2")}>
-                <FieldControl
-                  field={f}
-                  value={values[f.name]}
-                  onChange={(v) => set(f.name, v)}
-                  onPick={() => setPickingField(f.name)}
-                />
+            {/* Corps */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {preview && (
+                <div className="mb-6 rounded-admin-card border border-admin-border bg-admin-surface p-4">
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-admin-muted">
+                    Aperçu
+                  </div>
+                  {preview(values)}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {fields.map((f) => (
+                  <div key={f.name} className={cn(f.colSpan === 1 ? "" : "sm:col-span-2")}>
+                    <FieldControl
+                      field={f}
+                      value={values[f.name]}
+                      onChange={(v) => set(f.name, v)}
+                      onPick={() => setPickingField(f.name)}
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* Pied */}
-        <div className="flex items-center justify-between gap-2 border-t border-admin-border bg-admin-surface px-6 py-4">
-          <div>
-            {onDelete && (
-              <Button type="button" variant="destructive" size="sm" onClick={onDelete}>
-                Supprimer
-              </Button>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-              Annuler
-            </Button>
-            <Button type="button" size="sm" loading={saving} onClick={submit}>
-              {submitLabel}
-            </Button>
-          </div>
-        </div>
-      </div>
+            {/* Pied */}
+            <div className="flex items-center justify-between gap-2 border-t border-admin-border bg-admin-surface px-6 py-4">
+              <div>
+                {onDelete && (
+                  <Button type="button" variant="destructive" size="sm" onClick={onDelete}>
+                    Supprimer
+                  </Button>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button type="button" variant="ghost" size="sm" onClick={onClose}>
+                  Annuler
+                </Button>
+                <Button type="button" size="sm" loading={saving} onClick={submit}>
+                  {submitLabel}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {pickingField && (
+      {open && pickingField && (
         <MediaPicker
           open
           onClose={() => setPickingField(null)}
@@ -178,7 +205,7 @@ export function SlideOverEditor({
           accept="image/*"
         />
       )}
-    </div>
+    </>
   );
 }
 
@@ -194,14 +221,6 @@ function FieldControl({
   onPick: () => void;
 }) {
   const str = value == null ? "" : String(value);
-  const labelEl = (
-    <label className="mb-1.5 block text-sm font-medium text-admin-ink">
-      {f.label}
-      {f.required && <span className="ml-0.5 text-admin-danger-fg">*</span>}
-    </label>
-  );
-  const inputCls =
-    "w-full rounded-admin-ctrl border border-admin-border bg-admin-surface px-3 py-2 text-sm text-admin-ink focus:border-admin-accent focus:outline-none focus:ring-2 focus:ring-admin-accent/25";
 
   if (f.type === "toggle") {
     const on = Boolean(value);
@@ -212,15 +231,16 @@ function FieldControl({
           type="button"
           role="switch"
           aria-checked={on}
+          aria-label={f.label}
           onClick={() => onChange(!on)}
           className={cn(
-            "relative h-5 w-9 rounded-full transition-colors",
+            "relative h-5 w-9 shrink-0 rounded-full transition-colors",
             on ? "bg-admin-accent" : "bg-admin-border"
           )}
         >
           <span
             className={cn(
-              "absolute top-0.5 h-4 w-4 rounded-full bg-admin-surface transition-transform",
+              "absolute top-0.5 h-4 w-4 rounded-full bg-admin-surface shadow-sm transition-transform",
               on ? "translate-x-4" : "translate-x-0.5"
             )}
           />
@@ -229,18 +249,26 @@ function FieldControl({
     );
   }
 
+  const label = (
+    <Label htmlFor={f.name} required={f.required} className="mb-1.5">
+      {f.label}
+    </Label>
+  );
+  const help = f.help ? <p className="mt-1 text-xs text-admin-muted">{f.help}</p> : null;
+
   if (f.type === "textarea") {
     return (
       <div>
-        {labelEl}
-        <textarea
-          className={inputCls}
+        {label}
+        <Textarea
+          id={f.name}
           rows={f.rows ?? 4}
           placeholder={f.placeholder}
           value={str}
           onChange={(e) => onChange(e.target.value)}
+          className="text-sm"
         />
-        {f.help && <p className="mt-1 text-xs text-admin-muted">{f.help}</p>}
+        {help}
       </div>
     );
   }
@@ -252,15 +280,21 @@ function FieldControl({
         : f.options ?? [];
     return (
       <div>
-        {labelEl}
-        <select className={inputCls} value={str} onChange={(e) => onChange(e.target.value)}>
+        {label}
+        <NativeSelect
+          id={f.name}
+          value={str}
+          onChange={(e) => onChange(e.target.value)}
+          className="text-sm"
+        >
           <option value="">— {f.placeholder ?? "Choisir"} —</option>
           {options.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
             </option>
           ))}
-        </select>
+        </NativeSelect>
+        {help}
       </div>
     );
   }
@@ -268,10 +302,11 @@ function FieldControl({
   if (f.type === "image") {
     return (
       <div>
-        {labelEl}
+        {label}
         <div className="flex flex-wrap items-center gap-2">
-          <input
-            className={cn(inputCls, "flex-1")}
+          <Input
+            id={f.name}
+            className="flex-1 text-sm"
             placeholder={f.placeholder ?? "URL de l'image"}
             value={str}
             onChange={(e) => onChange(e.target.value)}
@@ -282,7 +317,11 @@ function FieldControl({
         </div>
         {str && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={str} alt="" className="mt-2 h-20 w-auto rounded-admin-ctrl border border-admin-border object-contain" />
+          <img
+            src={str}
+            alt=""
+            className="mt-2 h-20 w-auto rounded-admin-ctrl border border-admin-border object-contain"
+          />
         )}
       </div>
     );
@@ -290,15 +329,16 @@ function FieldControl({
 
   return (
     <div>
-      {labelEl}
-      <input
+      {label}
+      <Input
+        id={f.name}
         type={f.type === "number" ? "number" : f.type === "date" ? "date" : f.type === "url" ? "url" : "text"}
-        className={inputCls}
+        className="text-sm"
         placeholder={f.placeholder}
         value={str}
         onChange={(e) => onChange(f.type === "number" ? Number(e.target.value) : e.target.value)}
       />
-      {f.help && <p className="mt-1 text-xs text-admin-muted">{f.help}</p>}
+      {help}
     </div>
   );
 }

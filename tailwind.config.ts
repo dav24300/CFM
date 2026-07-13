@@ -77,6 +77,7 @@ const config: Config = {
       animation: {
         "live-pulse": "live-pulse 2s ease-in-out infinite",
         "fade-in": "fade-in 0.6s ease-out forwards",
+        "admin-pop-in": "admin-pop-in 0.14s ease-out",
       },
       keyframes: {
         "live-pulse": {
@@ -86,6 +87,11 @@ const config: Config = {
         "fade-in": {
           from: { opacity: "0", transform: "translateY(16px)" },
           to: { opacity: "1", transform: "translateY(0)" },
+        },
+        // Menus/dropdowns admin (Radix) — entrée douce.
+        "admin-pop-in": {
+          from: { opacity: "0", transform: "translateY(-4px) scale(0.97)" },
+          to: { opacity: "1", transform: "translateY(0) scale(1)" },
         },
       },
       boxShadow: {

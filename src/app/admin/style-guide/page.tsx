@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/primitives/textarea";
 import { Label } from "@/components/ui/primitives/label";
 import { Badge } from "@/components/ui/primitives/badge";
 import { Alert } from "@/components/ui/primitives/alert";
+import { ShowcaseIsland } from "@/app/admin/style-guide/ShowcaseIsland";
 
 export const metadata: Metadata = {
   title: "Design system — CFM",
@@ -20,7 +21,7 @@ const SITE_TOKENS = [
 
 const ADMIN_TOKENS = [
   "bg", "surface", "sidebar", "ink", "muted", "border", "accent", "accent-dark",
-  "deep", "warn-fg", "ok-fg", "info-fg", "danger-fg",
+  "accent-fg", "deep", "warn-fg", "ok-fg", "info-fg", "danger-fg",
 ] as const;
 
 const BUTTON_VARIANTS = ["primary", "secondary", "outline", "ghost", "destructive"] as const;
@@ -148,11 +149,23 @@ export default async function StyleGuidePage() {
           <ControlsShowcase title="Thème site (bleu, coins nets)" />
         </div>
         <div className="theme-admin">
-          <ControlsShowcase title="Thème admin (teal, 8px)" />
+          <ControlsShowcase title="Thème admin (bleu, coins 10px)" />
         </div>
         <div className="theme-admin dark">
           <ControlsShowcase title="Thème admin — sombre" />
         </div>
+      </section>
+
+      <section className="mt-10 space-y-4">
+        <h2 className="font-display text-lg font-semibold text-admin-ink">
+          Composants admin premium
+        </h2>
+        <p className="max-w-2xl text-sm text-admin-muted">
+          DataTable (recherche, tri, filtres, sélection groupée, menu kebab, squelette),
+          slide-over animé (champs routés sur les primitives) et dialogue de confirmation.
+          Données fictives.
+        </p>
+        <ShowcaseIsland />
       </section>
     </div>
   );
