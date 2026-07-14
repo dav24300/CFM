@@ -1,29 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { AlertTriangle } from "lucide-react";
+import { useStorageAvailable } from "@/components/admin/design/useStorageAvailable";
 
+/** Bannière « mode démo » quand le stockage média (Supabase) est indisponible. */
 export function ServerlessUploadBanner() {
-  const [readonly, setReadonly] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/admin/media/upload-capabilities")
-      .then((r) => r.json())
-      .then((d) => setReadonly(d.storageAvailable === false))
-      .catch(() => {});
-  }, []);
-
-  if (!readonly) return null;
+  const storage = useStorageAvailable();
+  if (storage !== false) return null;
 
   return (
     <div
       role="alert"
-      className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+      className="flex items-start gap-3 rounded-admin-card border border-admin-warn-fg/25 bg-admin-warn-bg px-4 py-3 text-sm text-admin-warn-fg"
     >
-      <strong>Mode démo — upload désactivé.</strong> Cet hébergement ne conserve pas les fichiers
-      sans Supabase Storage. Configurez{" "}
-      <code className="text-xs">SUPABASE_URL</code> +{" "}
-      <code className="text-xs">SUPABASE_SERVICE_ROLE_KEY</code> sur Vercel pour activer les
-      uploads, ou utilisez le VPS / localhost.
+      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+      <div className="min-w-0">
+        <strong className="font-semibold">Mode démo — upload désactivé.</strong>{" "}
+        Cet hébergement ne conserve pas les fichiers sans Supabase Storage. Configurez{" "}
+        <code className="rounded bg-admin-surface/50 px-1 text-xs">SUPABASE_URL</code> +{" "}
+        <code className="rounded bg-admin-surface/50 px-1 text-xs">SUPABASE_SERVICE_ROLE_KEY</code>{" "}
+        sur Vercel pour activer les uploads, ou utilisez le VPS / localhost.
+      </div>
     </div>
   );
 }

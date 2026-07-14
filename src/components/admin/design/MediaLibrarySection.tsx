@@ -92,7 +92,7 @@ export function MediaLibrarySection() {
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-xs text-sm"
         />
-        <label className="cursor-pointer rounded-lg bg-admin-deep px-3 py-2 text-sm text-white">
+        <label className="cursor-pointer rounded-admin-ctrl bg-admin-deep px-3 py-2 text-sm text-white">
           {uploading ? "Upload…" : "Upload multiple"}
           <input
             type="file"
@@ -111,8 +111,8 @@ export function MediaLibrarySection() {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {filtered.map((item) => (
-          <div key={item.path} className="group rounded-lg border bg-admin-surface p-2 shadow-sm">
-            <div className="relative aspect-video overflow-hidden rounded bg-admin-bg">
+          <div key={item.path} className="group rounded-admin-ctrl border border-admin-border bg-admin-surface p-2 shadow-admin-rest">
+            <div className="relative aspect-video overflow-hidden rounded-admin-ctrl bg-admin-bg">
               {item.path.endsWith(".pdf") ? (
                 <div className="flex h-full items-center justify-center text-xs text-admin-ink">PDF</div>
               ) : item.path.match(/\.(mp4|webm)$/i) ? (
@@ -124,7 +124,7 @@ export function MediaLibrarySection() {
             <p className="mt-1 truncate text-xs text-admin-muted" title={item.path}>
               {item.path.split("/").pop()}
             </p>
-            <span className="text-[10px] text-amber-700">Bibliothèque</span>
+            <span className="text-[10px] font-medium uppercase tracking-wide text-admin-muted-2">Bibliothèque</span>
             <div className="mt-1 flex gap-1 opacity-0 group-hover:opacity-100">
               <button
                 type="button"
@@ -133,7 +133,7 @@ export function MediaLibrarySection() {
               >
                 Copier URL
               </button>
-              <button type="button" className="text-xs text-red-600" onClick={() => remove(item.path)}>
+              <button type="button" className="text-xs text-admin-danger-fg" onClick={() => remove(item.path)}>
                 <Trash2 className="h-3 w-3" />
               </button>
             </div>

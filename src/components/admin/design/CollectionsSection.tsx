@@ -79,7 +79,7 @@ export function CollectionsSection() {
   return (
     <div className="space-y-10">
       {dirty && (
-        <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900">
+        <div className="rounded-admin-ctrl border border-admin-warn-fg/25 bg-admin-warn-bg px-4 py-2 text-sm text-admin-warn-fg">
           Modifications alt non publiées — cliquez « Enregistrer collections » pour mettre à jour le
           site.
         </div>
@@ -102,10 +102,10 @@ export function CollectionsSection() {
             />
           </label>
         </div>
-        <p className="mb-3 text-xs text-green-800">Upload = publication immédiate sur le site</p>
+        <p className="mb-3 text-xs font-medium text-admin-ok-fg">Upload = publication immédiate sur le site</p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {gallery.map((item) => (
-            <div key={item.sort} className="rounded-lg border p-3">
+            <div key={item.sort} className="rounded-admin-ctrl border border-admin-border p-3">
               <div className="relative aspect-video overflow-hidden rounded bg-admin-bg">
                 <Image src={item.src} alt={item.alt} fill className="object-cover" sizes="200px" />
               </div>
@@ -129,7 +129,7 @@ export function CollectionsSection() {
         <h3 className="mb-4 font-semibold text-admin-ink">Images des axes (×5)</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {AXIS_SLUGS.map((slug) => (
-            <div key={slug} className="rounded-lg border p-3">
+            <div key={slug} className="rounded-admin-ctrl border border-admin-border p-3">
               <p className="text-sm font-medium">{AXIS_LABELS[slug] || slug}</p>
               {axes[slug] && (
                 <div className="relative mt-2 aspect-video overflow-hidden rounded bg-admin-bg">

@@ -55,7 +55,7 @@ export function DefaultsSection({ defaults, onChange, onSaved }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border bg-admin-bg/50 p-4 text-sm">
+      <div className="rounded-admin-ctrl border border-admin-border bg-admin-bg/50 p-4 text-sm">
         <h4 className="font-semibold text-admin-ink">PWA — manifest</h4>
         <p className="mt-1 text-admin-muted">
           Nom : CFM — Cri de Familles Militaires · Thème : #1a2f4a · Fond : #f5f0e8
@@ -72,10 +72,10 @@ export function DefaultsSection({ defaults, onChange, onSaved }: Props) {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {FIELDS.map(({ key, label }) => (
-          <div key={key} className="rounded-lg border p-3">
+          <div key={key} className="rounded-admin-ctrl border border-admin-border p-3">
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-medium text-admin-ink">{label}</p>
-              <span className="text-[10px] text-green-800">Publié si upload</span>
+              <span className="text-[10px] font-medium text-admin-ok-fg">Publié si upload</span>
             </div>
             {defaults[key] && (
               <div className="relative mt-2 aspect-video overflow-hidden rounded bg-admin-bg">

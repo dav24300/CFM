@@ -44,14 +44,14 @@ export function MediaPicker({ open, onClose, onSelect, title = "Choisir un médi
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
-      <div className="flex max-h-[85vh] w-full max-w-3xl flex-col rounded-xl bg-admin-surface shadow-xl">
-        <div className="flex items-center justify-between border-b p-4">
-          <h3 className="font-semibold text-admin-ink">{title}</h3>
-          <button type="button" onClick={onClose} className="text-sm text-admin-muted">
+      <div className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-admin-card border border-admin-border bg-admin-surface shadow-admin-overlay">
+        <div className="flex items-center justify-between border-b border-admin-border p-4">
+          <h3 className="font-display font-semibold text-admin-ink">{title}</h3>
+          <button type="button" onClick={onClose} className="text-sm text-admin-muted transition-colors hover:text-admin-ink">
             Fermer
           </button>
         </div>
-        <div className="border-b p-3">
+        <div className="border-b border-admin-border p-3">
           <label className="cursor-pointer text-sm text-admin-accent">
             {uploading ? "Upload…" : "+ Nouveau fichier"}
             <input
@@ -73,7 +73,7 @@ export function MediaPicker({ open, onClose, onSelect, title = "Choisir un médi
               <button
                 key={item.path}
                 type="button"
-                className="rounded-lg border p-1 text-left hover:border-admin-accent"
+                className="rounded-admin-ctrl border border-admin-border p-1 text-left transition-colors hover:border-admin-accent"
                 onClick={() => onSelect(item.path)}
               >
                 <div className="relative aspect-video overflow-hidden rounded bg-admin-bg">
