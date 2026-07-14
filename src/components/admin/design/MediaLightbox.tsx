@@ -32,7 +32,7 @@ export function MediaLightbox({ item, onClose, onCopy }: Props) {
   const reduced = useReducedMotion();
   const ref = useFocusTrap<HTMLDivElement>(!!item);
   const [dims, setDims] = useState("—");
-  const [usages, setUsages] = useState<string[] | null>(null);
+  const [usages, setUsages] = useState<string[] | "error" | null>(null);
 
   // Réinitialise les dimensions + récupère « où est-ce utilisé » au changement de
   // média uniquement (pas à chaque re-render du parent — sinon un toast effacerait
@@ -44,12 +44,15 @@ export function MediaLightbox({ item, onClose, onCopy }: Props) {
     if (!path) return;
     let alive = true;
     fetch(`/api/admin/media/library?usage=${encodeURIComponent(path)}`)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        return r.json();
+      })
       .then((d) => {
-        if (alive) setUsages(Array.isArray(d.usages) ? d.usages : []);
+        if (alive) setUsages(Array.isArray(d.usages) ? d.usages : "error");
       })
       .catch(() => {
-        if (alive) setUsages([]);
+        if (alive) setUsages("error");
       });
     return () => {
       alive = false;
@@ -144,6 +147,8 @@ export function MediaLightbox({ item, onClose, onCopy }: Props) {
                 <p className="text-[12px] uppercase tracking-wide text-admin-muted-2">Utilisé dans</p>
                 {usages === null ? (
                   <p className="mt-1 text-[13px] text-admin-muted-2">Vérification…</p>
+                ) : usages === "error" ? (
+                  <p className="mt-1 text-[13px] text-admin-warn-fg">Vérification impossible — usage inconnu.</p>
                 ) : usages.length === 0 ? (
                   <p className="mt-1 text-[13px] text-admin-muted">Aucun emplacement — suppression possible.</p>
                 ) : (

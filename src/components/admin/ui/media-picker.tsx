@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { Search, FileText, X } from "lucide-react";
 import { Input } from "@/components/ui/primitives/input";
+import { useFocusTrap } from "@/components/admin/ui/use-focus-trap";
 import { MediaDropzone } from "@/components/admin/design/MediaDropzone";
 import { mediaKind } from "@/components/admin/design/MediaCard";
 
@@ -24,6 +25,7 @@ type Item = { path: string };
 export function MediaPicker({ open, onClose, onSelect, title = "Choisir un média", accept }: Props) {
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
+  const panelRef = useFocusTrap<HTMLDivElement>(open);
 
   const load = useCallback(() => {
     fetch("/api/admin/media/library")
@@ -39,18 +41,40 @@ export function MediaPicker({ open, onClose, onSelect, title = "Choisir un médi
     }
   }, [open, load]);
 
+  // Fermeture au clavier (Échap) — ferme UNIQUEMENT le picker (modale du dessus).
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  // Types acceptés déduits de `accept` (image/video/pdf) — filtre par type réel.
+  const wantedKinds = useMemo(() => {
+    if (!accept) return null;
+    const kinds = accept
+      .split(",")
+      .map((a) => {
+        const t = a.trim().toLowerCase();
+        if (t.includes("pdf")) return "pdf" as const;
+        if (t.startsWith("video/")) return "video" as const;
+        if (t.startsWith("image/")) return "image" as const;
+        return null;
+      })
+      .filter((k): k is "pdf" | "video" | "image" => k !== null);
+    return kinds.length ? kinds : null;
+  }, [accept]);
+
   const filtered = useMemo(
     () =>
       items.filter((i) => {
-        if (accept) {
-          const wantsPdf = accept.includes("pdf");
-          const isPdf = i.path.toLowerCase().endsWith(".pdf");
-          if (wantsPdf ? !isPdf : isPdf) return false;
-        }
+        if (wantedKinds && !wantedKinds.includes(mediaKind(i.path))) return false;
         if (search.trim() && !i.path.toLowerCase().includes(search.toLowerCase())) return false;
         return true;
       }),
-    [items, accept, search]
+    [items, wantedKinds, search]
   );
 
   if (!open) return null;
@@ -61,11 +85,13 @@ export function MediaPicker({ open, onClose, onSelect, title = "Choisir un médi
       onClick={onClose}
     >
       <div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-admin-card border border-admin-border bg-admin-surface shadow-admin-overlay"
+        className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-admin-card border border-admin-border bg-admin-surface shadow-admin-overlay focus:outline-none"
       >
         <div className="flex items-center justify-between gap-3 border-b border-admin-border p-4">
           <h3 className="font-display font-semibold text-admin-ink">{title}</h3>

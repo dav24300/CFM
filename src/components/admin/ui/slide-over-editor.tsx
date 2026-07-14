@@ -81,15 +81,16 @@ export function SlideOverEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, JSON.stringify(initialValues ?? {})]);
 
-  // Fermeture au clavier (Échap).
+  // Fermeture au clavier (Échap) — inhibée quand le MediaPicker est ouvert par-dessus
+  // (sinon Échap fermerait l'éditeur sous-jacent et perdrait les saisies en cours).
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape" && !pickingField) onClose();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open, onClose, pickingField]);
 
   function set(name: string, value: unknown) {
     setValues((v) => ({ ...v, [name]: value }));

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { FileText, ImageOff, ImagePlus } from "lucide-react";
 import { AdminFileUpload } from "@/components/admin/ui/admin-file-upload";
 import { MediaPicker } from "@/components/admin/ui/media-picker";
+import { useAdminToast } from "@/components/admin/context/AdminToastContext";
 import { PublishBadge, type PublishState } from "@/components/admin/design/PublishBadge";
 import { useStorageAvailable } from "@/components/admin/design/useStorageAvailable";
 import type { MediaUploadOptions } from "@/components/admin/hooks/useMediaUpload";
@@ -50,7 +51,33 @@ export function MediaSlot({
   const storage = useStorageAvailable();
   const readonly = storage === false;
   const [pickerOpen, setPickerOpen] = useState(false);
+  const { success, error } = useAdminToast();
   const resolvedState: PublishState = state ?? (value ? "online" : "fallback");
+
+  // La sélection depuis la bibliothèque ne passe pas par l'upload (qui persiste le
+  // réglage via settingKey) → on persiste explicitement l'assignation avant de recharger.
+  async function assignFromLibrary(path: string) {
+    setPickerOpen(false);
+    const settingKey = uploadOptions.settingKey;
+    if (settingKey) {
+      try {
+        const res = await fetch("/api/admin/media", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ [settingKey]: path }),
+        });
+        if (!res.ok) {
+          error("Échec de l'assignation");
+          return;
+        }
+        success("Média assigné et publié sur le site");
+      } catch {
+        error("Échec de l'assignation");
+        return;
+      }
+    }
+    onUploaded(path);
+  }
 
   return (
     <>
@@ -124,10 +151,7 @@ export function MediaSlot({
     <MediaPicker
       open={pickerOpen}
       onClose={() => setPickerOpen(false)}
-      onSelect={(path) => {
-        onUploaded(path);
-        setPickerOpen(false);
-      }}
+      onSelect={assignFromLibrary}
       title={`Choisir — ${label}`}
       accept={accept}
     />
