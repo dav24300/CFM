@@ -339,7 +339,9 @@ export function DataTable<T extends Record<string, unknown>>({
               ) : pageRows.length === 0 ? (
                 <tr>
                   <td colSpan={totalCols} className="px-4 py-12">
-                    {emptyState ?? (
+                    {!search.trim() && emptyState ? (
+                      emptyState
+                    ) : (
                       <div className="flex flex-col items-center gap-2 text-center">
                         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-admin-bg text-admin-muted-2">
                           <Inbox className="h-5 w-5" />
