@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { RefreshCw, Sparkles, FileText, Radio } from "lucide-react";
 import { PageHeader } from "@/components/admin/ui/PageHeader";
 import { Button } from "@/components/ui/primitives/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/primitives/tabs";
@@ -87,6 +88,36 @@ export function DesignPanel() {
       />
 
       <ServerlessUploadBanner />
+
+      <div className="rounded-admin-card border border-admin-border bg-admin-surface p-4 shadow-admin-rest">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-admin-ctrl bg-admin-accent/10 text-admin-accent">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            <div className="min-w-0">
+              <h3 className="font-display text-admin-h3 font-semibold text-admin-ink">Enrichir le site public</h3>
+              <p className="text-[12.5px] text-admin-muted">
+                Ces médias illustrent le contenu. Publiez ce qui apparaît sur le site.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/admin/dashboard?section=content"
+              className="inline-flex items-center gap-1.5 rounded-admin-ctrl bg-admin-accent px-3 py-2 text-sm font-medium text-admin-accent-fg transition-colors hover:bg-admin-accent-dark"
+            >
+              <FileText className="h-3.5 w-3.5" /> Publier une actualité
+            </Link>
+            <Link
+              href="/admin/dashboard?section=live"
+              className="inline-flex items-center gap-1.5 rounded-admin-ctrl border border-admin-border px-3 py-2 text-sm font-medium text-admin-ink transition-colors hover:bg-admin-bg"
+            >
+              <Radio className="h-3.5 w-3.5" /> Programmer un live
+            </Link>
+          </div>
+        </div>
+      </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
         <TabsList className="flex h-auto flex-wrap gap-1">

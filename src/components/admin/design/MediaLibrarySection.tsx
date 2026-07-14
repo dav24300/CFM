@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/primitives/skeleton";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
 import { useAdminToast } from "@/components/admin/context/AdminToastContext";
 import { MediaDropzone } from "@/components/admin/design/MediaDropzone";
+import { uploadWithProgress } from "@/components/admin/design/uploadWithProgress";
 import { MediaCard, mediaKind, type MediaItem } from "@/components/admin/design/MediaCard";
 import { MediaLightbox } from "@/components/admin/design/MediaLightbox";
 import { cn } from "@/lib/utils/cn";
@@ -51,6 +52,33 @@ export function MediaLibrarySection() {
 
   useEffect(() => {
     load();
+  }, []);
+
+  // Raccourci : coller une image (ex. capture d'écran) → upload en bibliothèque.
+  useEffect(() => {
+    async function onPaste(e: ClipboardEvent) {
+      const files = Array.from(e.clipboardData?.files || []).filter((f) => f.type.startsWith("image/"));
+      if (files.length === 0) return;
+      e.preventDefault();
+      let ok = 0;
+      for (const f of files) {
+        try {
+          await uploadWithProgress(f, { category: "library" });
+          ok++;
+        } catch {
+          /* erreur par fichier ignorée ; tally ci-dessous */
+        }
+      }
+      if (ok > 0) {
+        success(`${ok} image(s) collée(s) en bibliothèque`);
+        load();
+      } else {
+        error("Collage impossible");
+      }
+    }
+    document.addEventListener("paste", onPaste);
+    return () => document.removeEventListener("paste", onPaste);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const counts = useMemo(() => {
@@ -178,9 +206,21 @@ export function MediaLibrarySection() {
             </button>
           ))}
         </div>
-        <Button type="button" size="sm" variant="secondary" onClick={cleanupOrphans}>
-          Nettoyer les orphelins
-        </Button>
+        <div className="flex items-center gap-2">
+          {filtered.length > 0 && (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => setSelected(new Set(filtered.map((i) => i.path)))}
+            >
+              Tout sélectionner
+            </Button>
+          )}
+          <Button type="button" size="sm" variant="secondary" onClick={cleanupOrphans}>
+            Nettoyer les orphelins
+          </Button>
+        </div>
       </div>
 
       {selected.size > 0 && (

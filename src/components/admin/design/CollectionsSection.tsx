@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { GripVertical } from "lucide-react";
 import { Input } from "@/components/ui/primitives/input";
 import { Button } from "@/components/ui/primitives/button";
 import { useAdminToast } from "@/components/admin/context/AdminToastContext";
@@ -9,6 +10,7 @@ import { useMediaUpload } from "@/components/admin/hooks/useMediaUpload";
 import { MediaSlot } from "@/components/admin/design/MediaSlot";
 import { AXIS_SLUGS, type GalleryItem } from "@/domain/media";
 import { AXES } from "@/lib/constants";
+import { cn } from "@/lib/utils/cn";
 
 const AXIS_LABELS: Record<string, string> = Object.fromEntries(
   AXES.map((a) => [a.slug, a.title])
@@ -18,8 +20,22 @@ export function CollectionsSection() {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [axes, setAxes] = useState<Record<string, string>>({});
   const [dirty, setDirty] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   const { success, error } = useAdminToast();
   const { upload } = useMediaUpload();
+
+  // Réordonnancement par glisser-déposer : déplace l'élément et republie l'ordre.
+  function reorder(to: number) {
+    const from = dragIndex;
+    setDragIndex(null);
+    if (from === null || from === to) return;
+    const next = [...gallery];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    const resorted = next.map((g, i) => ({ ...g, sort: i + 1 }));
+    setGallery(resorted);
+    void persistCollections(resorted, axes);
+  }
 
   async function load() {
     const res = await fetch("/api/admin/media/collections");
@@ -97,9 +113,26 @@ export function CollectionsSection() {
         </div>
         <p className="mb-3 text-xs font-medium text-admin-ok-fg">Upload = publication immédiate sur le site</p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {gallery.map((item) => (
-            <div key={item.sort} className="rounded-admin-ctrl border border-admin-border p-3">
-              <div className="relative aspect-video overflow-hidden rounded bg-admin-bg">
+          {gallery.map((item, i) => (
+            <div
+              key={item.src}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => reorder(i)}
+              className={cn(
+                "rounded-admin-ctrl border border-admin-border p-3 transition-opacity",
+                dragIndex === i && "opacity-40"
+              )}
+            >
+              <div
+                draggable
+                onDragStart={() => setDragIndex(i)}
+                onDragEnd={() => setDragIndex(null)}
+                className="mb-2 flex cursor-grab items-center gap-1.5 text-admin-muted-2 active:cursor-grabbing"
+              >
+                <GripVertical className="h-4 w-4" />
+                <span className="text-[11px]">Glisser pour réordonner</span>
+              </div>
+              <div className="relative aspect-video overflow-hidden rounded-admin-ctrl bg-admin-bg">
                 <Image src={item.src} alt={item.alt} fill className="object-cover" sizes="200px" />
               </div>
               <Input
@@ -107,10 +140,9 @@ export function CollectionsSection() {
                 placeholder="Texte alt"
                 value={item.alt}
                 onChange={(e) => {
+                  const v = e.target.value;
                   setDirty(true);
-                  setGallery((prev) =>
-                    prev.map((g) => (g.sort === item.sort ? { ...g, alt: e.target.value } : g))
-                  );
+                  setGallery((prev) => prev.map((g, gi) => (gi === i ? { ...g, alt: v } : g)));
                 }}
               />
             </div>
