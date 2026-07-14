@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/primitives/button";
 import { Input } from "@/components/ui/primitives/input";
 import { Textarea } from "@/components/ui/primitives/textarea";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { Card, CardHeader } from "@/components/admin/ui/card";
 import { useAdminToast } from "@/components/admin/context/AdminToastContext";
 
 export function I18nPanel() {
@@ -68,18 +70,25 @@ export function I18nPanel() {
 
   return (
     <div className="space-y-8">
-      <h2 className="font-display text-xl font-bold text-admin-ink">Langues & textes</h2>
+      <PageHeader
+        title="Langues & textes"
+        subtitle="Overrides i18n et constantes éditoriales du site"
+      />
 
-      <section className="rounded-xl border bg-admin-surface p-4">
-        <h3 className="font-semibold">Override i18n</h3>
-        <p className="mt-1 text-sm text-admin-muted">
-          Clés au format pointé (ex. <code>home.hero.title</code>). Les overrides sont stockés en base.
-        </p>
+      <Card className="p-5">
+        <CardHeader
+          title="Override i18n"
+          subtitle={
+            <>
+              Clés au format pointé (ex. <code>home.hero.title</code>). Les overrides sont stockés en base.
+            </>
+          }
+        />
         <form onSubmit={saveOverride} className="mt-4 grid gap-3 md:grid-cols-2">
           <select
             value={locale}
             onChange={(e) => setLocale(e.target.value)}
-            className="rounded border px-3 py-2 text-sm"
+            className="rounded-admin-ctrl border border-admin-border px-3 py-2 text-sm"
           >
             {locales.map((l) => (
               <option key={l} value={l}>{l.toUpperCase()}</option>
@@ -96,15 +105,15 @@ export function I18nPanel() {
             ))}
           </ul>
         )}
-      </section>
+      </Card>
 
-      <section className="rounded-xl border bg-admin-surface p-4">
-        <h3 className="font-semibold">Constantes site — liens sociaux (JSON)</h3>
+      <Card className="p-5">
+        <CardHeader title="Constantes site — liens sociaux (JSON)" />
         <form onSubmit={saveSocial} className="mt-3 space-y-2">
           <Textarea value={socialLinks} onChange={(e) => setSocialLinks(e.target.value)} rows={4} className="font-mono text-xs" />
           <Button type="submit" size="sm">Enregistrer</Button>
         </form>
-      </section>
+      </Card>
     </div>
   );
 }

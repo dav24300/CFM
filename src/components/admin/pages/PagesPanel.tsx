@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/primitives/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/primitives/tabs";
 import { useAdminToast } from "@/components/admin/context/AdminToastContext";
 import { PreviewButton } from "@/components/admin/ui/preview-button";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { Card, CardHeader } from "@/components/admin/ui/card";
 import { CACHE_TAGS } from "@/infrastructure/cache/cache-tags";
 import type { ContentBlocks } from "@/domain/site-config";
 
@@ -109,39 +111,46 @@ export function PagesPanel() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-bold text-admin-ink">Pages structurelles</h2>
-        <div className="flex flex-wrap gap-2">
-          <PreviewButton href="/a-propos" tags={[CACHE_TAGS.siteConfig]} label="À propos" />
-          <PreviewButton href="/confidentialite" tags={[CACHE_TAGS.siteConfig]} label="Confidentialité" />
-        </div>
+    <div>
+      <PageHeader
+        title="Pages structurelles"
+        subtitle="Timeline « À propos », confidentialité et mentions légales du site."
+        actions={
+          <>
+            <PreviewButton href="/a-propos" tags={[CACHE_TAGS.siteConfig]} label="À propos" />
+            <PreviewButton href="/confidentialite" tags={[CACHE_TAGS.siteConfig]} label="Confidentialité" />
+          </>
+        }
+      />
+
+      <div className="space-y-6">
+        <Tabs value={locale} onValueChange={(v) => setLocale(v as LocaleTab)}>
+          <TabsList>
+            <TabsTrigger value="fr">Français</TabsTrigger>
+            <TabsTrigger value="en">English</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <Card className="space-y-3 p-5">
+          <CardHeader
+            title="Timeline À propos (JSON)"
+            subtitle={"Tableau d'objets : date, title, description, image (optionnel)"}
+          />
+          <Textarea rows={10} value={timelineJson} onChange={(e) => setTimelineJson(e.target.value)} className="font-mono text-xs" />
+        </Card>
+
+        <Card className="space-y-3 p-5">
+          <CardHeader title="Confidentialité (markdown)" />
+          <Textarea rows={12} value={privacyMd} onChange={(e) => setPrivacyMd(e.target.value)} className="font-mono text-xs" />
+        </Card>
+
+        <Card className="space-y-3 p-5">
+          <CardHeader title="Mentions légales (markdown)" />
+          <Textarea rows={12} value={mentionsMd} onChange={(e) => setMentionsMd(e.target.value)} className="font-mono text-xs" />
+        </Card>
+
+        <Button type="button" size="sm" onClick={save}>Enregistrer</Button>
       </div>
-
-      <Tabs value={locale} onValueChange={(v) => setLocale(v as LocaleTab)}>
-        <TabsList>
-          <TabsTrigger value="fr">Français</TabsTrigger>
-          <TabsTrigger value="en">English</TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      <section className="space-y-3 rounded-xl border bg-admin-surface p-4 shadow-sm">
-        <h3 className="font-semibold">Timeline À propos (JSON)</h3>
-        <p className="text-xs text-admin-muted">Tableau d&apos;objets : date, title, description, image (optionnel)</p>
-        <Textarea rows={10} value={timelineJson} onChange={(e) => setTimelineJson(e.target.value)} className="font-mono text-xs" />
-      </section>
-
-      <section className="space-y-3 rounded-xl border bg-admin-surface p-4 shadow-sm">
-        <h3 className="font-semibold">Confidentialité (markdown)</h3>
-        <Textarea rows={12} value={privacyMd} onChange={(e) => setPrivacyMd(e.target.value)} className="font-mono text-xs" />
-      </section>
-
-      <section className="space-y-3 rounded-xl border bg-admin-surface p-4 shadow-sm">
-        <h3 className="font-semibold">Mentions légales (markdown)</h3>
-        <Textarea rows={12} value={mentionsMd} onChange={(e) => setMentionsMd(e.target.value)} className="font-mono text-xs" />
-      </section>
-
-      <Button type="button" size="sm" onClick={save}>Enregistrer</Button>
     </div>
   );
 }

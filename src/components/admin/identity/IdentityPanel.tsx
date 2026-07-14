@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/primitives/input";
 import { Textarea } from "@/components/ui/primitives/textarea";
 import { useAdminToast } from "@/components/admin/context/AdminToastContext";
 import { PreviewButton } from "@/components/admin/ui/preview-button";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { Card, CardHeader } from "@/components/admin/ui/card";
 import { CACHE_TAGS } from "@/infrastructure/cache/cache-tags";
 
 type FormState = {
@@ -80,26 +82,33 @@ export function IdentityPanel() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-bold text-admin-ink">Identité & contact</h2>
-        <PreviewButton href="/contact" tags={[CACHE_TAGS.siteConfig]} />
-      </div>
+    <div>
+      <PageHeader
+        title="Identité & contact"
+        subtitle="Nom, coordonnées et éléments d'identité affichés publiquement sur le site."
+        actions={<PreviewButton href="/contact" tags={[CACHE_TAGS.siteConfig]} />}
+      />
 
-      <form onSubmit={handleSubmit} className="grid gap-4 rounded-xl border bg-admin-surface p-4 shadow-sm md:grid-cols-2">
-        <Input placeholder="Nom complet" value={form.site_name} onChange={(e) => setField("site_name", e.target.value)} />
-        <Input placeholder="Sigle (CFM)" value={form.site_sigle} onChange={(e) => setField("site_sigle", e.target.value)} />
-        <Input placeholder="Tagline" className="md:col-span-2" value={form.site_tagline} onChange={(e) => setField("site_tagline", e.target.value)} />
-        <Textarea placeholder="Citation" className="md:col-span-2" rows={2} value={form.site_quote} onChange={(e) => setField("site_quote", e.target.value)} />
-        <Input placeholder="Fondateur" value={form.site_founder} onChange={(e) => setField("site_founder", e.target.value)} />
-        <Input placeholder="Année fondation" type="number" value={form.site_founded} onChange={(e) => setField("site_founded", e.target.value)} />
-        <Input placeholder="Pays" className="md:col-span-2" value={form.site_country} onChange={(e) => setField("site_country", e.target.value)} />
-        <Input placeholder="Email" type="email" value={form.site_email} onChange={(e) => setField("site_email", e.target.value)} />
-        <Input placeholder="Téléphone" value={form.site_phone} onChange={(e) => setField("site_phone", e.target.value)} />
-        <div className="md:col-span-2">
-          <Button type="submit" size="sm">Enregistrer</Button>
-        </div>
-      </form>
+      <Card className="p-5">
+        <CardHeader
+          title="Informations générales"
+          subtitle="Ces champs alimentent la page contact et le pied de page du site public."
+        />
+        <form onSubmit={handleSubmit} className="mt-4 grid gap-4 md:grid-cols-2">
+          <Input placeholder="Nom complet" value={form.site_name} onChange={(e) => setField("site_name", e.target.value)} />
+          <Input placeholder="Sigle (CFM)" value={form.site_sigle} onChange={(e) => setField("site_sigle", e.target.value)} />
+          <Input placeholder="Tagline" className="md:col-span-2" value={form.site_tagline} onChange={(e) => setField("site_tagline", e.target.value)} />
+          <Textarea placeholder="Citation" className="md:col-span-2" rows={2} value={form.site_quote} onChange={(e) => setField("site_quote", e.target.value)} />
+          <Input placeholder="Fondateur" value={form.site_founder} onChange={(e) => setField("site_founder", e.target.value)} />
+          <Input placeholder="Année fondation" type="number" value={form.site_founded} onChange={(e) => setField("site_founded", e.target.value)} />
+          <Input placeholder="Pays" className="md:col-span-2" value={form.site_country} onChange={(e) => setField("site_country", e.target.value)} />
+          <Input placeholder="Email" type="email" value={form.site_email} onChange={(e) => setField("site_email", e.target.value)} />
+          <Input placeholder="Téléphone" value={form.site_phone} onChange={(e) => setField("site_phone", e.target.value)} />
+          <div className="md:col-span-2">
+            <Button type="submit" size="sm">Enregistrer</Button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 }

@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ClipboardList } from "lucide-react";
 import { DataTable, type Column } from "@/components/admin/ui/data-table";
 import { StatusBadge } from "@/components/admin/ui/status-badge";
 import { ExportButton } from "@/components/admin/ui/export-button";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { EmptyState } from "@/components/admin/ui/EmptyState";
 
 type Entry = {
   timestamp: string;
@@ -33,15 +36,18 @@ export function AuditPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-bold text-admin-ink">Journal & exports</h2>
-        <div className="flex flex-wrap gap-2">
-          <ExportButton entity="help_requests" label="Aide CSV" />
-          <ExportButton entity="contacts" label="Contacts CSV" />
-          <ExportButton entity="memberships" label="Adhésions CSV" />
-          <ExportButton entity="news" label="Actualités CSV" />
-        </div>
-      </div>
+      <PageHeader
+        title="Journal & exports"
+        subtitle="Historique des actions administratives et exports de données au format CSV."
+        actions={
+          <>
+            <ExportButton entity="help_requests" label="Aide CSV" />
+            <ExportButton entity="contacts" label="Contacts CSV" />
+            <ExportButton entity="memberships" label="Adhésions CSV" />
+            <ExportButton entity="news" label="Actualités CSV" />
+          </>
+        }
+      />
 
       <DataTable
         data={entries as unknown as Record<string, unknown>[]}
@@ -50,6 +56,13 @@ export function AuditPanel() {
         rowKey={(r) => String(r.timestamp) + String(r.action)}
         pageSize={15}
         emptyMessage="Aucune entrée d'audit"
+        emptyState={
+          <EmptyState
+            icon={ClipboardList}
+            title="Aucune entrée d'audit"
+            description="Les actions administratives et les exports apparaîtront ici au fil de l'activité."
+          />
+        }
       />
     </div>
   );

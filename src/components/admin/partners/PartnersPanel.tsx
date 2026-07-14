@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Pencil, Trash2, Handshake } from "lucide-react";
 import { Button } from "@/components/ui/primitives/button";
 import { DataTable, type Column } from "@/components/admin/ui/data-table";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
 import { SlideOverEditor, type EditorField } from "@/components/admin/ui/slide-over-editor";
 import { useAdminToast } from "@/components/admin/context/AdminToastContext";
 import { PreviewButton } from "@/components/admin/ui/preview-button";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { EmptyState } from "@/components/admin/ui/EmptyState";
 import { CACHE_TAGS } from "@/infrastructure/cache/cache-tags";
 
 type Partner = {
@@ -91,41 +94,44 @@ export function PartnersPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-semibold text-admin-ink">Partenaires</h2>
-        <div className="flex gap-2">
-          <PreviewButton href="/#footer" tags={[CACHE_TAGS.partners]} label="Voir Footer" />
-          <Button type="button" size="sm" onClick={openNew}>
-            + Partenaire
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Partenaires"
+        subtitle="Logos et liens des partenaires affichés dans le pied de page du site."
+        actions={
+          <>
+            <PreviewButton href="/#footer" tags={[CACHE_TAGS.partners]} label="Voir Footer" />
+            <Button type="button" size="sm" onClick={openNew}>
+              + Partenaire
+            </Button>
+          </>
+        }
+      />
 
       <DataTable
         data={partners as unknown as Record<string, unknown>[]}
         columns={columns as Column<Record<string, unknown>>[]}
         searchKeys={["name"]}
         rowKey={(r) => Number(r.id)}
-        actions={(row) => (
-          <div className="flex gap-1">
-            <Button
-              size="sm"
-              variant="secondary"
-              type="button"
-              onClick={() => openEdit(row as unknown as Partner)}
-            >
-              Modifier
-            </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              type="button"
-              onClick={() => setDeleteId(Number(row.id))}
-            >
-              Suppr.
-            </Button>
-          </div>
-        )}
+        emptyState={
+          <EmptyState
+            icon={Handshake}
+            title="Aucun partenaire"
+            description="Ajoutez un premier partenaire pour l'afficher dans le pied de page du site."
+          />
+        }
+        rowActions={(row) => [
+          {
+            label: "Modifier",
+            icon: Pencil,
+            onSelect: () => openEdit(row as unknown as Partner),
+          },
+          {
+            label: "Supprimer",
+            icon: Trash2,
+            destructive: true,
+            onSelect: () => setDeleteId(Number(row.id)),
+          },
+        ]}
       />
 
       <SlideOverEditor

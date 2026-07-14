@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { HandCoins } from "lucide-react";
 import { Button } from "@/components/ui/primitives/button";
 import { Input } from "@/components/ui/primitives/input";
 import { NativeSelect } from "@/components/ui/primitives/native-select";
@@ -8,6 +9,8 @@ import { DataTable, type Column } from "@/components/admin/ui/data-table";
 import { StatusBadge } from "@/components/admin/ui/status-badge";
 import { ExportButton } from "@/components/admin/ui/export-button";
 import { PreviewButton } from "@/components/admin/ui/preview-button";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { EmptyState } from "@/components/admin/ui/EmptyState";
 import { useAdminToast } from "@/components/admin/context/AdminToastContext";
 import type { AdminData } from "@/components/admin/types";
 
@@ -95,43 +98,57 @@ export function DonationsPanel({ data, onReload }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="font-display text-xl font-bold text-admin-ink">Dons & transparence</h2>
-          <p className="text-sm text-admin-muted">
+      <PageHeader
+        title="Dons & transparence"
+        subtitle={
+          <>
             Total validé : <strong>{totalCompleted.toLocaleString("fr-FR")} CDF/USD</strong>
             {pendingCount > 0 && (
-              <span className="ml-2 text-amber-700">· {pendingCount} en attente</span>
+              <span className="ml-2 text-admin-warn-fg">· {pendingCount} en attente</span>
             )}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <PreviewButton href="/s-engager" tags={[]} label="Voir transparence" />
-          <Button
-            type="button"
-            size="sm"
-            variant={donorsPublic ? "primary" : "secondary"}
-            loading={savingPublic}
-            onClick={toggleDonorsPublic}
-          >
-            {donorsPublic ? "Masquer liste publique" : "Afficher liste publique"}
-          </Button>
-          <ExportButton entity="donations" />
-        </div>
-      </div>
-
-      <NativeSelect value={filter} onChange={(e) => setFilter(e.target.value)} className="w-48 text-sm">
-        <option value="all">Tous les statuts</option>
-        <option value="pending">En attente</option>
-        <option value="completed">Validés</option>
-        <option value="failed">Échoués</option>
-      </NativeSelect>
+          </>
+        }
+        actions={
+          <>
+            <PreviewButton href="/s-engager" tags={[]} label="Voir transparence" />
+            <Button
+              type="button"
+              size="sm"
+              variant={donorsPublic ? "primary" : "secondary"}
+              loading={savingPublic}
+              onClick={toggleDonorsPublic}
+            >
+              {donorsPublic ? "Masquer liste publique" : "Afficher liste publique"}
+            </Button>
+            <ExportButton entity="donations" />
+          </>
+        }
+      />
 
       <DataTable
         data={filtered}
         columns={columns}
         searchKeys={["phone", "provider", "donor_name", "transaction_id"]}
         rowKey={(r) => Number(r.id)}
+        toolbar={
+          <NativeSelect
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="w-48 text-sm"
+          >
+            <option value="all">Tous les statuts</option>
+            <option value="pending">En attente</option>
+            <option value="completed">Validés</option>
+            <option value="failed">Échoués</option>
+          </NativeSelect>
+        }
+        emptyState={
+          <EmptyState
+            icon={HandCoins}
+            title="Aucun don"
+            description="Les dons Mobile Money apparaîtront ici dès leur enregistrement."
+          />
+        }
         actions={(row) => {
           const id = Number(row.id);
           if (row.status !== "pending") return null;

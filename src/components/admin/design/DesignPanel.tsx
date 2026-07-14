@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { Button } from "@/components/ui/primitives/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/primitives/tabs";
 import { SkeletonList } from "@/components/ui/primitives/skeleton";
 import { HeroSection, type HeroState } from "@/components/admin/design/HeroSection";
@@ -74,16 +76,15 @@ export function DesignPanel() {
 
   return (
     <div className="w-full max-w-none space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-bold text-admin-ink">Médias & design</h2>
-        <button
-          type="button"
-          onClick={load}
-          className="flex items-center gap-1 text-sm text-admin-accent"
-        >
-          <RefreshCw className="h-4 w-4" /> Actualiser
-        </button>
-      </div>
+      <PageHeader
+        title="Médias & design"
+        subtitle="Hero, bibliothèque, collections et visuels par défaut du site."
+        actions={
+          <Button type="button" variant="ghost" size="sm" onClick={load}>
+            <RefreshCw className="h-4 w-4" /> Actualiser
+          </Button>
+        }
+      />
 
       <ServerlessUploadBanner />
 

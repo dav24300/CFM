@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Ban, Check, Download, Eye, EyeOff, FileText, Mail, Pencil, Trash2, UserPlus, Users, X } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/primitives/tabs";
 import { Button } from "@/components/ui/primitives/button";
 import { DataTable, type Column } from "@/components/admin/ui/data-table";
@@ -8,6 +9,9 @@ import { StatusBadge } from "@/components/admin/ui/status-badge";
 import { ExportButton } from "@/components/admin/ui/export-button";
 import { PreviewButton } from "@/components/admin/ui/preview-button";
 import { SlideOverEditor, type EditorField } from "@/components/admin/ui/slide-over-editor";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { EmptyState } from "@/components/admin/ui/EmptyState";
+import { type RowAction } from "@/components/admin/ui/dropdown-menu";
 import { useAdminApi } from "@/components/admin/hooks/useAdminApi";
 import { useAdminToast } from "@/components/admin/context/AdminToastContext";
 import type { AdminData } from "@/components/admin/types";
@@ -143,14 +147,22 @@ export function CommunityPanel({ data, onReload }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-semibold text-admin-ink">Communauté</h2>
-        <div className="flex gap-2">
-          {tab === "users" && <ExportButton entity="users" label="Exporter membres" />}
-          {tab === "newsletter" && <ExportButton entity="newsletter" />}
-          {tab === "petitions" && <PreviewButton href="/petitions" tags={["cfm:petitions"]} />}
-        </div>
-      </div>
+      <PageHeader
+        title="Communauté"
+        subtitle="Membres, familles, pétitions et abonnés à la newsletter."
+        actions={
+          <>
+            {tab === "users" && <ExportButton entity="users" label="Exporter membres" />}
+            {tab === "newsletter" && <ExportButton entity="newsletter" />}
+            {tab === "petitions" && <PreviewButton href="/petitions" tags={["cfm:petitions"]} />}
+            {tab === "petitions" && (
+              <Button type="button" size="sm" onClick={() => { setEditId(null); setEditorOpen(true); }}>
+                + Pétition
+              </Button>
+            )}
+          </>
+        }
+      />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
         <TabsList>
@@ -167,20 +179,21 @@ export function CommunityPanel({ data, onReload }: Props) {
           columns={userCols}
           searchKeys={["first_name", "last_name", "email"]}
           rowKey={(r) => Number(r.id)}
-          actions={(row) => (
-            <div className="flex gap-1">
-              {row.status === "pending" && (
-                <Button size="sm" type="button" onClick={() => post({ action: "activate_user", id: row.id })}>
-                  Activer
-                </Button>
-              )}
-              {row.status === "active" && (
-                <Button size="sm" variant="destructive" type="button" onClick={() => post({ action: "suspend_user", id: row.id })}>
-                  Suspendre
-                </Button>
-              )}
-            </div>
-          )}
+          emptyState={
+            <EmptyState
+              icon={Users}
+              title="Aucun membre"
+              description="Les membres inscrits apparaîtront ici."
+            />
+          }
+          rowActions={(row) => {
+            const acts: RowAction[] = [];
+            if (row.status === "pending")
+              acts.push({ label: "Activer", icon: Check, onSelect: () => post({ action: "activate_user", id: row.id }) });
+            if (row.status === "active")
+              acts.push({ label: "Suspendre", icon: Ban, destructive: true, onSelect: () => post({ action: "suspend_user", id: row.id }) });
+            return acts;
+          }}
         />
       )}
 
@@ -189,57 +202,52 @@ export function CommunityPanel({ data, onReload }: Props) {
           data={family}
           columns={familyCols}
           rowKey={(r) => Number(r.id)}
-          actions={(row) =>
-            row.status !== "approved" && row.status !== "rejected" ? (
-              <div className="flex gap-1">
-                <Button size="sm" type="button" onClick={() => post({ action: "approve_family_link", id: row.id })}>
-                  Approuver
-                </Button>
-                <Button size="sm" variant="destructive" type="button" onClick={() => post({ action: "reject_family_link", id: row.id })}>
-                  Refuser
-                </Button>
-              </div>
-            ) : null
+          emptyState={
+            <EmptyState
+              icon={UserPlus}
+              title="Aucun lien familial"
+              description="Les demandes de rattachement parent-enfant apparaîtront ici."
+            />
+          }
+          rowActions={(row) =>
+            row.status !== "approved" && row.status !== "rejected"
+              ? [
+                  { label: "Approuver", icon: Check, onSelect: () => post({ action: "approve_family_link", id: row.id }) },
+                  { label: "Refuser", icon: X, destructive: true, onSelect: () => post({ action: "reject_family_link", id: row.id }) },
+                ]
+              : []
           }
         />
       )}
 
       {tab === "petitions" && (
-        <>
-          <Button type="button" size="sm" onClick={() => { setEditId(null); setEditorOpen(true); }}>
-            + Pétition
-          </Button>
-          <DataTable
-            data={petitions}
-            columns={petitionCols}
-            searchKeys={["title", "slug"]}
-            rowKey={(r) => Number(r.id)}
-            actions={(row) => {
-              const id = Number(row.id);
-              const active = row.active === 1 || row.active === undefined ? 1 : 0;
-              return (
-                <div className="flex flex-wrap gap-1">
-                  <Button size="sm" variant="secondary" type="button" onClick={() => { setEditId(id); setEditorOpen(true); }}>
-                    Modifier
-                  </Button>
-                  <Button size="sm" variant="secondary" type="button" onClick={() => togglePetition(id, active)}>
-                    {active === 1 ? "Dépublier" : "Publier"}
-                  </Button>
-                  <a
-                    href={`/api/admin/export/petitions/${id}`}
-                    download
-                    className="inline-flex h-8 items-center rounded-admin-ctrl border border-admin-border bg-admin-surface px-3 text-xs font-medium hover:bg-admin-bg"
-                  >
-                    Signatures CSV
-                  </a>
-                  <Button size="sm" variant="destructive" type="button" onClick={() => removePetition(id)}>
-                    Supprimer
-                  </Button>
-                </div>
-              );
-            }}
-          />
-        </>
+        <DataTable
+          data={petitions}
+          columns={petitionCols}
+          searchKeys={["title", "slug"]}
+          rowKey={(r) => Number(r.id)}
+          emptyState={
+            <EmptyState
+              icon={FileText}
+              title="Aucune pétition"
+              description="Créez une pétition pour mobiliser la communauté autour d'une cause."
+            />
+          }
+          rowActions={(row) => {
+            const id = Number(row.id);
+            const active = row.active === 1 || row.active === undefined ? 1 : 0;
+            return [
+              { label: "Modifier", icon: Pencil, onSelect: () => { setEditId(id); setEditorOpen(true); } },
+              {
+                label: active === 1 ? "Dépublier" : "Publier",
+                icon: active === 1 ? EyeOff : Eye,
+                onSelect: () => togglePetition(id, active),
+              },
+              { label: "Signatures CSV", icon: Download, href: `/api/admin/export/petitions/${id}`, download: true },
+              { label: "Supprimer", icon: Trash2, destructive: true, onSelect: () => removePetition(id) },
+            ];
+          }}
+        />
       )}
 
       {tab === "newsletter" && (
@@ -248,11 +256,16 @@ export function CommunityPanel({ data, onReload }: Props) {
           columns={newsletterCols}
           searchKeys={["email"]}
           rowKey={(r) => Number(r.id)}
-          actions={(row) => (
-            <Button size="sm" variant="destructive" type="button" onClick={() => removeNewsletter(Number(row.id))}>
-              Retirer
-            </Button>
-          )}
+          emptyState={
+            <EmptyState
+              icon={Mail}
+              title="Aucun abonné"
+              description="Les inscriptions à la newsletter apparaîtront ici."
+            />
+          }
+          rowActions={(row) => [
+            { label: "Retirer", icon: Trash2, destructive: true, onSelect: () => removeNewsletter(Number(row.id)) },
+          ]}
         />
       )}
 

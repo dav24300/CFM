@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { Eye, EyeOff, Pencil, Trash2, FileText } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/primitives/tabs";
 import { Button } from "@/components/ui/primitives/button";
 import { DataTable, type Column } from "@/components/admin/ui/data-table";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { EmptyState } from "@/components/admin/ui/EmptyState";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
 import { SlideOverEditor, type EditorField } from "@/components/admin/ui/slide-over-editor";
 import { useAdminToast } from "@/components/admin/context/AdminToastContext";
@@ -165,25 +168,28 @@ export function ContentPanel({ data, onReload }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-semibold text-admin-ink">Contenu</h2>
-        <div className="flex gap-2">
-          <PreviewButton
-            href={table === "news" ? "/" : table === "studies" || table === "campaigns" ? "/plaidoyer" : table === "press_releases" ? "/presse" : "/"}
-            tags={[CACHE_TAGS.content, tagForTable(table)]}
-          />
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => {
-              setEditId(null);
-              setEditorOpen(true);
-            }}
-          >
-            + Nouveau
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Contenu"
+        subtitle="Actualités, études, campagnes, presse et témoignages publiés sur le site."
+        actions={
+          <>
+            <PreviewButton
+              href={table === "news" ? "/" : table === "studies" || table === "campaigns" ? "/plaidoyer" : table === "press_releases" ? "/presse" : "/"}
+              tags={[CACHE_TAGS.content, tagForTable(table)]}
+            />
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => {
+                setEditId(null);
+                setEditorOpen(true);
+              }}
+            >
+              + Nouveau
+            </Button>
+          </>
+        }
+      />
 
       <Tabs value={table} onValueChange={(v) => setTable(v as ContentType)}>
         <TabsList>
@@ -200,27 +206,34 @@ export function ContentPanel({ data, onReload }: Props) {
         columns={columns}
         searchKeys={["title", "slug"]}
         rowKey={(r) => Number(r.id)}
-        actions={(row) => (
-          <div className="flex flex-wrap gap-1">
-            <Button size="sm" variant="secondary" type="button" onClick={() => togglePublish(row)}>
-              {Number(row[publishKey]) === 1 ? "Dépublier" : "Publier"}
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              type="button"
-              onClick={() => {
-                setEditId(Number(row.id));
-                setEditorOpen(true);
-              }}
-            >
-              Modifier
-            </Button>
-            <Button size="sm" variant="destructive" type="button" onClick={() => setDeleteId(Number(row.id))}>
-              Suppr.
-            </Button>
-          </div>
-        )}
+        emptyState={
+          <EmptyState
+            icon={FileText}
+            title="Aucun contenu"
+            description={`Aucune entrée pour « ${tableLabel} » pour le moment.`}
+          />
+        }
+        rowActions={(row) => [
+          {
+            label: Number(row[publishKey]) === 1 ? "Dépublier" : "Publier",
+            icon: Number(row[publishKey]) === 1 ? EyeOff : Eye,
+            onSelect: () => togglePublish(row),
+          },
+          {
+            label: "Modifier",
+            icon: Pencil,
+            onSelect: () => {
+              setEditId(Number(row.id));
+              setEditorOpen(true);
+            },
+          },
+          {
+            label: "Supprimer",
+            icon: Trash2,
+            destructive: true,
+            onSelect: () => setDeleteId(Number(row.id)),
+          },
+        ]}
       />
 
       <SlideOverEditor
