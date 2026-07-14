@@ -21,6 +21,19 @@ type Props = {
   className?: string;
 };
 
+/** Filtre « soft » identique au sélecteur natif (l'attribut `accept` n'agit pas au drop). */
+function matchesAccept(file: File, accept: string): boolean {
+  const tokens = accept.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean);
+  if (tokens.length === 0) return true;
+  const name = file.name.toLowerCase();
+  const type = file.type.toLowerCase();
+  return tokens.some((token) => {
+    if (token.startsWith(".")) return name.endsWith(token);
+    if (token.endsWith("/*")) return type.startsWith(token.slice(0, -1));
+    return type === token;
+  });
+}
+
 /**
  * Zone de dépôt (glisser-déposer + clic) avec upload en lot et progression réelle
  * par fichier. Désactivée en mode démo (sans Supabase Storage).
@@ -72,7 +85,9 @@ export function MediaDropzone({
   function handleDrop(e: DragEvent<HTMLDivElement>) {
     e.preventDefault();
     setDragging(false);
-    if (!readonly) void enqueue(Array.from(e.dataTransfer.files));
+    if (readonly) return;
+    const allowed = Array.from(e.dataTransfer.files).filter((f) => matchesAccept(f, accept));
+    void enqueue(allowed);
   }
 
   const activeCount = queue.filter((q) => q.status === "uploading" || q.status === "queued").length;
@@ -97,6 +112,9 @@ export function MediaDropzone({
         onDragOver={(e) => e.preventDefault()}
         onDragLeave={(e) => {
           e.preventDefault();
+          // Ignore les dragleave qui partent vers un enfant du dropzone (icône, texte) :
+          // le fichier est toujours au-dessus de la zone → pas de clignotement.
+          if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget as Node)) return;
           setDragging(false);
         }}
         onDrop={handleDrop}
@@ -142,36 +160,56 @@ export function MediaDropzone({
       </div>
 
       {queue.length > 0 && (
-        <ul className="mt-3 space-y-2">
-          {queue.map((it) => (
-            <li
-              key={it.id}
-              className="flex items-center gap-3 rounded-admin-ctrl border border-admin-border bg-admin-surface px-3 py-2"
-            >
-              <span className="shrink-0">
-                {it.status === "done" ? (
-                  <CheckCircle2 className="h-4 w-4 text-admin-ok-fg" />
-                ) : it.status === "error" ? (
-                  <AlertCircle className="h-4 w-4 text-admin-danger-fg" />
-                ) : (
-                  <Loader2 className="h-4 w-4 animate-spin text-admin-accent" />
-                )}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-medium text-admin-ink">{it.name}</p>
-                {it.status === "error" ? (
-                  <p className="truncate text-[11px] text-admin-danger-fg">{it.error}</p>
-                ) : (
-                  <div className="mt-1 h-1 overflow-hidden rounded-full bg-admin-bg">
+        <ul className="mt-3 space-y-2" aria-live="polite">
+          {queue.map((it) => {
+            const statusLabel =
+              it.status === "done"
+                ? `${it.name} : téléversé`
+                : it.status === "error"
+                  ? `${it.name} : échec — ${it.error ?? "erreur"}`
+                  : it.status === "uploading"
+                    ? `${it.name} : téléversement en cours`
+                    : `${it.name} : en file d'attente`;
+            return (
+              <li
+                key={it.id}
+                className="flex items-center gap-3 rounded-admin-ctrl border border-admin-border bg-admin-surface px-3 py-2"
+              >
+                <span className="shrink-0" aria-hidden="true">
+                  {it.status === "done" ? (
+                    <CheckCircle2 className="h-4 w-4 text-admin-ok-fg" />
+                  ) : it.status === "error" ? (
+                    <AlertCircle className="h-4 w-4 text-admin-danger-fg" />
+                  ) : (
+                    <Loader2 className="h-4 w-4 animate-spin text-admin-accent" />
+                  )}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-medium text-admin-ink">{it.name}</p>
+                  <span className="sr-only">{statusLabel}</span>
+                  {it.status === "error" ? (
+                    <p role="alert" className="truncate text-[11px] text-admin-danger-fg">
+                      {it.error}
+                    </p>
+                  ) : (
                     <div
-                      className="h-full rounded-full bg-admin-accent transition-all"
-                      style={{ width: `${it.status === "done" ? 100 : it.pct}%` }}
-                    />
-                  </div>
-                )}
-              </div>
-            </li>
-          ))}
+                      role="progressbar"
+                      aria-label={`Progression du téléversement de ${it.name}`}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={it.status === "done" ? 100 : Math.round(it.pct)}
+                      className="mt-1 h-1 overflow-hidden rounded-full bg-admin-bg"
+                    >
+                      <div
+                        className="h-full rounded-full bg-admin-accent transition-all"
+                        style={{ width: `${it.status === "done" ? 100 : it.pct}%` }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </li>
+            );
+          })}
           {activeCount === 0 && (
             <li>
               <button

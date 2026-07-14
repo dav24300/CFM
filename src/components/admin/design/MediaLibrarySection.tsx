@@ -5,6 +5,7 @@ import { Search, Image as ImageIcon } from "lucide-react";
 import { Input } from "@/components/ui/primitives/input";
 import { Button } from "@/components/ui/primitives/button";
 import { EmptyState } from "@/components/admin/ui/EmptyState";
+import { Skeleton } from "@/components/ui/primitives/skeleton";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
 import { useAdminToast } from "@/components/admin/context/AdminToastContext";
 import { MediaDropzone } from "@/components/admin/design/MediaDropzone";
@@ -21,15 +22,31 @@ export function MediaLibrarySection() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [preview, setPreview] = useState<MediaItem | null>(null);
   const [confirmBulk, setConfirmBulk] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const { success, error } = useAdminToast();
 
   async function load() {
-    const res = await fetch("/api/admin/media/library");
-    if (res.ok) {
-      const data = await res.json();
-      setItems(data.items || []);
+    try {
+      const res = await fetch("/api/admin/media/library");
+      if (!res.ok) {
+        error("Chargement de la bibliothèque échoué");
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      const nextItems: MediaItem[] = data.items || [];
+      setItems(nextItems);
+      // Élague la sélection aux chemins encore présents (préserve une sélection
+      // en cours à travers un rafraîchissement en arrière-plan : fin d'upload, cleanup).
+      const valid = new Set(nextItems.map((it) => it.path));
+      setSelected((prev) => {
+        const next = new Set([...prev].filter((p) => valid.has(p)));
+        return next.size === prev.size ? prev : next;
+      });
+    } catch {
+      error("Chargement de la bibliothèque échoué");
+    } finally {
+      setLoaded(true);
     }
-    setSelected(new Set());
   }
 
   useEffect(() => {
@@ -62,8 +79,14 @@ export function MediaLibrarySection() {
   }
 
   function copyPath(path: string) {
-    void navigator.clipboard?.writeText(path);
-    success("Chemin copié");
+    if (!navigator.clipboard) {
+      error("Presse-papiers indisponible");
+      return;
+    }
+    navigator.clipboard.writeText(path).then(
+      () => success("Chemin copié"),
+      () => error("Copie impossible")
+    );
   }
 
   async function deleteOne(path: string): Promise<boolean> {
@@ -179,7 +202,13 @@ export function MediaLibrarySection() {
         </div>
       )}
 
-      {noResults ? (
+      {!loaded ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <Skeleton key={i} variant="rect" className="aspect-video w-full rounded-admin-ctrl" />
+          ))}
+        </div>
+      ) : noResults ? (
         <EmptyState
           icon={ImageIcon}
           title={isFiltering ? "Aucun résultat" : "Bibliothèque vide"}

@@ -33,8 +33,14 @@ export function MediaLightbox({ item, onClose, onCopy }: Props) {
   const ref = useFocusTrap<HTMLDivElement>(!!item);
   const [dims, setDims] = useState("—");
 
+  // Réinitialise les dimensions au changement de média uniquement (pas à chaque
+  // re-render du parent — sinon un toast effacerait « 1920 × 1080 » vers « — »).
   useEffect(() => {
     setDims("—");
+  }, [item?.path]);
+
+  // Fermeture au clavier (Échap), effet séparé (dépend de onClose non mémoïsé).
+  useEffect(() => {
     if (!item) return;
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
