@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/primitives/button";
 import { MediaPicker } from "@/components/admin/ui/media-picker";
 import { PreviewButton } from "@/components/admin/ui/preview-button";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
 import { SlideOverEditor, type EditorField } from "@/components/admin/ui/slide-over-editor";
 import { LiveEventCard } from "@/components/admin/live/LiveEventCard";
 import { ChatModerationSection } from "@/components/admin/live/ChatModerationSection";
@@ -167,25 +169,24 @@ export function AdminV3Panel({ initialEvents, onReload }: Props) {
     chat.pending.length > 0 || (chat.mode === "all" && chat.history.length > 0);
 
   return (
-    <div className="mt-8 space-y-10">
+    <div className="space-y-8">
       <section>
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Lives & événements ({events.length})</h2>
-          <div className="flex items-center gap-2">
-            {pushStats !== null && (
-              <span className="text-sm text-admin-muted">{pushStats} abonné(s) push</span>
-            )}
-            <PreviewButton href="/live" tags={["cfm:live"]} label="Voir sur le site" />
-            <button
-              type="button"
-              onClick={() => openEditor(null)}
-              className="rounded-admin-ctrl bg-admin-accent px-3 py-1 text-sm font-semibold text-admin-accent-fg"
-            >
-              + Nouveau live
-            </button>
-          </div>
-        </div>
-        <div className="mt-4 space-y-3">
+        <PageHeader
+          title="Live & mobilisation"
+          subtitle={`${events.length} événement${events.length > 1 ? "s" : ""} · modération du chat et notifications push.`}
+          actions={
+            <>
+              {pushStats !== null && (
+                <span className="mr-1 text-[13px] text-admin-muted">{pushStats} abonné(s) push</span>
+              )}
+              <PreviewButton href="/live" tags={["cfm:live"]} label="Voir sur le site" />
+              <Button type="button" size="sm" onClick={() => openEditor(null)}>
+                + Nouveau live
+              </Button>
+            </>
+          }
+        />
+        <div className="space-y-3">
           {events.map((ev) => (
             <LiveEventCard
               key={ev.id}

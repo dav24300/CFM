@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
 import { PROVINCES_RDC } from "@/lib/constants";
 import { Button } from "@/components/ui/primitives/button";
 import { DataTable, type Column } from "@/components/admin/ui/data-table";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
 import { SlideOverEditor, type EditorField } from "@/components/admin/ui/slide-over-editor";
 import { PreviewButton } from "@/components/admin/ui/preview-button";
+import { PageHeader } from "@/components/admin/ui/PageHeader";
+import { Card, CardHeader } from "@/components/admin/ui/card";
 import { useAdminApi } from "@/components/admin/hooks/useAdminApi";
 import type { AdminData } from "@/components/admin/types";
 import { CACHE_TAGS } from "@/infrastructure/cache/cache-tags";
@@ -82,54 +85,56 @@ export function TerritoryPanel({ data, onReload }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-semibold text-admin-ink">Actions & territoire</h2>
-        <div className="flex gap-2">
-          <PreviewButton href="/actions" tags={[CACHE_TAGS.actions, CACHE_TAGS.content]} />
-          <Button type="button" size="sm" onClick={() => { setEditId(null); setEditorOpen(true); }}>
-            + Action
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Actions & territoire"
+        subtitle="Actions de terrain et couverture des provinces."
+        actions={
+          <>
+            <PreviewButton href="/actions" tags={[CACHE_TAGS.actions, CACHE_TAGS.content]} />
+            <Button type="button" size="sm" onClick={() => { setEditId(null); setEditorOpen(true); }}>
+              + Action
+            </Button>
+          </>
+        }
+      />
 
-      <section className="rounded-admin border border-admin-border bg-admin-surface p-4 shadow-sm">
-        <h3 className="mb-3 text-sm font-semibold uppercase text-admin-muted">
-          Couverture RDC — {coveredProvinces.size}/{PROVINCES_RDC.length} provinces
-        </h3>
-        <div className="flex flex-wrap gap-1">
+      <Card className="p-5">
+        <CardHeader
+          title="Couverture territoriale"
+          subtitle={`${coveredProvinces.size}/${PROVINCES_RDC.length} provinces couvertes`}
+        />
+        <div className="mt-4 flex flex-wrap gap-1.5">
           {PROVINCES_RDC.map((p) => (
             <span
               key={p}
-              className={`rounded px-2 py-0.5 text-xs ${
-                coveredProvinces.has(p) ? "badge-ok" : "bg-admin-bg text-admin-muted"
+              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                coveredProvinces.has(p) ? "bg-admin-ok-bg text-admin-ok-fg" : "bg-admin-bg text-admin-muted-2"
               }`}
             >
               {p}
             </span>
           ))}
         </div>
-      </section>
+      </Card>
 
       <DataTable
         data={actions}
         columns={columns}
         searchKeys={["province", "title"]}
         rowKey={(r) => Number(r.id)}
-        actions={(row) => (
-          <div className="flex gap-1">
-            <Button
-              size="sm"
-              variant="secondary"
-              type="button"
-              onClick={() => { setEditId(Number(row.id)); setEditorOpen(true); }}
-            >
-              Modifier
-            </Button>
-            <Button size="sm" variant="destructive" type="button" onClick={() => setDeleteId(Number(row.id))}>
-              Suppr.
-            </Button>
-          </div>
-        )}
+        rowActions={(row) => [
+          {
+            label: "Modifier",
+            icon: Pencil,
+            onSelect: () => { setEditId(Number(row.id)); setEditorOpen(true); },
+          },
+          {
+            label: "Supprimer",
+            icon: Trash2,
+            destructive: true,
+            onSelect: () => setDeleteId(Number(row.id)),
+          },
+        ]}
       />
 
       <SlideOverEditor
