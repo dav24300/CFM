@@ -1,8 +1,10 @@
 "use client";
 
+import { useState, type ReactNode } from "react";
 import Image from "next/image";
-import { FileText, ImageOff } from "lucide-react";
+import { FileText, ImageOff, ImagePlus } from "lucide-react";
 import { AdminFileUpload } from "@/components/admin/ui/admin-file-upload";
+import { MediaPicker } from "@/components/admin/ui/media-picker";
 import { PublishBadge, type PublishState } from "@/components/admin/design/PublishBadge";
 import { useStorageAvailable } from "@/components/admin/design/useStorageAvailable";
 import type { MediaUploadOptions } from "@/components/admin/hooks/useMediaUpload";
@@ -21,6 +23,8 @@ type Props = {
   /** Lien « Voir sur le site » (affiché seulement si un fichier est présent). */
   siteHref?: string;
   help?: string;
+  /** Contenu avancé rendu en bas de la carte (ex. saisie de chemin manuel). */
+  footer?: ReactNode;
   className?: string;
 };
 
@@ -40,13 +44,16 @@ export function MediaSlot({
   state,
   siteHref,
   help,
+  footer,
   className,
 }: Props) {
   const storage = useStorageAvailable();
   const readonly = storage === false;
+  const [pickerOpen, setPickerOpen] = useState(false);
   const resolvedState: PublishState = state ?? (value ? "online" : "fallback");
 
   return (
+    <>
     <div className={cn("rounded-admin-card border border-admin-border bg-admin-surface p-4 shadow-admin-rest", className)}>
       <div className="flex items-center justify-between gap-2">
         <h4 className="truncate font-display text-sm font-semibold text-admin-ink">{label}</h4>
@@ -78,7 +85,14 @@ export function MediaSlot({
         {value ? value.split("/").pop() : "Le site affiche un visuel par défaut."}
       </p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-3">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-admin-ctrl border border-admin-border px-2.5 py-2 text-sm font-medium text-admin-ink transition-colors hover:bg-admin-bg"
+        >
+          <ImagePlus className="h-3.5 w-3.5" /> Choisir…
+        </button>
         <AdminFileUpload
           label={uploadLabel}
           accept={accept}
@@ -91,7 +105,7 @@ export function MediaSlot({
             href={siteHref}
             target="_blank"
             rel="noreferrer"
-            className="text-xs font-medium text-admin-accent hover:underline"
+            className="ml-auto text-xs font-medium text-admin-accent hover:underline"
           >
             Voir sur le site →
           </a>
@@ -99,10 +113,24 @@ export function MediaSlot({
       </div>
 
       {readonly ? (
-        <p className="mt-2 text-xs text-admin-warn-fg">Upload désactivé (mode démo — sans Supabase Storage).</p>
+        <p className="mt-2 text-xs text-admin-warn-fg">Import désactivé (mode démo). « Choisir… » reste possible.</p>
       ) : (
         help && <p className="mt-2 text-xs text-admin-muted">{help}</p>
       )}
+
+      {footer && <div className="mt-3 border-t border-admin-border pt-3">{footer}</div>}
     </div>
+
+    <MediaPicker
+      open={pickerOpen}
+      onClose={() => setPickerOpen(false)}
+      onSelect={(path) => {
+        onUploaded(path);
+        setPickerOpen(false);
+      }}
+      title={`Choisir — ${label}`}
+      accept={accept}
+    />
+    </>
   );
 }

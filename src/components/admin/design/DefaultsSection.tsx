@@ -1,10 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { Input } from "@/components/ui/primitives/input";
 import { Button } from "@/components/ui/primitives/button";
 import { useAdminToast } from "@/components/admin/context/AdminToastContext";
-import { AdminFileUpload } from "@/components/admin/ui/admin-file-upload";
+import { MediaSlot } from "@/components/admin/design/MediaSlot";
 
 export type DefaultsState = {
   default_news_cover: string;
@@ -72,33 +71,25 @@ export function DefaultsSection({ defaults, onChange, onSaved }: Props) {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {FIELDS.map(({ key, label }) => (
-          <div key={key} className="rounded-admin-ctrl border border-admin-border p-3">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-medium text-admin-ink">{label}</p>
-              <span className="text-[10px] font-medium text-admin-ok-fg">Publié si upload</span>
-            </div>
-            {defaults[key] && (
-              <div className="relative mt-2 aspect-video overflow-hidden rounded bg-admin-bg">
-                <Image src={defaults[key]} alt="" fill className="object-cover" sizes="160px" />
-              </div>
-            )}
-            <Input
-              className="mt-2 text-xs"
-              value={defaults[key]}
-              onChange={(e) => onChange({ ...defaults, [key]: e.target.value })}
-            />
-            <AdminFileUpload
-              label="Upload"
-              variant="inline"
-              accept={key === "favicon_url" ? "image/*,.svg" : "image/jpeg,image/png,image/webp,image/heic,image/heif"}
-              options={{ settingKey: key, category: "defaults" }}
-              onUploaded={({ path }) => {
-                onChange({ ...defaults, [key]: path });
-                onSaved();
-              }}
-              className="mt-1 block"
-            />
-          </div>
+          <MediaSlot
+            key={key}
+            label={label}
+            value={defaults[key]}
+            accept={key === "favicon_url" ? "image/*,.svg" : "image/jpeg,image/png,image/webp,image/heic,image/heif"}
+            uploadOptions={{ settingKey: key, category: "defaults" }}
+            onUploaded={(path) => {
+              onChange({ ...defaults, [key]: path });
+              onSaved();
+            }}
+            footer={
+              <Input
+                className="text-xs"
+                placeholder="Chemin manuel (avancé)"
+                value={defaults[key]}
+                onChange={(e) => onChange({ ...defaults, [key]: e.target.value })}
+              />
+            }
+          />
         ))}
       </div>
 

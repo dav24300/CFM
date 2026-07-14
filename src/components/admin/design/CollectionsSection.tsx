@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/primitives/input";
 import { Button } from "@/components/ui/primitives/button";
 import { useAdminToast } from "@/components/admin/context/AdminToastContext";
 import { useMediaUpload } from "@/components/admin/hooks/useMediaUpload";
+import { MediaSlot } from "@/components/admin/design/MediaSlot";
 import { AXIS_SLUGS, type GalleryItem } from "@/domain/media";
 import { AXES } from "@/lib/constants";
 
@@ -55,14 +56,6 @@ export function CollectionsSection() {
 
   async function saveAll() {
     await persistCollections(gallery, axes);
-  }
-
-  async function uploadAxis(slug: string, file: File) {
-    const result = await upload(file, { category: "axes" });
-    if (!result) return;
-    const nextAxes = { ...axes, [slug]: result.path };
-    setAxes(nextAxes);
-    await persistCollections(gallery, nextAxes);
   }
 
   async function addGalleryItem(file: File) {
@@ -129,27 +122,18 @@ export function CollectionsSection() {
         <h3 className="mb-4 font-semibold text-admin-ink">Images des axes (×5)</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {AXIS_SLUGS.map((slug) => (
-            <div key={slug} className="rounded-admin-ctrl border border-admin-border p-3">
-              <p className="text-sm font-medium">{AXIS_LABELS[slug] || slug}</p>
-              {axes[slug] && (
-                <div className="relative mt-2 aspect-video overflow-hidden rounded bg-admin-bg">
-                  <Image src={axes[slug]} alt="" fill className="object-cover" sizes="160px" />
-                </div>
-              )}
-              <label className="mt-2 block cursor-pointer text-xs text-admin-accent">
-                Remplacer
-                <input
-                  type="file"
-                  className="sr-only"
-                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) void uploadAxis(slug, f);
-                    e.target.value = "";
-                  }}
-                />
-              </label>
-            </div>
+            <MediaSlot
+              key={slug}
+              label={AXIS_LABELS[slug] || slug}
+              value={axes[slug]}
+              accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+              uploadOptions={{ category: "axes" }}
+              onUploaded={(path) => {
+                const next = { ...axes, [slug]: path };
+                setAxes(next);
+                void persistCollections(gallery, next);
+              }}
+            />
           ))}
         </div>
       </section>

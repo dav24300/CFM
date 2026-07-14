@@ -32,11 +32,28 @@ export function MediaLightbox({ item, onClose, onCopy }: Props) {
   const reduced = useReducedMotion();
   const ref = useFocusTrap<HTMLDivElement>(!!item);
   const [dims, setDims] = useState("—");
+  const [usages, setUsages] = useState<string[] | null>(null);
 
-  // Réinitialise les dimensions au changement de média uniquement (pas à chaque
-  // re-render du parent — sinon un toast effacerait « 1920 × 1080 » vers « — »).
+  // Réinitialise les dimensions + récupère « où est-ce utilisé » au changement de
+  // média uniquement (pas à chaque re-render du parent — sinon un toast effacerait
+  // « 1920 × 1080 » vers « — »).
   useEffect(() => {
     setDims("—");
+    setUsages(null);
+    const path = item?.path;
+    if (!path) return;
+    let alive = true;
+    fetch(`/api/admin/media/library?usage=${encodeURIComponent(path)}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (alive) setUsages(Array.isArray(d.usages) ? d.usages : []);
+      })
+      .catch(() => {
+        if (alive) setUsages([]);
+      });
+    return () => {
+      alive = false;
+    };
   }, [item?.path]);
 
   // Fermeture au clavier (Échap), effet séparé (dépend de onClose non mémoïsé).
@@ -122,6 +139,24 @@ export function MediaLightbox({ item, onClose, onCopy }: Props) {
                 <MetaRow label="Dimensions" value={dims} />
                 <MetaRow label="Ajouté le" value={formatDate(item.uploaded_at)} />
               </dl>
+
+              <div className="mt-4">
+                <p className="text-[12px] uppercase tracking-wide text-admin-muted-2">Utilisé dans</p>
+                {usages === null ? (
+                  <p className="mt-1 text-[13px] text-admin-muted-2">Vérification…</p>
+                ) : usages.length === 0 ? (
+                  <p className="mt-1 text-[13px] text-admin-muted">Aucun emplacement — suppression possible.</p>
+                ) : (
+                  <ul className="mt-1.5 space-y-1">
+                    {usages.map((u, i) => (
+                      <li key={`${u}-${i}`} className="flex items-start gap-2 text-[13px] text-admin-ink">
+                        <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-admin-accent" />
+                        <span className="min-w-0 break-words">{u}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
               <div className="mt-5 flex flex-wrap gap-2">
                 <button

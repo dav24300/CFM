@@ -16,7 +16,7 @@ export function DesignHeroPreview({ image, video, poster, alt }: Props) {
   return (
     <div className="sticky top-4 space-y-3">
       <p className="text-xs font-semibold uppercase text-admin-muted">Aperçu accueil</p>
-      <div className="relative aspect-video overflow-hidden rounded-xl border bg-admin-deep shadow-lg">
+      <div className="relative aspect-video overflow-hidden rounded-admin-card border border-admin-border bg-admin-deep shadow-admin-raised">
         {videoSrc ? (
           <video
             src={videoSrc}
