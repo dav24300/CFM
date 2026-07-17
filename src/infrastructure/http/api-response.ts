@@ -4,6 +4,12 @@ import { DomainError } from "@/domain/errors/domain-error";
 type ErrorSpec = { message: string; status: number };
 
 const DOMAIN_ERRORS: Record<string, ErrorSpec> = {
+  ACCOUNT_PENDING: {
+    message:
+      "Votre compte est en attente de validation par l'équipe CFM. Vous recevrez un email dès son activation.",
+    status: 403,
+  },
+  ACCOUNT_SUSPENDED: { message: "Compte suspendu. Contactez l'équipe CFM.", status: 403 },
   ALREADY_EXISTS: { message: "Email déjà inscrit", status: 409 },
   ALREADY_SIGNED: { message: "Déjà signé", status: 409 },
   ALREADY_VOTED: { message: "Vous avez déjà voté", status: 400 },

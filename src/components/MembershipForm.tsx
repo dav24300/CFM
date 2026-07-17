@@ -45,6 +45,13 @@ export function MembershipForm() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Erreur");
+        try {
+          // Pont vers /membre/inscription : évite la re-saisie (sessionStorage,
+          // jamais l'URL — données personnelles).
+          sessionStorage.setItem("cfm-adhesion-prefill", JSON.stringify({ type, ...form }));
+        } catch {
+          // stockage indisponible : le préremplissage est simplement perdu
+        }
         setForm({
           first_name: "",
           last_name: "",

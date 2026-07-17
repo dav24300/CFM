@@ -28,6 +28,7 @@ import {
   createPasswordResetToken,
   resetPasswordWithToken,
 } from "@/infrastructure/auth/password-reset";
+import { domainError } from "@/domain/errors/domain-error";
 import type { MembershipType, PublicUser, User } from "@/domain/entities/v2";
 import type { FamilyLink } from "@/domain/entities/v2";
 
@@ -45,6 +46,10 @@ export async function loginMember(
 ): Promise<PublicUser | null> {
   const user = await verifyUserPassword(email, password);
   if (!user) return null;
+  // Statut vérifié AVANT la pose du cookie : un compte non actif ne doit
+  // recevoir aucune session, même invalidée en aval par getCurrentMember.
+  if (user.status === "pending") throw domainError("ACCOUNT_PENDING");
+  if (user.status === "suspended") throw domainError("ACCOUNT_SUSPENDED");
   await createMemberSession(user.id);
   return toPublicUser(user);
 }

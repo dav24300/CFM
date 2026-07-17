@@ -206,6 +206,7 @@
       "registerBtn": "Komikoma",
       "registerLoading": "Inscription...",
       "registerSuccess": "Inscription réussie ! Votre compte sera activé après validation par l'équipe CFM.",
+      "prefillNotice": "Vos informations de la demande d'adhésion ont été préremplies — choisissez simplement un mot de passe.",
       "editProfile": "Modifier mon profil",
       "dashboardHello": "Mbote",
       "accountActive": "Compte actif",

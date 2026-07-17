@@ -206,6 +206,7 @@
       "registerBtn": "Create my account",
       "registerLoading": "Registering...",
       "registerSuccess": "Registration successful! Your account will be activated after review.",
+      "prefillNotice": "Your membership request details have been prefilled — just choose a password.",
       "editProfile": "Edit my profile",
       "dashboardHello": "Hello",
       "accountActive": "Active account",
