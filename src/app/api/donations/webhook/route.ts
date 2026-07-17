@@ -1,11 +1,12 @@
 import { NextRequest } from "next/server";
 import { handleDonationWebhook } from "@/application/services/donation.service";
+import { getMobileMoneyMode } from "@/infrastructure/payment/payment-mode";
 import { jsonData, jsonError, jsonUnauthorized } from "@/infrastructure/http/api-response";
 
 export async function POST(request: NextRequest) {
   try {
     const masterKey = process.env.PAYDUNYA_MASTER_KEY;
-    const isProd = process.env.MOBILE_MONEY_MODE === "production";
+    const isProd = getMobileMoneyMode() === "production";
     const receivedHash =
       request.headers.get("PAYDUNYA-SIGNATURE") ||
       request.headers.get("paydunya-signature") ||

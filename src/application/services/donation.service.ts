@@ -5,6 +5,7 @@ import {
 } from "@/infrastructure/repositories/donations.repository";
 import { getCurrentMember } from "@/infrastructure/auth/member-auth";
 import { createPayDunyaInvoice } from "@/infrastructure/payment/paydunya.adapter";
+import { getMobileMoneyMode } from "@/infrastructure/payment/payment-mode";
 import { sendDonationReceiptEmail } from "@/infrastructure/email/nodemailer.adapter";
 import type { Donation } from "@/domain/entities/v2";
 
@@ -15,7 +16,7 @@ export type DonationResult =
       message: string;
     }
   | {
-      mode: "production";
+      mode: "sandbox" | "production";
       donation: Donation;
       paymentUrl: string;
     };
@@ -39,9 +40,9 @@ export async function processDonation(body: {
     donor_email: body.donor_email || member?.email,
   });
 
-  const isDemo = process.env.MOBILE_MONEY_MODE !== "production";
+  const mode = getMobileMoneyMode();
 
-  if (isDemo) {
+  if (mode === "demo") {
     const completed = await completeDonation(
       donation.id,
       `DEMO-${Date.now()}-${donation.id}`
@@ -76,7 +77,7 @@ export async function processDonation(body: {
   }
 
   return {
-    mode: "production",
+    mode,
     donation,
     paymentUrl: paydunya.invoice_url,
   };

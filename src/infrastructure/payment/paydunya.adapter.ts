@@ -1,8 +1,17 @@
 import { SITE } from "@/lib/constants";
 import { createHmac, timingSafeEqual } from "crypto";
 import { domainError } from "@/domain/errors/domain-error";
+import { getMobileMoneyMode } from "@/infrastructure/payment/payment-mode";
 
-const PAYDUNYA_API = "https://app.paydunya.com/api/v1";
+const PAYDUNYA_LIVE_API = "https://app.paydunya.com/api/v1";
+const PAYDUNYA_SANDBOX_API = "https://app.paydunya.com/sandbox-api/v1";
+
+// PAYDUNYA_API_BASE prime sur le mode (utile pour pointer un simulateur local).
+export function getPayDunyaApiBase(): string {
+  const override = process.env.PAYDUNYA_API_BASE?.trim();
+  if (override) return override.replace(/\/+$/, "");
+  return getMobileMoneyMode() === "sandbox" ? PAYDUNYA_SANDBOX_API : PAYDUNYA_LIVE_API;
+}
 
 type CreateInvoiceParams = {
   amount: number;
@@ -69,7 +78,7 @@ export async function createPayDunyaInvoice(
   };
 
   try {
-    const res = await fetch(`${PAYDUNYA_API}/checkout-invoice/create`, {
+    const res = await fetch(`${getPayDunyaApiBase()}/checkout-invoice/create`, {
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify(body),
@@ -106,8 +115,8 @@ export function verifyPayDunyaWebhookHash(
   const normalized = receivedHash.trim();
   if (!normalized) return false;
 
-  // Backward-compatible fallback (demo/dev only).
-  if (process.env.MOBILE_MONEY_MODE !== "production" && normalized === masterKey) {
+  // Backward-compatible fallback (demo/sandbox only, jamais en production).
+  if (getMobileMoneyMode() !== "production" && normalized === masterKey) {
     return true;
   }
 
