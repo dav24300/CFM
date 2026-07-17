@@ -1,0 +1,34 @@
+# À installer dans .github/workflows/ci.yml
+#
+# Le jeton git utilisé par cette machine n'a pas le scope OAuth `workflow` :
+# GitHub refuse tout push touchant .github/workflows/. Deux options :
+#   a) régénérer le jeton avec le scope `workflow`, puis
+#      `git mv docs/ci/github-actions-ci.yml .github/workflows/ci.yml` et pousser ;
+#   b) via l'interface GitHub : Add file → Create new file →
+#      `.github/workflows/ci.yml` → coller le contenu ci-dessous (sans cet en-tête).
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+        env:
+          SESSION_SECRET: ci-test-secret-min-32-chars-long
+          ADMIN_PASSWORD: ci-admin
+          DATA_ENCRYPTION_KEY: ci-encryption-key-32chars-min
