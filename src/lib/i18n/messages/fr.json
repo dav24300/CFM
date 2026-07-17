@@ -235,7 +235,8 @@
       "partnerBody": "Institutions, ONG et entreprises : contactez-nous pour explorer un partenariat avec CFM.",
       "partnerBtn": "Proposer un partenariat",
       "demoPayment": "Mode démo : paiement simulé. Configurez MOBILE_MONEY_MODE=production et PayDunya pour la production.",
-      "prodPayment": "Paiement sécurisé via PayDunya (Orange Money, M-Pesa, Airtel)."
+      "prodPayment": "Paiement sécurisé via PayDunya (Orange Money, M-Pesa, Airtel).",
+      "sandboxPayment": "Mode test : paiement via l'environnement d'essai PayDunya, aucun encaissement réel."
     },
     "legal": {
       "mentionsTitle": "Mentions légales",

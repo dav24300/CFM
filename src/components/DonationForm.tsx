@@ -39,7 +39,7 @@ export function DonationForm() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
-        if (data.mode === "production" && data.paymentUrl) {
+        if (data.paymentUrl) {
           window.location.href = data.paymentUrl;
           return;
         }
@@ -117,7 +117,9 @@ export function DonationForm() {
       <p className="text-xs text-site-muted">
         {process.env.NEXT_PUBLIC_MOBILE_MONEY_MODE === "production"
           ? pay.prodPayment
-          : pay.demoPayment}
+          : process.env.NEXT_PUBLIC_MOBILE_MONEY_MODE === "sandbox"
+            ? pay.sandboxPayment
+            : pay.demoPayment}
       </p>
 
       <Button type="submit" loading={isLoading} className="w-full" data-cta="cta_don">

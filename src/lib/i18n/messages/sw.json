@@ -235,7 +235,8 @@
       "partnerBody": "Institutions, NGOs and companies: contact us to explore a partnership.",
       "partnerBtn": "Propose a partnership",
       "demoPayment": "Demo mode: simulated payment. Set MOBILE_MONEY_MODE=production and PayDunya for production.",
-      "prodPayment": "Secure payment via PayDunya (Orange Money, M-Pesa, Airtel)."
+      "prodPayment": "Secure payment via PayDunya (Orange Money, M-Pesa, Airtel).",
+      "sandboxPayment": "Test mode: payment through the PayDunya sandbox, no real charge."
     },
     "legal": {
       "mentionsTitle": "Notisi ya kisheria",
