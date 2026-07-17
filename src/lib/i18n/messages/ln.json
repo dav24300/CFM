@@ -40,8 +40,8 @@
   "donate": {
     "title": "Kopesa don",
     "amount": "Motango",
-    "provider": "Opérateur",
-    "phone": "Numéro Mobile Money",
+    "provider": "Réseau",
+    "phone": "Numéro ya Mobile Money",
     "submit": "Kopesa",
     "success": "Don enregistré",
     "orange": "Orange Money",
@@ -66,17 +66,17 @@
       "liveSectionTitle": "Live & ba événements",
       "liveSectionSubtitle": "Landela biso na temps réel.",
       "liveSectionCta": "Tala ba live",
-      "heroCtaLive": "Rejoindre le live"
+      "heroCtaLive": "Kota na live"
     },
     "contact": {
       "title": "Contact & lisalisi",
       "subtitle": "Bozala biso to tinda demande ya lisalisi. Tokoyanola na mikolo 7.",
       "email": "Email",
-      "phone": "Téléphone",
+      "phone": "Telefone",
       "country": "Mboka",
       "helpTitle": "Demande ya lisalisi",
       "helpSubtitle": "Mpo na bamili ya basoda.",
-      "generalTitle": "Contact général",
+      "generalTitle": "Contact ya biso",
       "generalSubtitle": "Mpo na presse to partenariat."
     },
     "about": {
@@ -98,7 +98,7 @@
       "donateSubtitle": "Via Mobile Money."
     },
     "auth": {
-      "forgotTitle": "Mot de passe oublié",
+      "forgotTitle": "Obosani mot de passe",
       "forgotSubtitle": "Tinda email na yo.",
       "resetTitle": "Mot de passe ya sika",
       "resetSubtitle": "Minimum 8 caractères.",
@@ -116,14 +116,14 @@
       "title": "Live & ba événements",
       "subtitle": "Landela biso na temps réel.",
       "pushSubscribe": "Bozwa ba alertes live",
-      "pushSubscribed": "Alertes activées",
+      "pushSubscribed": "Ba alertes epelisami",
       "pushError": "Notifications ezali te",
       "nowLive": "Live ezali kosala",
       "join": "Kota na live",
       "allEvents": "Ba événements nionso",
       "badgeLive": "NA TEMPS RÉEL",
       "badgeReplay": "Replay",
-      "badgeScheduled": "Programmé",
+      "badgeScheduled": "Ebongisami",
       "viewers": "bato balandaka",
       "chatTitle": "Chat",
       "chatPlaceholder": "Message na yo...",
@@ -141,103 +141,103 @@
     "actions": {
       "title": "Misala na mboka mpe na bitúká",
       "subtitle": "Carte ya misala na CFM na 26 provinces.",
-      "heroAlt": "Actions CFM en RDC",
+      "heroAlt": "Misala ya CFM na RDC",
       "loading": "Ezali kozela...",
       "empty": "Misala ezali te mpo na sélection oyo.",
-      "mapTitle": "Carte des actions",
-      "mapSubtitle": "province(s) avec des actions — 26 provinces RDC",
-      "mapAria": "Carte stylisée de la RDC",
+      "mapTitle": "Carte ya misala",
+      "mapSubtitle": "ba provinces oyo ezali na misala — ba provinces 26 ya RDC",
+      "mapAria": "Carte ya RDC",
       "allProvinces": "Ba provinces nionso",
       "types": {
-        "evenement": "Événement",
+        "evenement": "Molulu",
         "atelier": "Atelier",
-        "plaidoyer": "Plaidoyer",
-        "action": "Action"
+        "plaidoyer": "Kokamba makambo",
+        "action": "Mosala"
       }
     },
     "advocacy": {
       "title": "Plaidoyer & ba études",
-      "subtitle": "Nos analyses, conclusions et campagnes pour influencer les politiques nationales et internationales en faveur des familles militaires.",
-      "heroAlt": "Plaidoyer CFM",
+      "subtitle": "Ba analyses, ba conclusions mpe ba campagnes na biso mpo na kobongola ba politiques ya ekolo mpe ya mokili mpo na bolamu ya ba familles militaires.",
+      "heroAlt": "Kokamba makambo ya CFM",
       "studiesTitle": "Ba études & rapports",
       "campaignsTitle": "Ba campagnes",
       "newsTitle": "Ba actualités",
-      "downloadPdf": "Télécharger le rapport (PDF)",
-      "ctaTitle": "Vous êtes décideur ou institution ?",
-      "ctaBody": "Contactez notre équipe plaidoyer pour accéder à nos rapports complets.",
-      "contactBtn": "Nous contacter"
+      "downloadPdf": "Kitisa rapport (PDF)",
+      "ctaTitle": "Ozali mozwi ya mikano to institution?",
+      "ctaBody": "Benga équipe na biso ya plaidoyer mpo na kozwa ba rapports mobimba.",
+      "contactBtn": "Benga biso"
     },
     "press": {
-      "title": "Espace presse",
-      "subtitle": "Ressources pour les journalistes et médias couvrant les droits des familles militaires en RDC.",
-      "pressKitTitle": "Dossier de presse",
-      "pressKitDesc": "Présentation de CFM, chiffres clés et visuels.",
-      "downloadPdf": "Télécharger le PDF",
+      "title": "Esika ya lapresse",
+      "subtitle": "Ba ressources mpo na ba journalistes mpe ba médias oyo balandaka makambo ya ba droits ya ba familles militaires na RDC.",
+      "pressKitTitle": "Dossier ya lapresse",
+      "pressKitDesc": "Boyebisi ya CFM, ba chiffres ya ntina mpe ba photos.",
+      "downloadPdf": "Kitisa PDF",
       "pressKitHint": "Déposez le fichier dans public/media/presse/dossier-presse.pdf",
-      "contactPress": "Contact presse",
-      "contactBtn": "Nous contacter",
-      "aboutCardTitle": "À propos",
-      "aboutCardDesc": "ASBL fondée en {year}, plaidoyer national et international.",
-      "learnMore": "En savoir plus",
+      "contactPress": "Contact ya lapresse",
+      "contactBtn": "Benga biso",
+      "aboutCardTitle": "Mpo na biso",
+      "aboutCardDesc": "ASBL esalema na {year}, kokamba makambo na ekolo mpe na mokili.",
+      "learnMore": "Yeba mingi",
       "releasesTitle": "Ba communiqués",
-      "downloadRelease": "Télécharger le communiqué (PDF)"
+      "downloadRelease": "Kitisa communiqué (PDF)"
     },
     "news": {
-      "back": "← Plaidoyer & actualités",
-      "fallbackTitle": "Actualité"
+      "back": "← Kokamba makambo mpe ba sango",
+      "fallbackTitle": "Sango"
     },
     "memberArea": {
       "loginTitle": "Esika ya membres",
       "loginSubtitle": "Kota na compte na yo",
       "registerTitle": "Komikoma",
-      "registerSubtitle": "Rejoignez la communauté CFM. Votre compte sera validé par l'équipe avant activation.",
+      "registerSubtitle": "Kota na communauté ya CFM. Compte na yo ekondimama na équipe liboso ya kofungwama.",
       "profileTitle": "Profil na ngai",
-      "profileBack": "← Mon espace",
+      "profileBack": "← Esika na ngai",
       "email": "Email",
       "password": "Mot de passe",
-      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPassword": "Zongisa mot de passe",
       "loginBtn": "Kokota",
-      "loginLoading": "Connexion...",
-      "forgotLink": "Mot de passe oublié ?",
-      "noAccount": "Pas encore de compte ?",
-      "registerLink": "S'inscrire",
-      "hasAccount": "Déjà inscrit ?",
-      "loginLink": "Se connecter",
+      "loginLoading": "Kokota...",
+      "forgotLink": "Obosani mot de passe?",
+      "noAccount": "Ozali naino na compte te?",
+      "registerLink": "Komikoma",
+      "hasAccount": "Osila komikoma?",
+      "loginLink": "Kokota",
       "registerBtn": "Komikoma",
-      "registerLoading": "Inscription...",
-      "registerSuccess": "Inscription réussie ! Votre compte sera activé après validation par l'équipe CFM.",
-      "prefillNotice": "Vos informations de la demande d'adhésion ont été préremplies — choisissez simplement un mot de passe.",
-      "editProfile": "Modifier mon profil",
+      "registerLoading": "Komikoma...",
+      "registerSuccess": "Komikoma esimbi! Compte na yo ekofungwama sima ya bondimi ya équipe CFM.",
+      "prefillNotice": "Ba informations ya demande na yo ya adhésion esili kotiama — pona kaka mot de passe.",
+      "editProfile": "Bongola profil na ngai",
       "dashboardHello": "Mbote",
-      "accountActive": "Compte actif",
-      "accountPending": "En attente de validation",
-      "pendingBanner": "Votre compte est en attente de validation par l'équipe CFM.",
-      "volunteerBanner": "Espace bénévole : accédez au tableau de bord limité.",
-      "volunteerDashboard": "Dashboard bénévole",
-      "noHelp": "Aucune demande.",
-      "requestHelp": "Faire une demande",
-      "noDonations": "Aucun don.",
-      "donate": "Faire un don"
+      "accountActive": "Compte efungwami",
+      "accountPending": "Ezali kozela bondimi",
+      "pendingBanner": "Compte na yo ezali kozela bondimi ya équipe CFM.",
+      "volunteerBanner": "Esika ya bénévole: tala tableau de bord na yo.",
+      "volunteerDashboard": "Tableau ya bénévole",
+      "noHelp": "Demande ezali te.",
+      "requestHelp": "Senga lisalisi",
+      "noDonations": "Don ezali te.",
+      "donate": "Kopesa don"
     },
     "engageExtra": {
       "createAccount": "Komikoma",
       "signIn": "Kokota",
-      "quickSignupTitle": "Pré-inscription rapide (sans compte)",
-      "quickSignupDesc": "Alternative sans mot de passe — validée manuellement par l'équipe CFM.",
-      "transparencyTitle": "Transparence financière",
-      "transparencyBody": "CFM s'engage à une transparence totale envers ses donateurs. Chaque contribution est utilisée pour nos actions de plaidoyer, d'études et d'accompagnement direct des familles militaires.",
-      "fundsTitle": "Utilisation des fonds",
-      "fund1": "Études et rapports de plaidoyer",
-      "fund2": "Campagnes d'autonomisation des femmes et veuves",
-      "fund3": "Accompagnement des familles en situation de vulnérabilité",
-      "fund4": "Actions sur le terrain dans les provinces",
-      "annualReport": "Rapport annuel disponible sur demande auprès de l'équipe administrative.",
-      "partnerTitle": "Devenir partenaire",
-      "partnerBody": "Institutions, ONG et entreprises : contactez-nous pour explorer un partenariat avec CFM.",
-      "partnerBtn": "Proposer un partenariat",
+      "quickSignupTitle": "Komikoma ya mbangu (kozanga compte)",
+      "quickSignupDesc": "Nzela mosusu kozanga mot de passe — équipe CFM ekondima yango na maboko.",
+      "transparencyTitle": "Polele na makambo ya mbongo",
+      "transparencyBody": "CFM elaka polele mobimba epai ya bapesi ba dons. Contribution nionso esalelamaka mpo na misala ya plaidoyer, ba études mpe lisalisi ya mbala moko epai ya ba familles militaires.",
+      "fundsTitle": "Ndenge mbongo esalelamaka",
+      "fund1": "Ba études mpe ba rapports ya plaidoyer",
+      "fund2": "Ba campagnes mpo basi mpe ba veuves bamitelemela",
+      "fund3": "Lisalisi ya ba familles oyo ezali na pasi",
+      "fund4": "Misala na terrain na ba provinces",
+      "annualReport": "Rapport ya mbula ezali; senga yango epai ya équipe administrative.",
+      "partnerTitle": "Kokoma partenaire",
+      "partnerBody": "Ba institutions, ba ONG mpe ba entreprises: benga biso mpo na kosala partenariat na CFM.",
+      "partnerBtn": "Proposa partenariat",
       "demoPayment": "Mode démo : paiement simulé. Configurez MOBILE_MONEY_MODE=production et PayDunya pour la production.",
-      "prodPayment": "Paiement sécurisé via PayDunya (Orange Money, M-Pesa, Airtel).",
-      "sandboxPayment": "Mode test : paiement via l'environnement d'essai PayDunya, aucun encaissement réel."
+      "prodPayment": "Kofuta na sécurité na nzela ya PayDunya (Orange Money, M-Pesa, Airtel).",
+      "sandboxPayment": "Mode test: kofuta na esika ya komeka ya PayDunya, mbongo ya solo ekobima te."
     },
     "legal": {
       "mentionsTitle": "Mentions légales",
@@ -249,221 +249,221 @@
     "loading": "Ezali kozela...",
     "discover": "Tala",
     "campaign": "Campagne",
-    "error": "Erreur",
+    "error": "Libunga",
     "save": "Kobomba",
     "saving": "Ezali kobomba...",
-    "donationsRecorded": "Dons enregistrés",
-    "totalUsd": "Total USD (complétés)",
-    "totalCdf": "Total CDF (complétés)",
-    "select": "Sélectionner",
+    "donationsRecorded": "Ba dons ekomami",
+    "totalUsd": "Total USD (esili)",
+    "totalCdf": "Total CDF (esili)",
+    "select": "Pona",
     "logout": "Kobima",
     "viewPetitions": "Tala ba pétitions",
-    "profileUpdated": "Profil mis à jour.",
-    "passwordMismatch": "Les mots de passe ne correspondent pas",
-    "createAccountBtn": "Créer mon compte"
+    "profileUpdated": "Profil ebongwami.",
+    "passwordMismatch": "Ba mots de passe ekokani te",
+    "createAccountBtn": "Fungola compte na ngai"
   },
   "footer": {
-    "tagline": "Défendre les droits des dépendants des militaires",
-    "quote": "Derrière chaque militaire, il y a une famille.",
+    "tagline": "Kobatela ba droits ya ba familles ya ba militaires",
+    "quote": "Na sima ya militaire nionso, libota ezali.",
     "quickLinks": "Ba liens",
     "about": "Biso nde bani",
     "advocacy": "Plaidoyer",
     "engage": "Kosala elongo",
-    "privacy": "Confidentialité",
-    "contact": "Contact",
+    "privacy": "Bobateli ya ba données",
+    "contact": "Bozala biso",
     "newsletter": "Newsletter",
     "newsletterDesc": "Bozwa ba sango na biso.",
     "legal": "Mentions légales",
-    "privacyPolicy": "Politique de confidentialité",
+    "privacyPolicy": "Politique ya bobateli ya ba données",
     "copyright": "ASBL",
-    "actNow": "Agir maintenant",
-    "live": "Rejoindre le live",
-    "petitions": "Signer une pétition",
-    "donate": "Faire un don",
-    "axes": "Nos axes",
-    "press": "Presse"
+    "actNow": "Sala sikoyo",
+    "live": "Kota na live",
+    "petitions": "Signer pétition",
+    "donate": "Kopesa don",
+    "axes": "Bisika ya misala",
+    "press": "Lapresse"
   },
   "ux": {
     "nextAction": {
-      "title": "Passez à l'action",
-      "subtitle": "Transformez votre engagement en impact concret pour les familles militaires.",
-      "signPetition": "Signer une pétition",
-      "makeDonation": "Faire un don",
-      "getInvolved": "Adhérer"
+      "title": "Sala sikoyo",
+      "subtitle": "Bongola engagement na yo na lisalisi ya solo mpo na ba familles militaires.",
+      "signPetition": "Signer pétition",
+      "makeDonation": "Kopesa don",
+      "getInvolved": "Kokoma membre"
     },
     "membershipCompare": {
-      "title": "Quel parcours choisir ?",
-      "colFeature": "Critère",
-      "colAccount": "Compte membre",
-      "colQuick": "Adhésion rapide",
-      "rowGoal": "Objectif",
-      "rowAccountGoal": "Espace privé, suivi et participation continue",
-      "rowQuickGoal": "Demande d'adhésion sans mot de passe",
-      "rowDelay": "Délai",
-      "rowAccountDelay": "Activation après validation (24-72 h)",
-      "rowQuickDelay": "Traitement manuel sous 7 jours",
-      "rowFollowUp": "Suivi",
-      "rowAccountFollowUp": "Tableau de bord, demandes, dons, pétitions",
-      "rowQuickFollowUp": "Contact par l'équipe CFM uniquement",
-      "ctaAccount": "Créer un compte",
-      "ctaQuick": "Adhésion rapide"
+      "title": "Pona nzela nini?",
+      "colFeature": "Likambo",
+      "colAccount": "Compte ya membre",
+      "colQuick": "Adhésion ya mbangu",
+      "rowGoal": "Mokano",
+      "rowAccountGoal": "Esika na yo moko, bolandi mpe kosangana ntango nionso",
+      "rowQuickGoal": "Demande ya adhésion kozanga mot de passe",
+      "rowDelay": "Ntango",
+      "rowAccountDelay": "Efungwamaka sima ya bondimi (24-72 h)",
+      "rowQuickDelay": "Etalamaka na maboko na mikolo 7",
+      "rowFollowUp": "Bolandi",
+      "rowAccountFollowUp": "Tableau de bord, ba demandes, ba dons, ba pétitions",
+      "rowQuickFollowUp": "Kaka équipe CFM nde ekobenga yo",
+      "ctaAccount": "Fungola compte",
+      "ctaQuick": "Adhésion ya mbangu"
     },
     "memberPromo": {
-      "title": "Pourquoi créer un compte membre ?",
-      "body": "Allez plus loin après votre action : suivez vos démarches et restez informé des mobilisations.",
-      "benefit1": "Suivre vos demandes d'aide en toute confidentialité",
-      "benefit2": "Recevoir les alertes live et les prochaines pétitions",
-      "benefit3": "Centraliser vos dons et votre participation",
-      "cta": "Créer un compte"
+      "title": "Mpo na nini kofungola compte ya membre?",
+      "body": "Kende mosika sima ya action na yo: landa ba démarches na yo mpe yeba ba mobilisations.",
+      "benefit1": "Kolanda ba demandes na yo ya lisalisi na secret nionso",
+      "benefit2": "Kozwa ba alertes ya live mpe ba pétitions ya sika",
+      "benefit3": "Kosangisa ba dons mpe kosangana na yo esika moko",
+      "cta": "Fungola compte"
     },
     "formSuccess": {
-      "helpAck": "Votre demande confidentielle a bien été enregistrée.",
-      "helpDelay": "Notre équipe vous répond sous 7 jours ouvrés.",
-      "helpNext": "Créer un compte pour suivre votre demande",
-      "contactAck": "Votre message a bien été envoyé.",
-      "contactDelay": "Nous vous répondrons sous 7 jours ouvrés.",
-      "contactNext": "Consulter nos actions sur le terrain",
-      "membershipAck": "Votre demande d'adhésion a bien été enregistrée.",
-      "membershipDelay": "Nous vous contacterons sous peu pour la suite.",
-      "membershipNext": "Créer un compte pour un suivi en ligne",
-      "donationAck": "Merci pour votre générosité !",
-      "donationDelay": "Votre don sera confirmé après traitement du paiement.",
-      "donationNext": "Voir la transparence financière",
-      "petitionAck": "Merci ! Votre signature a été enregistrée.",
-      "petitionDelay": "Chaque signature renforce notre plaidoyer.",
-      "petitionNext": "Créer un compte pour les prochaines mobilisations"
+      "helpAck": "Demande na yo ya secret ekomami malamu.",
+      "helpDelay": "Équipe na biso ekoyanola yo na mikolo 7 ya mosala.",
+      "helpNext": "Fungola compte mpo na kolanda demande na yo",
+      "contactAck": "Message na yo etindami malamu.",
+      "contactDelay": "Tokoyanola yo na mikolo 7 ya mosala.",
+      "contactNext": "Tala misala na biso na terrain",
+      "membershipAck": "Demande na yo ya adhésion ekomami malamu.",
+      "membershipDelay": "Tokobenga yo kala mingi te mpo na makambo oyo elandi.",
+      "membershipNext": "Fungola compte mpo na bolandi na internet",
+      "donationAck": "Matondi mpo na motema malamu na yo!",
+      "donationDelay": "Don na yo ekondimama sima ya kofuta.",
+      "donationNext": "Tala polele ya mbongo",
+      "petitionAck": "Matondi! Signature na yo ekomami.",
+      "petitionDelay": "Signature nionso elendisaka plaidoyer na biso.",
+      "petitionNext": "Fungola compte mpo na ba mobilisations ya sika"
     },
     "helpInfo": {
-      "title": "Avant de remplir le formulaire",
-      "confidentiality": "Ce formulaire est strictement confidentiel. Vos données ne sont accessibles qu'à l'équipe autorisée.",
-      "delay": "Délai de réponse : 7 jours ouvrés maximum.",
-      "memberFollowUp": "Créez un compte membre pour suivre l'état de votre demande depuis votre espace privé."
+      "title": "Liboso ya kotondisa formulaire",
+      "confidentiality": "Formulaire oyo ezali secret mpenza. Kaka équipe oyo endimami nde ekoki komona ba données na yo.",
+      "delay": "Eyano: mikolo 7 ya mosala, koleka te.",
+      "memberFollowUp": "Fungola compte ya membre mpo na kolanda demande na yo na esika na yo moko."
     },
     "plaidoyer": {
-      "viewPetitions": "Voir toutes les pétitions →"
+      "viewPetitions": "Tala ba pétitions nionso →"
     },
     "actions": {
-      "provinceHelp": "Besoin d'aide dans votre province ?",
-      "provinceHelpCta": "Demander de l'aide"
+      "provinceHelp": "Ozali na mposa ya lisalisi na province na yo?",
+      "provinceHelpCta": "Senga lisalisi"
     },
     "axes": {
-      "ctaActions": "Voir nos actions sur le terrain",
-      "ctaHelp": "Demander de l'aide"
+      "ctaActions": "Tala misala na biso na terrain",
+      "ctaHelp": "Senga lisalisi"
     },
     "about": {
-      "ctaTransparency": "Voir la transparence financière",
-      "ctaEngage": "Adhérer"
+      "ctaTransparency": "Tala polele ya mbongo",
+      "ctaEngage": "Kokoma membre"
     },
     "transparency": {
-      "impactTitle": "Impact de vos dons",
-      "impactBody": "Chaque contribution finance directement le plaidoyer, les études et l'accompagnement des familles militaires sur le terrain."
+      "impactTitle": "Litomba ya ba dons na yo",
+      "impactBody": "Contribution nionso efutaka mbala moko plaidoyer, ba études mpe lisalisi ya ba familles militaires na terrain."
     },
     "memberDashboard": {
-      "citizenActionsTitle": "Prochaines actions citoyennes",
-      "citizenActionsBody": "Participez aux mobilisations en cours et suivez les événements live.",
-      "liveNow": "Live en cours",
-      "openPetitions": "Pétitions ouvertes",
-      "viewLive": "Rejoindre le live"
+      "citizenActionsTitle": "Misala ya sika ya bana mboka",
+      "citizenActionsBody": "Sangana na ba mobilisations mpe landa ba événements live.",
+      "liveNow": "Live ezali koleka",
+      "openPetitions": "Ba pétitions efungwami",
+      "viewLive": "Kota na live"
     },
     "news": {
-      "viewCampaign": "Signer la pétition liée",
-      "viewAdvocacy": "Retour au plaidoyer"
+      "viewCampaign": "Signer pétition oyo ekangani na yango",
+      "viewAdvocacy": "Zonga na plaidoyer"
     }
   },
   "membershipTypes": {
     "famille": {
-      "label": "Famille militaire",
-      "description": "Pour les conjoints, enfants, veuves et orphelins de militaires. Informations sur le lien familial requises."
+      "label": "Libota ya militaire",
+      "description": "Mpo na balongani, bana, ba veuves mpe ba orphelins ya ba militaires. Ba informations ya boyokani na militaire esengeli."
     },
     "soutien": {
-      "label": "Soutien",
-      "description": "Pour toute personne souhaitant soutenir la cause sans informations sur un parent militaire."
+      "label": "Lisungi",
+      "description": "Mpo na moto nionso oyo alingi kosunga cause, kozanga ba informations ya militaire."
     },
     "benevole": {
       "label": "Bénévole",
-      "description": "Pour rejoindre l'équipe et contribuer activement aux actions de CFM."
+      "description": "Mpo na kokota na équipe mpe kosala elongo na misala ya CFM."
     }
   },
   "axesContent": {
     "social": {
-      "title": "Social",
-      "description": "Améliorer les conditions de vie des conjoints, veuves, orphelins et enfants de militaires.",
+      "title": "Bomoi ya bato",
+      "description": "Kobongisa bomoi ya balongani, ba veuves, ba orphelins mpe bana ya ba militaires.",
       "details": [
-        "Protection sociale renforcée",
-        "Accompagnement des veuves et orphelins",
-        "Soutien psychologique et communautaire",
-        "Reconnaissance du sacrifice familial"
+        "Bobateli ya bomoi ya bato oyo elendisami",
+        "Lisalisi ya ba veuves mpe ba orphelins",
+        "Lisungi ya motema mpe ya lisanga",
+        "Kondima pasi oyo libota emonaka"
       ]
     },
     "economique": {
-      "title": "Économique",
-      "description": "Autonomisation des femmes et veuves par l'entrepreneuriat et l'accès aux ressources économiques.",
+      "title": "Nkita",
+      "description": "Kosalisa basi mpe ba veuves bamitelemela na nzela ya entrepreneuriat mpe bozwi ya mbongo.",
       "details": [
-        "Formation à l'entrepreneuriat",
-        "Microcrédit et accompagnement",
-        "Réseau de femmes entrepreneures",
-        "Plaidoyer pour l'accès équitable aux aides"
+        "Formation ya entrepreneuriat",
+        "Microcrédit mpe lisalisi",
+        "Réseau ya basi ba entrepreneurs",
+        "Plaidoyer mpo lisalisi ekabwana na bosembo"
       ]
     },
     "education": {
-      "title": "Éducation",
-      "description": "Garantir l'accès à l'éducation et à la formation pour les enfants de militaires.",
+      "title": "Boyekoli",
+      "description": "Kosala ete bana ya ba militaires bazwa kelasi mpe formation.",
       "details": [
-        "Scolarisation des orphelins",
-        "Bourses et soutien scolaire",
-        "Formation professionnelle",
-        "Plaidoyer pour des politiques éducatives inclusives"
+        "Kokotisa ba orphelins na kelasi",
+        "Ba bourses mpe lisungi ya kelasi",
+        "Formation ya mosala",
+        "Plaidoyer mpo ba politiques ya kelasi ezala mpo na bato nionso"
       ]
     },
     "environnement": {
-      "title": "Environnement",
-      "description": "Améliorer le cadre de vie dans et autour des camps et quartiers militaires.",
+      "title": "Zinga-zinga",
+      "description": "Kobongisa esika ya bomoi na kati mpe zinga-zinga ya ba camps ya ba militaires.",
       "details": [
-        "Conditions d'habitat décentes",
-        "Accès à l'eau et à l'assainissement",
-        "Espaces verts et qualité de vie",
-        "Développement durable des communautés militaires"
+        "Bandako ya kofanda ya malamu",
+        "Mai ya peto mpe bopeto",
+        "Bisika ya mobesu mpe bomoi ya malamu",
+        "Développement ya seko ya ba communautés ya ba militaires"
       ]
     },
     "sante": {
-      "title": "Santé",
-      "description": "Santé sexuelle et reproductive des femmes dans les milieux des camps militaires.",
+      "title": "Bokolongono",
+      "description": "Bokolongono ya basi na makambo ya kobota na ba camps ya ba militaires.",
       "details": [
-        "Sensibilisation et prévention",
-        "Accès aux soins de santé reproductive",
-        "Plaidoyer pour des services adaptés",
-        "Formation des agents de santé communautaires"
+        "Koteya mpe kokebisa",
+        "Bozwi ya lisalisi ya santé ya kobota",
+        "Plaidoyer mpo na ba services oyo ebongi",
+        "Formation ya ba agents ya santé ya lisanga"
       ]
     }
   },
   "donateForm": {
-    "currency": "Devise",
-    "providerLabel": "Opérateur Mobile Money",
-    "donorName": "Nom (optionnel)",
-    "donorEmail": "Email (reçu)",
-    "processing": "Traitement...",
-    "submitMobile": "Donner via Mobile Money",
-    "thanks": "Merci pour votre don !"
+    "currency": "Lolenge ya mbongo",
+    "providerLabel": "Réseau ya Mobile Money",
+    "donorName": "Kombo (esengeli te)",
+    "donorEmail": "Email (mpo na reçu)",
+    "processing": "Ezali koleka...",
+    "submitMobile": "Kopesa na Mobile Money",
+    "thanks": "Matondi mpo na don na yo!"
   },
   "forms": {
-    "firstName": "Prénom",
-    "lastName": "Nom",
-    "phone": "Téléphone",
+    "firstName": "Kombo ya liboso",
+    "lastName": "Kombo ya libota",
+    "phone": "Telefone",
     "province": "Province",
-    "accountType": "Type de compte",
-    "militaryLink": "Lien avec le militaire",
-    "militaryName": "Nom du militaire",
-    "skills": "Compétences",
-    "createMyAccount": "Créer mon compte",
-    "familyLinks": "Liens familiaux",
-    "myHelpRequests": "Mes demandes d'aide",
-    "myDonations": "Mes dons",
+    "accountType": "Lolenge ya compte",
+    "militaryLink": "Boyokani na militaire",
+    "militaryName": "Kombo ya militaire",
+    "skills": "Mayele",
+    "createMyAccount": "Fungola compte na ngai",
+    "familyLinks": "Boyokani ya libota",
+    "myHelpRequests": "Ba demandes na ngai ya lisalisi",
+    "myDonations": "Ba dons na ngai",
     "links": {
-      "conjoint": "Conjoint(e)",
-      "enfant": "Enfant",
+      "conjoint": "Molongani",
+      "enfant": "Mwana",
       "veuve": "Veuve / Veuf",
-      "orphelin": "Orphelin",
-      "parent": "Parent"
+      "orphelin": "Mwana etike",
+      "parent": "Moboti"
     }
   }
 }
