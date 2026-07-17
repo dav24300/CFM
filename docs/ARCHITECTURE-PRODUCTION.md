@@ -479,7 +479,7 @@ Utilisé par : load balancer, Docker HEALTHCHECK, CI smoke.
 | Document | Contenu |
 |----------|---------|
 | `PLAN.md` | Spécification produit V1–V3 |
-| `Strat_Refact.md` | Plan refactor R0–R7 |
+| `archive/Strat_Refact.md` | Plan refactor R0–R7 |
 | `scripts/schema.sql` | DDL PostgreSQL |
 | `docs/runbook.md` | Procédures ops |
 | `docs/adr/` | Décisions architecture (ADR 0001–0004) |

@@ -413,7 +413,7 @@ src/components/admin/
 | Document | Lien |
 |----------|------|
 | Plan produit | `PLAN.md` |
-| Correctif fonctionnel | `Corrective.md` § module 7 Admin |
+| Correctif fonctionnel | `archive/Corrective.md` § module 7 Admin |
 | APIs admin | `src/app/api/admin/*` |
 | Composants actuels | `src/components/admin/*` |
 | Schéma données | `scripts/schema.sql` |
