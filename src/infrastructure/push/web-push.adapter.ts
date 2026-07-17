@@ -8,7 +8,7 @@ import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
 import * as sqlPush from "@/infrastructure/repositories/sql/push.sql";
 import type { PushSubscription, PushTopic } from "@/domain/entities/v3";
 
-function isVapidConfigured(): boolean {
+export function isVapidConfigured(): boolean {
   return Boolean(
     process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY
   );
