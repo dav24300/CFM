@@ -101,6 +101,10 @@ export const adminUserActivateSchema = z.object({
   action: z.enum(["activate", "suspend"]),
 });
 
+export const adminUserRoleSchema = z.object({
+  role: z.enum(["member", "volunteer", "coordinator"]),
+});
+
 export const adminMediaPatchSchema = z.object({
   action: z.literal("reset_hero").optional(),
   hero: z.record(z.string(), z.string()).optional(),

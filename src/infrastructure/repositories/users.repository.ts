@@ -120,6 +120,22 @@ export async function activateUser(userId: number): Promise<User | undefined> {
   return user;
 }
 
+export async function setUserRole(
+  userId: number,
+  role: UserRole
+): Promise<User | undefined> {
+  if (isPgMode()) return sqlUsers.setUserRole(userId, role);
+  let user: User | undefined;
+  await updateStoreAsync((store) => {
+    const u = store.users?.find((x) => x.id === userId);
+    if (u) {
+      u.role = role;
+      user = u;
+    }
+  });
+  return user;
+}
+
 export async function updateMemberProfile(
   userId: number,
   data: { first_name?: string; last_name?: string; phone?: string; province?: string }

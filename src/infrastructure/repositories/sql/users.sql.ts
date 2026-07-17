@@ -105,6 +105,21 @@ export async function activateUser(userId: number): Promise<User | undefined> {
   }
 }
 
+export async function setUserRole(
+  userId: number,
+  role: UserRole
+): Promise<User | undefined> {
+  try {
+    const res = await query<User>(
+      "UPDATE users SET role = $2 WHERE id = $1 RETURNING *",
+      [userId, role]
+    );
+    return res.rows[0] ? normalizePgRow(res.rows[0]) : undefined;
+  } catch (err) {
+    mapPgError(err);
+  }
+}
+
 /**
  * Parité Store : first_name/last_name appliqués seulement si truthy (+ trim),
  * phone/province si !== undefined ; aucun champ fourni → renvoie l'utilisateur
