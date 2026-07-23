@@ -17,7 +17,17 @@ export type PortalEvent = {
   type: PortalEventType;
   location: string;
   capacity: number | null;
+  /**
+   * @deprecated Conservé pour le mode JSON local et la réversibilité de la
+   * migration. Les lectures SQL renvoient un tableau VIDE : exposer la liste
+   * des inscrits divulguait les identifiants des autres membres au navigateur.
+   * Utiliser `rsvp_count` et `viewer_going`.
+   */
   rsvp_user_ids: number[];
+  /** Nombre d'inscrits (calculé côté base). */
+  rsvp_count?: number;
+  /** Le membre qui consulte est-il inscrit ? */
+  viewer_going?: boolean;
   created_at: string;
 };
 
