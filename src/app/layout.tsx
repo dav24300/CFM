@@ -4,7 +4,6 @@ import {
   Newsreader,
   Archivo,
   Space_Grotesk,
-  IBM_Plex_Sans,
   IBM_Plex_Mono,
 } from "next/font/google";
 import {
@@ -28,24 +27,27 @@ const archivo = Archivo({
   variable: "--font-archivo",
   weight: ["400", "500", "600", "700"],
 });
-// Admin
+// Essentiellement admin (`font-display`), mais aussi un titre public
+// (PetitionSignForm) : la famille reste globale, sans préchargement — elle
+// n'est jamais l'élément de plus grand rendu d'une page publique.
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-space-grotesk",
   weight: ["500", "600", "700"],
+  preload: false,
 });
-const plexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  variable: "--font-plex-sans",
-  weight: ["400", "500", "600", "700"],
-});
+// `font-mono` : usage ponctuel (pages d'erreur, /axes, quelques vues admin).
 const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   variable: "--font-plex-mono",
   weight: ["400", "500"],
+  preload: false,
 });
 
-const fontVars = `${newsreader.variable} ${archivo.variable} ${spaceGrotesk.variable} ${plexSans.variable} ${plexMono.variable}`;
+// IBM Plex Sans a été retirée : la classe `font-ui` qui la portait n'était
+// utilisée nulle part, mais ses 4 graisses (24 @font-face) étaient servies
+// sur toutes les routes, y compris publiques.
+const fontVars = `${newsreader.variable} ${archivo.variable} ${spaceGrotesk.variable} ${plexMono.variable}`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteConfig();

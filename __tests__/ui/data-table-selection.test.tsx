@@ -33,7 +33,9 @@ describe("DataTable — sélection multiple", () => {
   });
 
   it("sélectionne une ligne et expose la ligne au rendu d'actions groupées", () => {
-    const bulk = vi.fn(() => <button type="button">Agir</button>);
+    const bulk = vi.fn((_selected: Row[], _clear: () => void) => (
+      <button type="button">Agir</button>
+    ));
     render(
       <DataTable data={ROWS} columns={COLS} rowKey={(r) => r.id} selectable bulkActions={bulk} />
     );
@@ -48,7 +50,9 @@ describe("DataTable — sélection multiple", () => {
   });
 
   it("« tout sélectionner » couvre les 12 lignes, pas seulement la page affichée", () => {
-    const bulk = vi.fn(() => <button type="button">Agir</button>);
+    const bulk = vi.fn((_selected: Row[], _clear: () => void) => (
+      <button type="button">Agir</button>
+    ));
     render(
       <DataTable data={ROWS} columns={COLS} rowKey={(r) => r.id} selectable bulkActions={bulk} />
     );
@@ -61,7 +65,9 @@ describe("DataTable — sélection multiple", () => {
   });
 
   it("restreint la sélection globale au sous-ensemble filtré par la recherche", () => {
-    const bulk = vi.fn(() => <button type="button">Agir</button>);
+    const bulk = vi.fn((_selected: Row[], _clear: () => void) => (
+      <button type="button">Agir</button>
+    ));
     render(
       <DataTable
         data={ROWS}
@@ -101,7 +107,9 @@ describe("DataTable — sélection multiple", () => {
   });
 
   it("retire de la sélection une ligne disparue du jeu de données", () => {
-    const bulk = vi.fn(() => <button type="button">Agir</button>);
+    const bulk = vi.fn((_selected: Row[], _clear: () => void) => (
+      <button type="button">Agir</button>
+    ));
     const { rerender } = render(
       <DataTable data={ROWS} columns={COLS} rowKey={(r) => r.id} selectable bulkActions={bulk} />
     );

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useEffect, useState } from "react";
 import { ArrowDown } from "lucide-react";
-import { useReducedMotion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/hooks/use-prefers-reduced-motion";
 import { MagneticLink } from "./MagneticLink";
 
 type Props = {
@@ -47,7 +47,7 @@ export function HomeHero({
   liveBadgeLabel,
   helpHref,
 }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = usePrefersReducedMotion();
   const [interactive, setInteractive] = useState(false);
   const scopeRef = useRef<HTMLElement>(null);
   const baseRef = useRef<HTMLDivElement>(null);

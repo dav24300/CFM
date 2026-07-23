@@ -1,8 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
-import { useRef } from "react";
-import { useInView } from "framer-motion";
+import { useEffect, useLayoutEffect, useRef } from "react";
+import { usePrefersReducedMotion } from "@/lib/hooks/use-prefers-reduced-motion";
 
 type Props = {
   children: React.ReactNode;
@@ -11,13 +10,31 @@ type Props = {
   direction?: "up" | "down" | "left" | "right" | "none";
 };
 
-const offsets = {
-  up: { y: 24, x: 0 },
-  down: { y: -24, x: 0 },
-  left: { x: -32, y: 0 },
-  right: { x: 32, y: 0 },
-  none: { x: 0, y: 0 },
+/**
+ * Apparition au défilement, une seule fois, en CSS pur.
+ *
+ * Utilisé 37 fois sur 9 routes publiques, ce composant était l'UNIQUE raison
+ * pour laquelle framer-motion entrait dans leur bundle — pour un simple
+ * fondu-translation joué une fois, sans interpolation continue.
+ *
+ * L'état masqué n'est JAMAIS présent dans le HTML servi : il est posé par le
+ * script au montage. Sans JavaScript (ou si le script échoue), le contenu
+ * reste visible au lieu de disparaître définitivement.
+ */
+const OFFSETS: Record<NonNullable<Props["direction"]>, string> = {
+  up: "translateY(24px)",
+  down: "translateY(-24px)",
+  left: "translateX(-32px)",
+  right: "translateX(32px)",
+  none: "none",
 };
+
+// Même courbe que l'implémentation framer-motion précédente ([.25,.1,.25,1]).
+const EASING = "cubic-bezier(.25,.1,.25,1)";
+
+// useLayoutEffect pose l'état masqué AVANT le premier paint (donc sans
+// clignotement), mais React le refuse au rendu serveur.
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export function ScrollReveal({
   children,
@@ -25,24 +42,41 @@ export function ScrollReveal({
   delay = 0,
   direction = "up",
 }: Props) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
-  const reduceMotion = useReducedMotion();
-  const offset = offsets[direction];
+  const ref = useRef<HTMLDivElement>(null);
+  const reduced = usePrefersReducedMotion();
 
-  if (reduceMotion) {
-    return <div className={className}>{children}</div>;
-  }
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || reduced) return;
+
+    el.style.opacity = "0";
+    el.style.transform = OFFSETS[direction];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        observer.disconnect();
+        el.style.transition = `opacity .5s ${EASING} ${delay}s, transform .5s ${EASING} ${delay}s`;
+        el.style.opacity = "1";
+        el.style.transform = "none";
+      },
+      { rootMargin: "-10% 0px" }
+    );
+    observer.observe(el);
+
+    return () => {
+      observer.disconnect();
+      // Si la préférence bascule vers « animations réduites », l'élément ne
+      // doit pas rester figé dans son état masqué.
+      el.style.opacity = "";
+      el.style.transform = "";
+      el.style.transition = "";
+    };
+  }, [reduced, direction, delay]);
 
   return (
-    <motion.div
-      ref={ref}
-      className={className}
-      initial={{ opacity: 0, x: offset.x, y: offset.y }}
-      animate={inView ? { opacity: 1, x: 0, y: 0 } : { opacity: 0, x: offset.x, y: offset.y }}
-      transition={{ duration: 0.5, delay, ease: [0.25, 0.1, 0.25, 1] }}
-    >
+    <div ref={ref} className={className}>
       {children}
-    </motion.div>
+    </div>
   );
 }

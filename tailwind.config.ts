@@ -71,7 +71,6 @@ const config: Config = {
         serif: ["var(--font-newsreader)", "Georgia", "serif"],
         sans: ["var(--font-archivo)", "system-ui", "sans-serif"],
         display: ["var(--font-space-grotesk)", "system-ui", "sans-serif"],
-        ui: ["var(--font-plex-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-plex-mono)", "ui-monospace", "monospace"],
       },
       animation: {
