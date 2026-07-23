@@ -1,21 +1,29 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPetitionBySlug } from "@/infrastructure/repositories/petitions.repository";
+import {
+  getActivePetitionsCached,
+  getPetitionBySlugCached,
+} from "@/infrastructure/cache/petitions-cache";
 import { PetitionSignForm } from "@/components/PetitionSignForm";
 import { getTranslations } from "@/lib/i18n-server";
 
 type Props = { params: Promise<{ slug: string }> };
 
+export async function generateStaticParams() {
+  const petitions = await getActivePetitionsCached();
+  return petitions.map((p) => ({ slug: p.slug }));
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const p = await getPetitionBySlug(slug);
+  const p = await getPetitionBySlugCached(slug);
   return { title: p?.title || "Pétition" };
 }
 
 export default async function PetitionDetailPage({ params }: Props) {
   const { slug } = await params;
-  const petition = await getPetitionBySlug(slug);
+  const petition = await getPetitionBySlugCached(slug);
   if (!petition) notFound();
 
   const { t } = await getTranslations();

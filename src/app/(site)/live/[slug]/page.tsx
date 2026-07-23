@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getLiveEventBySlugCached } from "@/infrastructure/cache/live-cache";
-import { getPollsForEvent } from "@/infrastructure/repositories/live.repository";
+import { getPollsForEventCached } from "@/infrastructure/cache/public-page-cache";
 import { LiveRoom } from "@/components/live/LiveRoom";
 import { getTranslations } from "@/lib/i18n-server";
 import { PushSubscribeButton } from "@/components/PushSubscribeButton";
@@ -16,7 +16,7 @@ export default async function LiveEventPage({ params }: Props) {
   if (!event) notFound();
 
   const { t } = await getTranslations();
-  const polls = (await getPollsForEvent(event.id)).filter((p) => p.active === 1);
+  const polls = (await getPollsForEventCached(event.id)).filter((p) => p.active === 1);
   const live = t.pages.live;
 
   return (

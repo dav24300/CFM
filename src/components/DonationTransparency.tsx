@@ -1,31 +1,22 @@
-import { getAllDonations } from "@/infrastructure/repositories/donations.repository";
 import { getTranslations } from "@/lib/i18n-server";
 import { getSiteSetting } from "@/infrastructure/repositories/settings.repository";
+import { getDonationTotalsCached } from "@/infrastructure/cache/public-page-cache";
 
 export async function DonationTransparency() {
   const { t } = await getTranslations();
   const showDonorList = (await getSiteSetting("donors_public")) === "1";
 
-  const donations = (await getAllDonations()).filter((d) => d.status === "completed");
-  const totalUsd = donations
-    .filter((d) => d.currency === "USD")
-    .reduce((sum, d) => sum + d.amount, 0);
-  const totalCdf = donations
-    .filter((d) => d.currency === "CDF")
-    .reduce((sum, d) => sum + d.amount, 0);
-  const count = donations.length;
+  // Totaux agrégés une fois puis mis en cache : la table entière était
+  // rechargée à chaque affichage de /s-engager pour en tirer trois nombres.
+  const { count, totalUsd, totalCdf, recents } = await getDonationTotalsCached();
 
   const recentPublic = showDonorList
-    ? donations
-        .slice()
-        .sort((a, b) => b.created_at.localeCompare(a.created_at))
-        .slice(0, 10)
-        .map((d) => ({
-          id: d.id,
-          label: d.donor_name?.trim() || "Donateur anonyme",
-          amount: `${d.amount.toLocaleString("fr-FR")} ${d.currency}`,
-          date: d.created_at.slice(0, 10),
-        }))
+    ? recents.map((d) => ({
+        id: d.id,
+        label: d.donor_name?.trim() || "Donateur anonyme",
+        amount: `${d.amount.toLocaleString("fr-FR")} ${d.currency}`,
+        date: d.created_at.slice(0, 10),
+      }))
     : [];
 
   return (
