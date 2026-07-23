@@ -40,10 +40,11 @@ function dateBadge(iso: string): { month: string; day: string } {
   };
 }
 
-function EventCard({ event, memberId }: { event: PortalEvent; memberId: number }) {
+function EventCard({ event }: { event: PortalEvent }) {
   const badge = dateBadge(event.date);
-  const going = event.rsvp_user_ids.includes(memberId);
-  const count = event.rsvp_user_ids.length;
+  // Fournis par la base : la liste des inscrits n'est plus exposée.
+  const going = event.viewer_going ?? false;
+  const count = event.rsvp_count ?? 0;
   const capacity = event.capacity;
   const full = capacity != null && count >= capacity && !going;
   const progress =
@@ -111,7 +112,7 @@ export default async function PortailEvenementsPage() {
   const member = await getCurrentMember();
   if (!member) redirect("/membre/connexion");
 
-  const events = await getUpcomingEvents();
+  const events = await getUpcomingEvents(member.id);
 
   return (
     <PortalPage
@@ -123,7 +124,7 @@ export default async function PortailEvenementsPage() {
       ) : (
         <div className="flex flex-col gap-3.5">
           {events.map((event) => (
-            <EventCard key={event.id} event={event} memberId={member.id} />
+            <EventCard key={event.id} event={event} />
           ))}
         </div>
       )}

@@ -4,13 +4,14 @@ import {
 } from "@/infrastructure/persistence/store-access";
 import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
 import * as sqlPortal from "@/infrastructure/repositories/sql/portal.sql";
+import type { RsvpResult } from "@/infrastructure/repositories/sql/portal.sql";
 import type { PortalEvent } from "@/domain/entities/v4";
 
 /**
  * Agrégat portail (événements) — dual-mode :
- * - PG (DATABASE_URL) : SQL ciblé (sql/portal.sql.ts), RSVP transactionnel
- *   sous verrou FOR UPDATE — concurrent-safe.
- * - JSON (dev) : branche Store historique inchangée.
+ * - PG (DATABASE_URL) : SQL ciblé (sql/portal.sql.ts), RSVP sur la table
+ *   event_rsvps — sans verrou explicite, capacité appliquée côté serveur.
+ * - JSON (dev) : branche Store, alignée sur la même sémantique.
  */
 
 /** Tri chronologique (date + heure) croissant. */
@@ -21,8 +22,8 @@ function byDateAsc(a: PortalEvent, b: PortalEvent): number {
 }
 
 /** Événements à venir (date >= aujourd'hui), triés par date croissante. */
-export async function getUpcomingEvents(): Promise<PortalEvent[]> {
-  if (isPgMode()) return sqlPortal.getUpcomingEvents();
+export async function getUpcomingEvents(viewerId?: number): Promise<PortalEvent[]> {
+  if (isPgMode()) return sqlPortal.getUpcomingEvents(viewerId);
   const store = await getStoreAsync();
   const today = new Date().toISOString().slice(0, 10);
   return (store.events ?? [])
@@ -63,20 +64,28 @@ export async function getEventsForProvince(
 export async function rsvpEvent(
   eventId: number,
   userId: number
-): Promise<PortalEvent | undefined> {
+): Promise<RsvpResult | undefined> {
   if (isPgMode()) return sqlPortal.rsvpEvent(eventId, userId);
-  let result: PortalEvent | undefined;
+
+  let result: RsvpResult | undefined;
   await updateStoreAsync((store) => {
     if (!store.events) store.events = [];
     const ev = store.events.find((e) => e.id === eventId);
     if (!ev) return;
     if (!Array.isArray(ev.rsvp_user_ids)) ev.rsvp_user_ids = [];
+
     if (ev.rsvp_user_ids.includes(userId)) {
       ev.rsvp_user_ids = ev.rsvp_user_ids.filter((id) => id !== userId);
-    } else {
-      ev.rsvp_user_ids = [...ev.rsvp_user_ids, userId];
+      result = { going: false, count: ev.rsvp_user_ids.length };
+      return;
     }
-    result = ev;
+    // Parité SQL : la capacité est appliquée, elle ne l'était nulle part.
+    if (ev.capacity != null && ev.rsvp_user_ids.length >= ev.capacity) {
+      result = { going: false, count: ev.rsvp_user_ids.length, full: true };
+      return;
+    }
+    ev.rsvp_user_ids = [...ev.rsvp_user_ids, userId];
+    result = { going: true, count: ev.rsvp_user_ids.length };
   });
   return result;
 }

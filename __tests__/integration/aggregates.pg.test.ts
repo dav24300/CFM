@@ -923,34 +923,82 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
       expect(matin.rsvp_user_ids).toEqual([]);
     });
 
-    it("rsvp : toggle aller/retour persisté, id inconnu → undefined", async () => {
-      const target = (await events.getUpcomingEvents())[0]; // "Aube"
-      const on = await events.rsvpEvent(target.id, 777);
-      expect(on?.id).toBe(target.id);
-      expect(on?.rsvp_user_ids).toEqual([777]);
+    it("rsvp : bascule aller/retour persistée, id inconnu → undefined", async () => {
+      // event_rsvps référence users(id) : les inscrits doivent exister.
+      await sqlClient.query(
+        `INSERT INTO users (id, email, password_hash, first_name, last_name, phone, role, membership_type, status, created_at)
+         VALUES (777, 'rsvp777@x.cd', 'h', 'R', 'S', '+243', 'member', 'soutien', 'active', NOW())
+         ON CONFLICT DO NOTHING`
+      );
+      const target = (await events.getUpcomingEvents(777))[0]; // "Aube"
 
-      // Relecture : persisté.
-      let again = (await events.getUpcomingEvents())[0];
-      expect(again.rsvp_user_ids).toEqual([777]);
+      const on = await events.rsvpEvent(target.id, 777);
+      expect(on).toMatchObject({ going: true, count: 1 });
+
+      // Relecture : persisté, et l'état est celui du membre qui consulte.
+      let again = (await events.getUpcomingEvents(777))[0];
+      expect(again.rsvp_count).toBe(1);
+      expect(again.viewer_going).toBe(true);
+
+      // Un autre membre ne se voit pas inscrit et n'obtient aucune liste.
+      const autre = (await events.getUpcomingEvents(1234))[0];
+      expect(autre.viewer_going).toBe(false);
+      expect(autre.rsvp_user_ids).toEqual([]);
 
       const off = await events.rsvpEvent(target.id, 777);
-      expect(off?.rsvp_user_ids).toEqual([]);
-      again = (await events.getUpcomingEvents())[0];
-      expect(again.rsvp_user_ids).toEqual([]);
+      expect(off).toMatchObject({ going: false, count: 0 });
+      again = (await events.getUpcomingEvents(777))[0];
+      expect(again.rsvp_count).toBe(0);
 
       expect(await events.rsvpEvent(999999, 777)).toBeUndefined();
     });
 
-    it("rsvp : 10 RSVP parallèles d'users distincts → 10 inscrits", async () => {
+    it("rsvp : la capacité est respectée sous inscriptions simultanées", async () => {
+      await sqlClient.query(
+        `INSERT INTO users (id, email, password_hash, first_name, last_name, phone, role, membership_type, status, created_at)
+         SELECT g, 'cap'||g||'@x.cd', 'h', 'C', 'A', '+243', 'member', 'soutien', 'active', NOW()
+         FROM generate_series(2000, 2019) g ON CONFLICT DO NOTHING`
+      );
+      await sqlClient.query(
+        `INSERT INTO events (id, title, province, "date", "time", type, location, capacity, rsvp_user_ids, created_at)
+         VALUES (9100, 'Plafonné', 'Kinshasa', '2030-06-01', '09:00', 'atelier', 'Salle', 5, '[]'::jsonb, NOW())
+         ON CONFLICT DO NOTHING`
+      );
+
+      // 20 candidats simultanés pour 5 places : la limite doit tenir.
+      const res = await Promise.all(
+        Array.from({ length: 20 }, (_, i) => events.rsvpEvent(9100, 2000 + i))
+      );
+      const admis = res.filter((r) => r?.going).length;
+      const refuses = res.filter((r) => r?.full).length;
+
+      const total = await sqlClient.query<{ n: number }>(
+        "SELECT count(*)::int AS n FROM event_rsvps WHERE event_id = 9100"
+      );
+      expect(total.rows[0].n).toBe(5);
+      expect(admis).toBe(5);
+      expect(refuses).toBe(15);
+    });
+
+    it("rsvp : 10 inscriptions parallèles de membres distincts → 10 inscrits", async () => {
+      await sqlClient.query(
+        `INSERT INTO users (id, email, password_hash, first_name, last_name, phone, role, membership_type, status, created_at)
+         SELECT g, 'p'||g||'@x.cd', 'h', 'P', 'A', '+243', 'member', 'soutien', 'active', NOW()
+         FROM generate_series(1000, 1009) g ON CONFLICT DO NOTHING`
+      );
       const target = (await events.getUpcomingEvents())[0];
-      await Promise.all(
+      const res = await Promise.all(
         Array.from({ length: 10 }, (_, i) => events.rsvpEvent(target.id, 1000 + i))
       );
+      expect(res.every((r) => r?.going)).toBe(true);
+
       const after = (await events.getUpcomingEvents())[0];
-      expect(after.rsvp_user_ids).toHaveLength(10);
-      expect([...after.rsvp_user_ids].sort((a, b) => a - b)).toEqual(
-        Array.from({ length: 10 }, (_, i) => 1000 + i)
+      expect(after.rsvp_count).toBe(10);
+      const lignes = await sqlClient.query(
+        "SELECT count(*)::int AS n FROM event_rsvps WHERE event_id = $1",
+        [target.id]
       );
+      expect(lignes.rows[0].n).toBe(10);
     });
 
     it("messages : envoi + accusé auto, fil chronologique par user, marquage lu", async () => {
