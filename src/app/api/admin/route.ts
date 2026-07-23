@@ -11,6 +11,7 @@ import { adminUpdateContent, updateContactStatus } from "@/infrastructure/reposi
 import { patchSiteSettings } from "@/infrastructure/repositories/settings.repository";
 import {
   activateUser,
+  activateUsers,
   suspendUser,
   addHelpRequestUpdate,
 } from "@/infrastructure/repositories/users.repository";
@@ -57,6 +58,7 @@ const ACTION_ACCESS: Record<AdminActionName, "admin" | "volunteer"> = {
   petition_signatures_mark_read: "volunteer",
   reject_membership: "volunteer",
   activate_user: "admin",
+  activate_users: "admin",
   suspend_user: "admin",
   approve_family_link: "admin",
   reject_family_link: "admin",
@@ -140,6 +142,28 @@ export async function POST(request: NextRequest) {
           runAfterResponse(() => sendAccountActivatedEmail(user.email, user.first_name));
         }
         break;
+      }
+      case "activate_users": {
+        const users = await activateUsers(payload.ids);
+        for (const user of users) {
+          runAfterResponse(() => sendAccountActivatedEmail(user.email, user.first_name));
+        }
+        await logAdminAction({
+          actorType: access,
+          endpoint: "/api/admin",
+          action: "activate_users",
+          target: String(users.length),
+          status: "success",
+          ip: getClientIp(request),
+          metadata: { requested: payload.ids.length, activated: users.length },
+        });
+        // Rapport explicite : `activated` peut être < `requested` (comptes déjà
+        // actifs ou inexistants) sans que ce soit une erreur.
+        return jsonSuccess({
+          activated: users.length,
+          requested: payload.ids.length,
+          ids: users.map((u) => u.id),
+        });
       }
       case "suspend_user":
         await suspendUser(payload.id);

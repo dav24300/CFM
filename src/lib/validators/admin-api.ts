@@ -260,6 +260,12 @@ export const adminActionSchema = z.discriminatedUnion("action", [
     data: z.object({ status: z.string().min(1) }),
   }),
   z.object({ action: z.literal("activate_user"), id: adminActionId }),
+  // Activation par lot : plafonnée pour borner la taille de la requête et la
+  // durée de la transaction (une vague d'inscriptions se traite en 1 à 2 lots).
+  z.object({
+    action: z.literal("activate_users"),
+    ids: z.array(adminActionId).min(1).max(1000),
+  }),
   z.object({ action: z.literal("suspend_user"), id: adminActionId }),
   z.object({ action: z.literal("approve_family_link"), id: adminActionId }),
   z.object({ action: z.literal("reject_family_link"), id: adminActionId }),

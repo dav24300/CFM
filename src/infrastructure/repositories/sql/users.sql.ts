@@ -105,6 +105,30 @@ export async function activateUser(userId: number): Promise<User | undefined> {
   }
 }
 
+/**
+ * Active un lot de comptes en UNE requête.
+ *
+ * `AND status <> 'active'` rend l'appel idempotent : rejouer le même lot ne
+ * renvoie que ce qui a réellement changé, et `RETURNING` fournit le rapport
+ * (les identifiants absents du retour étaient déjà actifs ou n'existent pas).
+ * Volontairement sans transaction englobante ni rollback : sur une vague
+ * d'inscriptions, un succès partiel vaut mieux qu'un échec total.
+ */
+export async function activateUsers(userIds: number[]): Promise<User[]> {
+  if (userIds.length === 0) return [];
+  try {
+    const res = await query<User>(
+      `UPDATE users SET status = 'active', verified_at = $2
+       WHERE id = ANY($1::int[]) AND status <> 'active'
+       RETURNING *`,
+      [userIds, new Date().toISOString()]
+    );
+    return normalizePgRows(res.rows);
+  } catch (err) {
+    mapPgError(err);
+  }
+}
+
 export async function setUserRole(
   userId: number,
   role: UserRole

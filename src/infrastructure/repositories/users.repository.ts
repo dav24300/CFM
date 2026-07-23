@@ -120,6 +120,30 @@ export async function activateUser(userId: number): Promise<User | undefined> {
   return user;
 }
 
+/**
+ * Active un lot de comptes et renvoie ceux qui ont réellement changé d'état.
+ * Idempotent : les comptes déjà actifs (ou inexistants) sont ignorés.
+ */
+export async function activateUsers(userIds: number[]): Promise<User[]> {
+  if (userIds.length === 0) return [];
+  if (isPgMode()) return sqlUsers.activateUsers(userIds);
+
+  // Mode JSON : une seule mutation du store pour tout le lot — surtout pas un
+  // updateStoreAsync par identifiant (chaque appel réécrit le fichier entier).
+  const wanted = new Set(userIds);
+  const activated: User[] = [];
+  await updateStoreAsync((store) => {
+    activated.length = 0;
+    for (const u of store.users ?? []) {
+      if (!wanted.has(u.id) || u.status === "active") continue;
+      u.status = "active";
+      u.verified_at = new Date().toISOString();
+      activated.push(u);
+    }
+  });
+  return activated;
+}
+
 export async function setUserRole(
   userId: number,
   role: UserRole
