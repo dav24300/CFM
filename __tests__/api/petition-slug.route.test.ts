@@ -41,7 +41,9 @@ describe("/api/petitions/[slug] route", () => {
 
   it("POST signs petition using member fallback identity", async () => {
     mocked.getPetition.mockReturnValueOnce({ id: 45, slug: "reforme" });
-    mocked.signPetitionBySlug.mockResolvedValueOnce(undefined);
+    // La signature renvoie désormais le total à jour, que la route relaie au
+    // client (il affichait auparavant un compteur périmé).
+    mocked.signPetitionBySlug.mockResolvedValueOnce({ signatures_count: 43 });
 
     const req = new Request("http://localhost/api/petitions/reforme", {
       method: "POST",
@@ -53,7 +55,7 @@ describe("/api/petitions/[slug] route", () => {
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(body).toEqual({ success: true });
+    expect(body).toEqual({ success: true, signatures_count: 43 });
     expect(mocked.signPetitionBySlug).toHaveBeenCalledWith("reforme", {});
   });
 });

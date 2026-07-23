@@ -331,48 +331,77 @@ export async function createLivePoll(
   }
 }
 
+/**
+ * Enregistre un vote et renvoie le sondage à jour.
+ *
+ * L'ancienne version lisait le sondage sous `FOR UPDATE`, recomptait le tableau
+ * `options` en JavaScript puis le réécrivait en entier : tous les votes d'un
+ * même sondage étaient sérialisés sur trois allers-retours réseau, ce qui
+ * plafonnait un live à quelques dizaines de votes par seconde.
+ *
+ * Deux instructions désormais, sans verrou explicite :
+ *  1. l'INSERT du vote sert lui-même de garde (contrainte unique → ALREADY_VOTED),
+ *     et son `SELECT ... WHERE active = 1` filtre les sondages fermés ;
+ *  2. l'incrément se fait DANS le JSONB côté serveur (jsonb_set sur l'élément
+ *     ciblé), donc atomiquement, sans lecture préalable.
+ */
 export async function voteLivePoll(
   pollId: number,
   optionId: string,
   voterKey: string
 ): Promise<LivePoll> {
-  return withTransaction(async (client) => {
-    // Ordre des gardes identique à la branche Store : doublon d'abord.
-    const existing = await client.query(
-      "SELECT 1 FROM live_poll_votes WHERE poll_id = $1 AND voter_key = $2",
-      [pollId, voterKey]
+  try {
+    const inserted = await query<{ id: number }>(
+      `INSERT INTO live_poll_votes (poll_id, option_id, voter_key, created_at)
+       SELECT p.id, $2::text, $3::text, $4::timestamptz
+       FROM live_polls p
+       WHERE p.id = $1::int
+         AND p.active = 1
+         AND EXISTS (
+           SELECT 1 FROM jsonb_array_elements(p.options) o WHERE o->>'id' = $2::text
+         )
+       RETURNING id`,
+      [pollId, optionId, voterKey, new Date().toISOString()]
     );
-    if ((existing.rowCount ?? 0) > 0) throw domainError("ALREADY_VOTED");
 
-    const pollRes = await client.query<LivePoll>(
-      "SELECT * FROM live_polls WHERE id = $1 FOR UPDATE",
-      [pollId]
-    );
-    const poll = pollRes.rows[0];
-    if (!poll || poll.active !== 1) throw domainError("POLL_CLOSED");
-
-    if (!poll.options.some((o) => o.id === optionId)) throw domainError("INVALID_OPTION");
-
-    try {
-      await client.query(
-        `INSERT INTO live_poll_votes (poll_id, option_id, voter_key, created_at)
-         VALUES ($1, $2, $3, $4)`,
-        [pollId, optionId, voterKey, new Date().toISOString()]
+    if (inserted.rowCount === 0) {
+      // Aucune insertion : sondage absent/fermé, ou option inconnue. On
+      // rétablit la MÊME priorité de gardes que la branche Store — doublon
+      // d'abord — sinon un votant déjà inscrit sur un sondage entre-temps
+      // fermé recevrait POLL_CLOSED au lieu d'ALREADY_VOTED.
+      // Requêtes payées uniquement sur le chemin d'erreur.
+      const dejaVote = await query(
+        "SELECT 1 FROM live_poll_votes WHERE poll_id = $1::int AND voter_key = $2::text",
+        [pollId, voterKey]
       );
-    } catch (err) {
-      mapPgError(err); // 23505 live_poll_votes_poll_id_voter_key_key → ALREADY_VOTED
+      if ((dejaVote.rowCount ?? 0) > 0) throw domainError("ALREADY_VOTED");
+
+      const poll = await getPollById(pollId);
+      if (!poll || poll.active !== 1) throw domainError("POLL_CLOSED");
+      throw domainError("INVALID_OPTION");
     }
 
-    // Recomptage JSONB : tableau reconstruit côté JS sous verrou FOR UPDATE.
-    const options = poll.options.map((o) =>
-      o.id === optionId ? { ...o, votes: o.votes + 1 } : o
+    // Incrément atomique de l'option ciblée, sans relecture ni réécriture du
+    // tableau complet côté application.
+    const updated = await query<LivePoll>(
+      `UPDATE live_polls SET options = (
+         SELECT jsonb_agg(
+           CASE WHEN o->>'id' = $2::text
+                THEN jsonb_set(o, '{votes}', to_jsonb(COALESCE((o->>'votes')::int, 0) + 1))
+                ELSE o END
+           ORDER BY ord
+         )
+         FROM jsonb_array_elements(options) WITH ORDINALITY AS t(o, ord)
+       )
+       WHERE id = $1::int
+       RETURNING *`,
+      [pollId, optionId]
     );
-    await client.query("UPDATE live_polls SET options = $2::jsonb WHERE id = $1", [
-      pollId,
-      JSON.stringify(options),
-    ]);
-    return normalizePgRow({ ...poll, options });
-  }).catch((err) => mapPgError(err));
+
+    return normalizePgRow(updated.rows[0]);
+  } catch (err) {
+    mapPgError(err); // 23505 live_poll_votes_poll_id_voter_key_key → ALREADY_VOTED
+  }
 }
 
 export async function incrementViewerCount(eventId: number): Promise<void> {
