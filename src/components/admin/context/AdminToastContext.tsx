@@ -1,6 +1,15 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { cn } from "@/lib/utils/cn";
 
 type ToastType = "success" | "error" | "info";
@@ -17,6 +26,7 @@ const AdminToastContext = createContext<AdminToastContextValue | null>(null);
 
 export function AdminToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const timersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
   const dismiss = useCallback((id: number) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -26,16 +36,37 @@ export function AdminToastProvider({ children }: { children: ReactNode }) {
     (message: string, type: ToastType = "info") => {
       const id = Date.now() + Math.random();
       setToasts((prev) => [...prev, { id, message, type }]);
-      setTimeout(() => dismiss(id), 4000);
+      const timer = setTimeout(() => {
+        timersRef.current.delete(timer);
+        dismiss(id);
+      }, 4000);
+      timersRef.current.add(timer);
     },
     [dismiss]
   );
 
-  const value: AdminToastContextValue = {
-    toast,
-    success: (m) => toast(m, "success"),
-    error: (m) => toast(m, "error"),
-  };
+  // Les minuteries survivaient au démontage et déclenchaient un setState
+  // sur un composant disparu.
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => {
+      timers.forEach(clearTimeout);
+      timers.clear();
+    };
+  }, []);
+
+  // `value` était un objet neuf à chaque rendu, avec des fonctions `success` /
+  // `error` recréées : toute la console admin (le provider enveloppe le
+  // dashboard) se re-rendait à chaque toast, et les `useCallback` en aval qui
+  // dépendent de `success`/`error` étaient invalidés en permanence.
+  const value = useMemo<AdminToastContextValue>(
+    () => ({
+      toast,
+      success: (m: string) => toast(m, "success"),
+      error: (m: string) => toast(m, "error"),
+    }),
+    [toast]
+  );
 
   return (
     <AdminToastContext.Provider value={value}>

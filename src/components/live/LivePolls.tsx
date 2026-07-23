@@ -17,6 +17,12 @@ type Props = {
   labels: { vote: string; voted: string };
 };
 
+/**
+ * Les sondages sont créés par l'admin et leurs résultats tolèrent quelques
+ * secondes de retard : 5 s × N spectateurs était du trafic gratuit.
+ */
+const POLL_REFRESH_MS = 15_000;
+
 export function LivePolls({ slug, polls: initial, isLive, labels }: Props) {
   const [polls, setPolls] = useState(initial);
   const [voted, setVoted] = useState<Set<number>>(new Set());
@@ -24,16 +30,51 @@ export function LivePolls({ slug, polls: initial, isLive, labels }: Props) {
 
   useEffect(() => {
     if (!isLive) return;
+    const controller = new AbortController();
+
     async function refresh() {
-      const res = await fetch(`/api/live/${slug}/polls`);
-      if (res.ok) {
+      try {
+        const res = await fetch(`/api/live/${slug}/polls`, { signal: controller.signal });
+        if (!res.ok) return;
         const data = await res.json();
-        if (Array.isArray(data.polls)) setPolls(data.polls);
+        if (!Array.isArray(data.polls)) return;
+        // Ne remplacer le state que si les résultats ont bougé : sinon chaque
+        // tick recréait le tableau et re-rendait tous les sondages pour rien.
+        setPolls((prev) =>
+          JSON.stringify(prev) === JSON.stringify(data.polls) ? prev : data.polls
+        );
+      } catch {
+        // annulé ou hors ligne : le tick suivant réessaiera
       }
     }
+
     refresh();
-    const id = setInterval(refresh, 5000);
-    return () => clearInterval(id);
+    let timer: ReturnType<typeof setInterval> | null = null;
+    const stop = () => {
+      if (timer !== null) {
+        clearInterval(timer);
+        timer = null;
+      }
+    };
+    const start = () => {
+      if (timer === null) timer = setInterval(refresh, POLL_REFRESH_MS);
+    };
+    const onVisibility = () => {
+      if (document.hidden) {
+        stop();
+      } else {
+        refresh();
+        start();
+      }
+    };
+
+    if (!document.hidden) start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
+      controller.abort();
+    };
   }, [slug, isLive]);
 
   async function vote(pollId: number, optionId: string) {

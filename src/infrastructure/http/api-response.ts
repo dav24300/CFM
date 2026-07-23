@@ -59,6 +59,28 @@ export function jsonData<T>(data: T): NextResponse {
   return NextResponse.json(data);
 }
 
+/**
+ * Réponse publique mise en cache par le CDN.
+ *
+ * **Opt-in délibéré, jamais le défaut** : `jsonData` reste sans en-tête de
+ * cache pour que rien d'authentifié (admin, portail membre) ne puisse être
+ * mémorisé en périphérie par accident. À réserver aux lectures publiques
+ * identiques pour tout le monde.
+ *
+ * `stale-while-revalidate` sert la version périmée pendant le rafraîchissement
+ * en arrière-plan : aucun visiteur n'attend un aller-retour base de données.
+ */
+export function jsonPublicCached<T>(
+  data: T,
+  { sMaxAge = 60, staleWhileRevalidate = 300 } = {}
+): NextResponse {
+  return NextResponse.json(data, {
+    headers: {
+      "Cache-Control": `public, s-maxage=${sMaxAge}, stale-while-revalidate=${staleWhileRevalidate}`,
+    },
+  });
+}
+
 export function jsonError(message: string, status: number): NextResponse {
   return NextResponse.json({ error: message }, { status });
 }

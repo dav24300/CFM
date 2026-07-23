@@ -41,6 +41,30 @@ function logEmail(opts: SendOptions): void {
   }
 }
 
+/**
+ * Transport SMTP partagé et poolé. Un `createTransport` par email rouvrait une
+ * connexion + TLS + AUTH à chaque envoi : sous une rafale d'inscriptions, cela
+ * ouvre autant de connexions simultanées (rate-limit fournisseur, EMFILE).
+ */
+let transporter: nodemailer.Transporter | null = null;
+
+function getTransporter(): nodemailer.Transporter {
+  if (transporter) return transporter;
+  transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || "587", 10),
+    secure: process.env.SMTP_SECURE === "true",
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    pool: true,
+    maxConnections: 3,
+    maxMessages: 100,
+  });
+  return transporter;
+}
+
 export async function sendEmail(opts: SendOptions): Promise<boolean> {
   if (!opts.to) return false;
 
@@ -54,17 +78,7 @@ export async function sendEmail(opts: SendOptions): Promise<boolean> {
     return true;
   }
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || "587", 10),
-    secure: process.env.SMTP_SECURE === "true",
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-
-  await transporter.sendMail({
+  await getTransporter().sendMail({
     from: process.env.SMTP_FROM || `${SITE.sigle} <${SITE.email}>`,
     to: opts.to,
     subject: opts.subject,

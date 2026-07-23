@@ -169,13 +169,20 @@ export async function updateLiveEvent(
 
 export async function getChatMessages(
   eventId: number,
-  publicOnly = true
+  publicOnly = true,
+  options: { limit?: number; sinceId?: number } = {}
 ): Promise<LiveChatMessage[]> {
-  if (isPgMode()) return sqlLive.getChatMessages(eventId, publicOnly);
+  if (isPgMode()) return sqlLive.getChatMessages(eventId, publicOnly, options);
   const store = await getStoreAsync();
   const msgs = store.live_chat_messages.filter((m) => m.live_event_id === eventId);
   const filtered = publicOnly ? msgs.filter((m) => m.status === "approved") : msgs;
-  return filtered.sort((a, b) => compareIsoDesc(b.created_at, a.created_at));
+  const since =
+    options.sinceId === undefined
+      ? filtered
+      : filtered.filter((m) => m.id > options.sinceId!);
+  const sorted = since.sort((a, b) => compareIsoDesc(b.created_at, a.created_at));
+  // Parité SQL : `limit` = les N DERNIERS messages, ordre chronologique conservé.
+  return options.limit === undefined ? sorted : sorted.slice(-options.limit);
 }
 
 export async function postChatMessage(data: {

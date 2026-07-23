@@ -2,10 +2,20 @@ import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "crypt
 
 const ENC_PREFIX = "cfm_enc:v1:";
 
+// scryptSync coûte ~50-100 ms de CPU BLOQUANT (N=16384) : le recalculer à
+// chaque champ gelait l'event loop dès qu'on déchiffrait une liste (2 champs
+// par demande d'aide × toute la table). La dérivation est déterministe, on la
+// mémoïse. Le secret sert de clé de cache : une rotation à chaud reste prise
+// en compte (cf. procédure de rotation du runbook).
+let derivedKey: { secret: string; key: Buffer } | null = null;
+
 function getKey(): Buffer | null {
   const secret = process.env.DATA_ENCRYPTION_KEY;
   if (!secret) return null;
-  return scryptSync(secret, "cfm-asbl-salt", 32);
+  if (derivedKey?.secret === secret) return derivedKey.key;
+  const key = scryptSync(secret, "cfm-asbl-salt", 32);
+  derivedKey = { secret, key };
+  return key;
 }
 
 export function isEncryptionEnabled(): boolean {

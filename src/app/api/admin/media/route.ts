@@ -15,7 +15,7 @@ export const maxDuration = 120;
 export async function GET() {
   const auth = await requireAdminAccess();
   if (!auth.ok) return auth.response;
-  return jsonData(getMediaState());
+  return jsonData(await getMediaState());
 }
 
 export async function POST(request: NextRequest) {
@@ -86,7 +86,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
 
     if (body.action === "reset_hero") {
-      patchMediaSettings({ action: "reset_hero" });
+      await patchMediaSettings({ action: "reset_hero" });
       await logAdminAction({
         actorType: auth.access,
         endpoint: "/api/admin/media",
@@ -97,7 +97,7 @@ export async function PATCH(request: NextRequest) {
       return jsonSuccess();
     }
 
-    patchMediaSettings(body);
+    await patchMediaSettings(body);
 
     await logAdminAction({
       actorType: auth.access,

@@ -26,16 +26,20 @@ export function StatCounter({ value, label, suffix = "" }: Props) {
     let start = 0;
     const duration = 1500;
     const startTime = performance.now();
+    // Sans annulation, un changement de dépendances empilait des boucles rAF
+    // concurrentes, et l'animation continuait après démontage.
+    let frame = 0;
 
     function tick(now: number) {
       const progress = Math.min((now - startTime) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       start = Math.round(target * eased);
       setDisplay(String(start) + suffix);
-      if (progress < 1) requestAnimationFrame(tick);
+      if (progress < 1) frame = requestAnimationFrame(tick);
     }
 
-    requestAnimationFrame(tick);
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
   }, [inView, numeric, reduceMotion, suffix, value]);
 
   return (

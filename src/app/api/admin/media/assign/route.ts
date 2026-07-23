@@ -16,7 +16,7 @@ export async function PATCH(request: NextRequest) {
   if (!parsed.ok) return parsed.response;
 
   const { type, id, field, path } = parsed.data;
-  const ok = assignMedia({ type, id, field, path });
+  const ok = await assignMedia({ type, id, field, path });
   if (!ok) return jsonNotFound("Entité introuvable");
 
   await logAdminAction({

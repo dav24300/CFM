@@ -85,23 +85,36 @@ export async function sendPushToTopic(
   configureWebPush();
   let sent = 0;
   let failed = 0;
+  const stale: string[] = [];
   const body = JSON.stringify(payload);
 
-  for (const sub of subs) {
-    try {
-      await webpush.sendNotification(
-        {
-          endpoint: sub.endpoint,
-          keys: { p256dh: sub.p256dh, auth: sub.auth },
-        },
-        body
-      );
-      sent++;
-    } catch {
-      failed++;
-      await removePushSubscription(sub.endpoint);
-    }
+  // Envoi par lots concurrents : en séquentiel, 10 000 abonnés × ~200 ms de
+  // round-trip = plus de 30 minutes dans un seul handler HTTP (largement
+  // au-delà de toute maxDuration — notifications perdues en cours de route).
+  const BATCH_SIZE = 50;
+  for (let i = 0; i < subs.length; i += BATCH_SIZE) {
+    const batch = subs.slice(i, i + BATCH_SIZE);
+    const results = await Promise.allSettled(
+      batch.map((sub) =>
+        webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          body
+        )
+      )
+    );
+    results.forEach((res, idx) => {
+      if (res.status === "fulfilled") sent++;
+      else {
+        failed++;
+        stale.push(batch[idx].endpoint);
+      }
+    });
   }
+
+  // Purge groupée hors de la boucle d'envoi (auparavant : 1 DELETE SQL
+  // synchrone par échec, intercalé entre deux notifications).
+  await Promise.allSettled(stale.map((endpoint) => removePushSubscription(endpoint)));
+
   return { sent, failed };
 }
 

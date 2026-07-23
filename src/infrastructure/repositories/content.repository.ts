@@ -295,21 +295,36 @@ async function getContentAdminCounters(): Promise<{
 }
 
 export async function getAdminStats() {
-  const contentCounters = await getContentAdminCounters();
+  // Seul `petitionCounters` dépend d'une valeur précédente : le reste des
+  // groupes de compteurs est indépendant et était pourtant enchaîné en série
+  // (latence = somme des allers-retours au lieu du plus lent d'entre eux).
   const seenAtRaw = (await getSiteSetting("petition_signatures_seen_at")) || "";
-  const petitionCounters = await getPetitionAdminCounters(seenAtRaw);
-  const userCounters = await getUserAdminCounters();
-  const familyCounters = await getFamilyLinkCounters();
-  const liveCounters = await getLiveAdminCounters();
-  const donations = await countDonations();
-  const formCounters = await getFormsAdminCounters();
+  const [
+    contentCounters,
+    petitionCounters,
+    userCounters,
+    familyCounters,
+    liveCounters,
+    donations,
+    formCounters,
+    newsletter,
+  ] = await Promise.all([
+    getContentAdminCounters(),
+    getPetitionAdminCounters(seenAtRaw),
+    getUserAdminCounters(),
+    getFamilyLinkCounters(),
+    getLiveAdminCounters(),
+    countDonations(),
+    getFormsAdminCounters(),
+    countNewsletterSubscribers(),
+  ]);
   return {
     news: contentCounters.news,
     studies: contentCounters.studies,
     campaigns: contentCounters.campaigns,
     memberships: formCounters.memberships,
     help_requests: formCounters.help_requests,
-    newsletter: await countNewsletterSubscribers(),
+    newsletter,
     contacts: formCounters.contacts,
     pending_memberships: formCounters.pending_memberships,
     new_help: formCounters.new_help,
@@ -328,19 +343,42 @@ export async function getAdminStats() {
 
 export async function getAdminData() {
   if (isPgMode()) {
+    // 10 lectures indépendantes : en série, la latence était la somme des 10
+    // allers-retours vers la base.
+    const [
+      memberships,
+      helpRequests,
+      newsletter,
+      contacts,
+      news,
+      studies,
+      campaigns,
+      actions,
+      testimonials,
+      pressReleases,
+    ] = await Promise.all([
+      sqlForms.listMembershipsDesc(),
+      sqlForms.listHelpRequestsDesc(),
+      listNewsletterSubscribers(),
+      sqlForms.listContactMessagesDesc(),
+      sqlContent.listNewsDesc(),
+      sqlContent.listStudiesDesc(),
+      sqlContent.listCampaignsDesc(),
+      getActionsAsync(),
+      sqlContent.listTestimonialsDesc(),
+      sqlContent.listPressReleasesDesc(),
+    ]);
     return {
-      memberships: await sqlForms.listMembershipsDesc(),
-      help_requests: (await sqlForms.listHelpRequestsDesc()).map((h) =>
-        decryptHelpRequest(h)
-      ),
-      newsletter: await listNewsletterSubscribers(),
-      contacts: await sqlForms.listContactMessagesDesc(),
-      news: await sqlContent.listNewsDesc(),
-      studies: await sqlContent.listStudiesDesc(),
-      campaigns: await sqlContent.listCampaignsDesc(),
-      actions: await getActionsAsync(),
-      testimonials: await sqlContent.listTestimonialsDesc(),
-      press_releases: await sqlContent.listPressReleasesDesc(),
+      memberships,
+      help_requests: helpRequests.map((h) => decryptHelpRequest(h)),
+      newsletter,
+      contacts,
+      news,
+      studies,
+      campaigns,
+      actions,
+      testimonials,
+      press_releases: pressReleases,
     };
   }
   const store = await getStoreAsync();
