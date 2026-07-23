@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, type ReactNode } from "react";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
-import { useReducedMotion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/hooks/use-prefers-reduced-motion";
 
 type Crumb = { label: string; href?: string };
 
@@ -40,7 +40,7 @@ export function InteriorHero({
   showBar,
   minHeight = "440px",
 }: Props) {
-  const reduced = useReducedMotion();
+  const reduced = usePrefersReducedMotion();
   const scopeRef = useRef<HTMLElement>(null);
   const baseRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);

@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/hooks/use-prefers-reduced-motion";
 
 type Stat = { value?: number; text?: string; label: string };
 
 function CountUp({ target }: { target: number }) {
-  const reduced = useReducedMotion();
+  const reduced = usePrefersReducedMotion();
   const ref = useRef<HTMLSpanElement>(null);
   const [display, setDisplay] = useState(reduced ? target : 0);
 

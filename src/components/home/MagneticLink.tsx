@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRef, type ReactNode } from "react";
-import { useReducedMotion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/hooks/use-prefers-reduced-motion";
 
 type Props = {
   href: string;
@@ -18,7 +18,7 @@ type Props = {
  */
 export function MagneticLink({ href, className, children, ariaLabel, ...rest }: Props) {
   const ref = useRef<HTMLAnchorElement>(null);
-  const reduced = useReducedMotion();
+  const reduced = usePrefersReducedMotion();
 
   function onMove(e: React.MouseEvent<HTMLAnchorElement>) {
     if (reduced) return;
