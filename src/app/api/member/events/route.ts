@@ -14,7 +14,9 @@ import {
 export async function GET() {
   const member = await getCurrentMember();
   if (!member) return jsonUnauthorized();
-  const events = await getUpcomingEvents();
+  // `viewerId` : chaque membre reçoit son propre état d'inscription, sans que
+  // la liste des autres inscrits ne quitte la base.
+  const events = await getUpcomingEvents(member.id);
   return jsonData({ events });
 }
 
@@ -35,9 +37,13 @@ export async function POST(request: NextRequest) {
     return jsonError("Événement invalide", 400);
   }
 
-  const event = await rsvpEvent(eventId, member.id);
-  if (!event) return jsonNotFound("Événement introuvable");
+  const result = await rsvpEvent(eventId, member.id);
+  if (!result) return jsonNotFound("Événement introuvable");
 
-  const going = event.rsvp_user_ids.includes(member.id);
-  return jsonData({ event, going });
+  // On ne renvoie plus l'événement complet : il portait `rsvp_user_ids`, donc
+  // les identifiants des autres membres.
+  if (result.full) {
+    return jsonError("Événement complet", 409);
+  }
+  return jsonData({ going: result.going, count: result.count });
 }

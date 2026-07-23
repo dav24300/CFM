@@ -336,6 +336,22 @@ CREATE TABLE IF NOT EXISTS member_resources (
   created_at TIMESTAMPTZ NOT NULL
 );
 
+-- Inscriptions aux événements : une ligne par (événement, membre).
+-- Remplace le tableau JSONB events.rsvp_user_ids, qui était relu et réécrit en
+-- entier à chaque clic sous verrou de ligne (O(n), et toutes les inscriptions
+-- d'un même événement sérialisées). La clé primaire composite fournit
+-- l'unicité que la garde JavaScript assurait auparavant.
+-- La colonne rsvp_user_ids est CONSERVÉE : elle reste la source du backfill et
+-- permet un retour arrière. Sa migration est faite par un script dédié
+-- (scripts/backfill-event-rsvps.mjs), jamais ici — ce fichier est rejoué à
+-- chaque démarrage.
+CREATE TABLE IF NOT EXISTS event_rsvps (
+  event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (event_id, user_id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_events_date ON events("date");
 CREATE INDEX IF NOT EXISTS idx_member_messages_user ON member_messages(user_id);
 
