@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import fs from "fs";
-import path from "path";
 import { Download, Newspaper, Mail } from "lucide-react";
 import { AnchorButton, ButtonLink } from "@/components/ui/patterns/button-link";
 import { getPublishedPressReleasesCached as getPublishedPressReleases } from "@/infrastructure/cache/content-cache";
@@ -9,11 +7,7 @@ import { InteriorHero } from "@/components/ui/InteriorHero";
 import { getTranslations } from "@/lib/i18n-server";
 import { dateLocale } from "@/lib/i18n";
 import { getPressKitPathCached as getPressKitPath } from "@/infrastructure/cache/media-cache";
-
-function pressKitAvailable(kitPath: string): boolean {
-  const full = path.join(process.cwd(), "public", kitPath.replace(/^\//, ""));
-  return fs.existsSync(full);
-}
+import { getPressKitAvailableCached } from "@/infrastructure/cache/public-page-cache";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getTranslations();
@@ -25,7 +19,7 @@ export default async function PressePage() {
   const p = t.pages.press;
   const releases = await getPublishedPressReleases();
   const pressKitPath = await getPressKitPath();
-  const hasPressKit = pressKitAvailable(pressKitPath);
+  const hasPressKit = await getPressKitAvailableCached(pressKitPath);
 
   return (
     <>
