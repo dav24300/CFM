@@ -167,6 +167,29 @@ export function CommunityPanel({ data, onReload }: Props) {
           columns={userCols}
           searchKeys={["first_name", "last_name", "email"]}
           rowKey={(r) => Number(r.id)}
+          selectable
+          bulkActions={(selected, clearSelection) => {
+            // Seuls les comptes réellement en attente sont envoyés : l'API est
+            // idempotente, mais afficher le compte exact évite de promettre
+            // une action sur des comptes déjà actifs.
+            const pending = selected.filter((r) => r.status === "pending");
+            return (
+              <Button
+                size="sm"
+                type="button"
+                disabled={pending.length === 0}
+                onClick={async () => {
+                  await post({
+                    action: "activate_users",
+                    ids: pending.map((r) => Number(r.id)),
+                  });
+                  clearSelection();
+                }}
+              >
+                Activer {pending.length} compte{pending.length > 1 ? "s" : ""} en attente
+              </Button>
+            );
+          }}
           actions={(row) => (
             <div className="flex gap-1">
               {row.status === "pending" && (
