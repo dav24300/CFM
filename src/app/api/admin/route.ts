@@ -25,6 +25,7 @@ import {
 } from "@/infrastructure/email/nodemailer.adapter";
 import { sendPushToTopic } from "@/infrastructure/push/web-push.adapter";
 import { logAdminAction } from "@/lib/admin-audit";
+import { runAfterResponse } from "@/lib/after-response";
 import { getClientIp } from "@/infrastructure/rate-limit/memory";
 import { parseOrBadRequest } from "@/lib/validators";
 import {
@@ -136,7 +137,7 @@ export async function POST(request: NextRequest) {
       case "activate_user": {
         const user = await activateUser(payload.id);
         if (user) {
-          await sendAccountActivatedEmail(user.email, user.first_name);
+          runAfterResponse(() => sendAccountActivatedEmail(user.email, user.first_name));
         }
         break;
       }

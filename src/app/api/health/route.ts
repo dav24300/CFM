@@ -38,9 +38,24 @@ export async function GET() {
     storage: isSupabaseStorageEnabled() ? "supabase" : "local",
   };
 
+  // En production, une base "skipped" signifie DATABASE_URL absent : la
+  // persistance retombe alors sur data/store.json, éphémère en serverless —
+  // les écritures (inscriptions, dons, signatures) sont perdues au prochain
+  // cold start. C'est une panne silencieuse : le health check doit la crier.
+  const persistenceEphemeral =
+    checks.database === "skipped" && process.env.NODE_ENV === "production";
+
   const healthy =
     checks.app === "ok" &&
+    !persistenceEphemeral &&
     (checks.database === "ok" || checks.database === "skipped");
+
+  const warnings: string[] = [];
+  if (persistenceEphemeral) {
+    warnings.push(
+      "DATABASE_URL absent en production : les écritures vont dans un stockage éphémère et seront perdues."
+    );
+  }
 
   return NextResponse.json(
     {
@@ -49,6 +64,7 @@ export async function GET() {
       timestamp: new Date().toISOString(),
       checks,
       services,
+      ...(warnings.length ? { warnings } : {}),
     },
     { status: healthy ? 200 : 503 }
   );

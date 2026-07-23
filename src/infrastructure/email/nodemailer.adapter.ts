@@ -78,14 +78,29 @@ export async function sendEmail(opts: SendOptions): Promise<boolean> {
     return true;
   }
 
-  await getTransporter().sendMail({
-    from: process.env.SMTP_FROM || `${SITE.sigle} <${SITE.email}>`,
-    to: opts.to,
-    subject: opts.subject,
-    html: opts.html,
-    text: opts.text,
-  });
-  return true;
+  // Un envoi qui échoue ne doit JAMAIS faire échouer l'action métier qui l'a
+  // déclenché. Sans cette garde, une panne SMTP (auth, TLS, quota, timeout)
+  // remontait jusqu'à la route : l'inscription renvoyait une erreur 400 avec le
+  // message brut de nodemailer ALORS QUE LE COMPTE ÉTAIT DÉJÀ CRÉÉ. Le membre
+  // resoumettait et se heurtait à EMAIL_EXISTS, définitivement bloqué.
+  // La valeur de retour indique si l'email est parti ; l'appelant décide.
+  try {
+    await getTransporter().sendMail({
+      from: process.env.SMTP_FROM || `${SITE.sigle} <${SITE.email}>`,
+      to: opts.to,
+      subject: opts.subject,
+      html: opts.html,
+      text: opts.text,
+    });
+    return true;
+  } catch (err) {
+    // Ni le corps ni l'adresse complète ne sont journalisés en clair côté erreur.
+    console.error(
+      `[CFM Email] échec d'envoi (${opts.subject}) :`,
+      err instanceof Error ? err.message : err
+    );
+    return false;
+  }
 }
 
 function baseTemplate(title: string, body: string): string {
