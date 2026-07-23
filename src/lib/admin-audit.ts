@@ -42,34 +42,32 @@ function appendFileAudit(payload: AdminAuditPayload): void {
   }
 }
 
+/**
+ * Écrit via le pool partagé (`sql-client`). Auparavant chaque action admin
+ * créait puis détruisait son propre `pg.Pool` : handshake TCP + TLS + auth
+ * complets par ligne de journal (~100-300 ms sur base managée), et autant de
+ * connexions ouvertes/fermées — y compris sur les refus 401/403, ce qui
+ * transformait un martèlement non authentifié en épuisement de connexions.
+ */
 async function insertPgAudit(payload: AdminAuditPayload): Promise<void> {
   if (!process.env.DATABASE_URL) return;
   try {
-    const pg = await import("pg");
-    const pool = new pg.Pool({
-      connectionString: process.env.DATABASE_URL,
-      connectionTimeoutMillis: 2_000,
-      max: 1,
-    });
-    try {
-      await pool.query(
-        `INSERT INTO admin_audit_log
-         (actor_type, actor_identifier, endpoint, action, target, status, ip, metadata)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb)`,
-        [
-          payload.actorType,
-          payload.actorIdentifier || null,
-          payload.endpoint,
-          payload.action,
-          payload.target || null,
-          payload.status,
-          payload.ip || null,
-          JSON.stringify(payload.metadata || {}),
-        ]
-      );
-    } finally {
-      await pool.end();
-    }
+    const { query } = await import("@/infrastructure/persistence/sql/sql-client");
+    await query(
+      `INSERT INTO admin_audit_log
+       (actor_type, actor_identifier, endpoint, action, target, status, ip, metadata)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb)`,
+      [
+        payload.actorType,
+        payload.actorIdentifier || null,
+        payload.endpoint,
+        payload.action,
+        payload.target || null,
+        payload.status,
+        payload.ip || null,
+        JSON.stringify(payload.metadata || {}),
+      ]
+    );
   } catch {
     // Ne pas bloquer la requête admin si PostgreSQL est indisponible.
   }
@@ -102,10 +100,9 @@ export async function readAuditLogs(limit = 100): Promise<AuditLogEntry[]> {
 
   if (process.env.DATABASE_URL) {
     try {
-      const pg = await import("pg");
-      const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-      try {
-        const res = await pool.query(
+      const { query } = await import("@/infrastructure/persistence/sql/sql-client");
+      {
+        const res = await query(
           `SELECT created_at, actor_type, actor_identifier, endpoint, action, target, status, ip, metadata
            FROM admin_audit_log ORDER BY created_at DESC LIMIT $1`,
           [limit]
@@ -122,8 +119,6 @@ export async function readAuditLogs(limit = 100): Promise<AuditLogEntry[]> {
           metadata: (row.metadata as Record<string, unknown>) || {},
         }));
         if (pgEntries.length > entries.length) return pgEntries;
-      } finally {
-        await pool.end();
       }
     } catch {
       // fallback to file

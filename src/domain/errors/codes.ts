@@ -1,5 +1,7 @@
 /** Codes d'erreur métier mappés vers HTTP dans api-response. */
 export const DOMAIN_ERROR_CODES = [
+  "ACCOUNT_PENDING",
+  "ACCOUNT_SUSPENDED",
   "ALREADY_EXISTS",
   "ALREADY_SIGNED",
   "ALREADY_VOTED",

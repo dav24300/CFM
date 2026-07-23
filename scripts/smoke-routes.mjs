@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Smoke test — routes publiques CFM (Phase 0 Corrective.md)
+ * Smoke test — routes publiques CFM (Phase 0, docs/archive/Corrective.md)
  * Usage: node scripts/smoke-routes.mjs [baseUrl]
  */
 const base = process.argv[2] || process.env.SMOKE_BASE_URL || "http://localhost:3000";

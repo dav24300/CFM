@@ -25,6 +25,9 @@ export function AnimatedNumber({
     const el = ref.current;
     if (!el) return;
     let started = false;
+    // La boucle rAF survivait au démontage : elle continuait jusqu'à 1,4 s en
+    // appelant setDisplay sur un composant disparu.
+    let frame = 0;
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
@@ -35,10 +38,10 @@ export function AnimatedNumber({
             const step = (now: number) => {
               const prog = Math.min(1, (now - start) / dur);
               setDisplay(Math.round(value * (1 - Math.pow(1 - prog, 3))));
-              if (prog < 1) requestAnimationFrame(step);
+              if (prog < 1) frame = requestAnimationFrame(step);
               else setDisplay(value);
             };
-            requestAnimationFrame(step);
+            frame = requestAnimationFrame(step);
             io.unobserve(e.target);
           }
         });
@@ -46,7 +49,10 @@ export function AnimatedNumber({
       { threshold: 0.6 }
     );
     io.observe(el);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [value, reduced]);
 
   return (

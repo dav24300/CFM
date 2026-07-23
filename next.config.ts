@@ -3,15 +3,22 @@ import type { NextConfig } from "next";
 const isProd = process.env.NODE_ENV === "production";
 
 const cspDirectives = [
-  "default-src 'self' https: data: blob:",
-  "frame-src 'self' https:",
+  // Prod : default-src fermé, chaque besoin est couvert par une directive
+  // explicite ci-dessous. Dev : large (HMR, overlays).
+  isProd ? "default-src 'self'" : "default-src 'self' https: data: blob:",
+  "frame-src 'self' https:", // embeds YouTube/Facebook (live)
   "img-src 'self' https: data: blob:",
-  "connect-src 'self' https: wss:",
+  "connect-src 'self' https: wss:", // Pusher (wss), Supabase
+  // Aucun <script> externe dans l'app (pusher-js est bundlé, sw.js est même
+  // origine) : prod se limite à 'self' + inline Next.js.
   isProd
-    ? "script-src 'self' 'unsafe-inline' https:"
+    ? "script-src 'self' 'unsafe-inline'"
     : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
   "style-src 'self' 'unsafe-inline' https:",
   "font-src 'self' https: data:",
+  "media-src 'self' https: blob:", // photos/vidéos Supabase Storage
+  "worker-src 'self' blob:", // service worker PWA
+  "manifest-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

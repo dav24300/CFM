@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const usagePath = searchParams.get("usage");
-  return jsonData(getMediaLibrary(usagePath));
+  return jsonData(await getMediaLibrary(usagePath));
 }
 
 export async function PATCH(request: NextRequest) {
@@ -29,7 +29,7 @@ export async function PATCH(request: NextRequest) {
   const parsed = parseOrBadRequest(adminMediaLibraryPatchSchema, body);
   if (!parsed.ok) return parsed.response;
 
-  updateLibraryMeta(parsed.data.path, {
+  await updateLibraryMeta(parsed.data.path, {
     alt: parsed.data.alt,
     tags: parsed.data.tags,
     category: parsed.data.category,

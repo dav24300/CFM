@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { signSessionPayload, verifySessionSignature } from "@/infrastructure/auth/session-crypto";
 import type { PublicUser, User } from "@/domain/entities/v2";
@@ -44,13 +45,20 @@ export async function getMemberSessionUserId(): Promise<number | null> {
   return Number.isNaN(id) ? null : id;
 }
 
-export async function getLoggedInMember(): Promise<PublicUser | null> {
+/**
+ * Mémoïsé par requête (React.cache) : chaque écran du portail appelait cette
+ * fonction depuis le layout PUIS depuis la page, et `isVolunteerSession` /
+ * `isCoordinatorSession` la rappelaient encore — soit 2 à 4 `SELECT * FROM
+ * users WHERE id = $1` identiques par navigation. Le cache est vidé entre
+ * deux requêtes : aucun risque de fuite de session d'un utilisateur à l'autre.
+ */
+export const getLoggedInMember = cache(async function getLoggedInMember(): Promise<PublicUser | null> {
   const userId = await getMemberSessionUserId();
   if (!userId) return null;
   const user = await getUserById(userId);
   if (!user || user.status === "suspended") return null;
   return toPublicUser(user);
-}
+});
 
 export async function getCurrentMember(): Promise<PublicUser | null> {
   const user = await getLoggedInMember();

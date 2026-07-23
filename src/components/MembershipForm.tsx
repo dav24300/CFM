@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PROVINCES_RDC, MEMBERSHIP_TYPES } from "@/lib/constants";
+import { PROVINCES_RDC } from "@/lib/constants";
 import { Input } from "@/components/ui/primitives/input";
 import { Textarea } from "@/components/ui/primitives/textarea";
 import { NativeSelect } from "@/components/ui/primitives/native-select";
@@ -14,9 +14,12 @@ import { MemberAccountPromo } from "@/components/ux/MemberAccountPromo";
 import { useAsyncAction } from "@/lib/hooks/use-async-action";
 import { useTranslations } from "@/lib/i18n-client";
 
+const TYPE_IDS = ["famille", "soutien", "benevole"] as const;
+
 export function MembershipForm() {
   const { t } = useTranslations();
   const fs = t.ux.formSuccess;
+  const f = t.forms;
   const [type, setType] = useState("famille");
   const { isLoading, isSuccess, isError, error, run } = useAsyncAction();
   const [form, setForm] = useState({
@@ -45,6 +48,13 @@ export function MembershipForm() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Erreur");
+        try {
+          // Pont vers /membre/inscription : évite la re-saisie (sessionStorage,
+          // jamais l'URL — données personnelles).
+          sessionStorage.setItem("cfm-adhesion-prefill", JSON.stringify({ type, ...form }));
+        } catch {
+          // stockage indisponible : le préremplissage est simplement perdu
+        }
         setForm({
           first_name: "",
           last_name: "",
@@ -68,23 +78,23 @@ export function MembershipForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <FormField label="Type d'adhésion" htmlFor="membership-type" required>
+      <FormField label={f.membershipType} htmlFor="membership-type" required>
         <NativeSelect
           id="membership-type"
           value={type}
           onChange={(e) => setType(e.target.value)}
           required
         >
-          {MEMBERSHIP_TYPES.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.label}
+          {TYPE_IDS.map((id) => (
+            <option key={id} value={id}>
+              {t.membershipTypes[id].label}
             </option>
           ))}
         </NativeSelect>
       </FormField>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <FormField label="Prénom" htmlFor="first_name" required>
+        <FormField label={f.firstName} htmlFor="first_name" required>
           <Input
             type="text"
             required
@@ -92,7 +102,7 @@ export function MembershipForm() {
             onChange={(e) => update("first_name", e.target.value)}
           />
         </FormField>
-        <FormField label="Nom" htmlFor="last_name" required>
+        <FormField label={f.lastName} htmlFor="last_name" required>
           <Input
             type="text"
             required
@@ -103,14 +113,14 @@ export function MembershipForm() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <FormField label="Email" htmlFor="email">
+        <FormField label={f.email} htmlFor="email">
           <Input
             type="email"
             value={form.email}
             onChange={(e) => update("email", e.target.value)}
           />
         </FormField>
-        <FormField label="Téléphone" htmlFor="phone" required>
+        <FormField label={f.phone} htmlFor="phone" required>
           <Input
             type="tel"
             required
@@ -120,34 +130,34 @@ export function MembershipForm() {
         </FormField>
       </div>
 
-      <FormField label="Province" htmlFor="province">
+      <FormField label={f.province} htmlFor="province">
         <FormSelect
           id="province"
           value={form.province}
           onValueChange={(v) => update("province", v)}
-          placeholder="Sélectionner"
+          placeholder={t.common.select}
           options={PROVINCES_RDC.map((p) => ({ value: p, label: p }))}
         />
       </FormField>
 
       {isFamille && (
         <>
-          <FormField label="Lien avec le militaire" htmlFor="military_link" required>
+          <FormField label={f.militaryLink} htmlFor="military_link" required>
             <NativeSelect
               id="military_link"
               required
               value={form.military_link}
               onChange={(e) => update("military_link", e.target.value)}
             >
-              <option value="">Sélectionner</option>
-              <option value="conjoint">Conjoint(e)</option>
-              <option value="enfant">Enfant</option>
-              <option value="veuve">Veuve / Veuf</option>
-              <option value="orphelin">Orphelin</option>
-              <option value="parent">Parent</option>
+              <option value="">{t.common.select}</option>
+              <option value="conjoint">{f.links.conjoint}</option>
+              <option value="enfant">{f.links.enfant}</option>
+              <option value="veuve">{f.links.veuve}</option>
+              <option value="orphelin">{f.links.orphelin}</option>
+              <option value="parent">{f.links.parent}</option>
             </NativeSelect>
           </FormField>
-          <FormField label="Nom du militaire concerné" htmlFor="parent_military_name">
+          <FormField label={f.militaryName} htmlFor="parent_military_name">
             <Input
               type="text"
               value={form.parent_military_name}
@@ -158,22 +168,22 @@ export function MembershipForm() {
       )}
 
       {isBenevole && (
-        <FormField label="Compétences & disponibilité" htmlFor="skills">
+        <FormField label={f.skillsAvailability} htmlFor="skills">
           <Textarea
             rows={3}
             value={form.skills}
             onChange={(e) => update("skills", e.target.value)}
-            placeholder="Ex: communication, juridique, disponible les week-ends..."
+            placeholder={f.skillsPlaceholder}
           />
         </FormField>
       )}
 
-      <FormField label="Message" htmlFor="message">
+      <FormField label={f.message} htmlFor="message">
         <Textarea rows={3} value={form.message} onChange={(e) => update("message", e.target.value)} />
       </FormField>
 
       <Button type="submit" loading={isLoading} className="w-full" data-cta="cta_adhesion">
-        Soumettre ma demande
+        {f.submitRequest}
       </Button>
 
       {isSuccess && (

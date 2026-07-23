@@ -16,6 +16,7 @@
     "test:coverage": "vitest run --coverage",
     "smoke": "node scripts/smoke-routes.mjs",
     "test:repos": "node scripts/test-repositories.mjs",
+    "seed:qa": "node scripts/seed-qa-accounts.mjs",
     "migrate:pg": "npx tsx scripts/migrate-json-to-pg.mjs",
     "bootstrap:pg": "npx tsx scripts/bootstrap-pg.mjs",
     "hydrate:pg": "npx tsx scripts/hydrate-from-postgres.mjs",

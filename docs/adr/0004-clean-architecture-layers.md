@@ -6,7 +6,7 @@ Accepté — juillet 2026
 
 ## Contexte
 
-Après les phases R0–R6 (`Strat_Refact.md`), le code disposait de repositories et d'un `StorePort` non branché, mais les routes API appelaient encore directement repositories et modules infra. Les types métier vivaient dans `store.ts` (~518 lignes).
+Après les phases R0–R6 (`../archive/Strat_Refact.md`), le code disposait de repositories et d'un `StorePort` non branché, mais les routes API appelaient encore directement repositories et modules infra. Les types métier vivaient dans `store.ts` (~518 lignes).
 
 ## Décision
 

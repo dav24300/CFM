@@ -63,7 +63,7 @@ Actions : parcourir la bibliothèque ou uploader un nouveau fichier.
 - PostgreSQL — `site_settings` (hero, defaults, catalog JSON)
 - Variable `CFM_IMAGE_COMPRESS=true` — compression WebP automatique
 - Checklist complète : [`docs/vps-media-deploy-checklist.md`](vps-media-deploy-checklist.md)
-- Backup uploads : voir [`DEPLOY-VPS.md`](../DEPLOY-VPS.md)
+- Backup uploads : voir [`DEPLOY-VPS.md`](DEPLOY-VPS.md)
 
 ## Vérification rapide
 

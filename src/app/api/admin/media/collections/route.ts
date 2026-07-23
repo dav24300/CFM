@@ -18,7 +18,7 @@ import { parseOrBadRequest } from "@/lib/validators";
 export async function GET() {
   const auth = await requireAdminAccess();
   if (!auth.ok) return auth.response;
-  return jsonData(getMediaCollections());
+  return jsonData(await getMediaCollections());
 }
 
 export async function PUT(request: NextRequest) {
@@ -29,7 +29,7 @@ export async function PUT(request: NextRequest) {
   const parsed = parseOrBadRequest(adminMediaCollectionsPutSchema, body);
   if (!parsed.ok) return parsed.response;
 
-  saveMediaCollections(parsed.data);
+  await saveMediaCollections(parsed.data);
 
   await logAdminAction({
     actorType: auth.access,

@@ -28,6 +28,8 @@ import {
   createPasswordResetToken,
   resetPasswordWithToken,
 } from "@/infrastructure/auth/password-reset";
+import { domainError } from "@/domain/errors/domain-error";
+import { runAfterResponse } from "@/lib/after-response";
 import type { MembershipType, PublicUser, User } from "@/domain/entities/v2";
 import type { FamilyLink } from "@/domain/entities/v2";
 
@@ -35,7 +37,9 @@ export async function registerMember(
   data: Parameters<typeof registerUser>[0]
 ): Promise<{ userId: number; status: string }> {
   const user = await registerUser(data);
-  await sendRegistrationPendingEmail(user.email, user.first_name);
+  // Hors du chemin de requête : le compte est créé, l'inscrit ne doit pas
+  // attendre l'aller-retour SMTP pour voir sa confirmation.
+  runAfterResponse(() => sendRegistrationPendingEmail(user.email, user.first_name));
   return { userId: user.id, status: user.status };
 }
 
@@ -45,6 +49,10 @@ export async function loginMember(
 ): Promise<PublicUser | null> {
   const user = await verifyUserPassword(email, password);
   if (!user) return null;
+  // Statut vérifié AVANT la pose du cookie : un compte non actif ne doit
+  // recevoir aucune session, même invalidée en aval par getCurrentMember.
+  if (user.status === "pending") throw domainError("ACCOUNT_PENDING");
+  if (user.status === "suspended") throw domainError("ACCOUNT_SUSPENDED");
   await createMemberSession(user.id);
   return toPublicUser(user);
 }

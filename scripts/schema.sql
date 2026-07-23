@@ -339,6 +339,48 @@ CREATE TABLE IF NOT EXISTS member_resources (
 CREATE INDEX IF NOT EXISTS idx_events_date ON events("date");
 CREATE INDEX IF NOT EXISTS idx_member_messages_user ON member_messages(user_id);
 
+-- ── Index de performance (audit trafic massif) ─────────────────────────────
+-- PostgreSQL n'indexe PAS automatiquement les clés étrangères : sans ces
+-- index, chaque lecture par parent était un scan séquentiel de la table.
+
+-- Clés étrangères lues à chaque affichage (portail, dons, famille, live).
+CREATE INDEX IF NOT EXISTS idx_donations_user ON donations(user_id);
+CREATE INDEX IF NOT EXISTS idx_family_links_parent ON family_links(parent_user_id);
+CREATE INDEX IF NOT EXISTS idx_family_links_child ON family_links(child_user_id);
+CREATE INDEX IF NOT EXISTS idx_live_polls_event ON live_polls(live_event_id);
+CREATE INDEX IF NOT EXISTS idx_help_request_updates_request
+  ON help_request_updates(help_request_id);
+CREATE INDEX IF NOT EXISTS idx_password_reset_user ON password_reset_tokens(user_id);
+
+-- Listes publiques : filtre `published/active` + tri `created_at DESC`.
+-- Index composites : le tri est servi par l'index, plus de tri en mémoire.
+CREATE INDEX IF NOT EXISTS idx_news_published_created
+  ON news(published, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_studies_published_created
+  ON studies(published, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_campaigns_active_created
+  ON campaigns(active, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_testimonials_published_created
+  ON testimonials(published, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_press_releases_published_created
+  ON press_releases(published, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_actions_date ON actions("date" DESC);
+
+-- Chat live : le filtre porte sur (event, status) — l'index existant
+-- (live_event_id, created_at) obligeait à relire toutes les lignes de
+-- l'événement pour écarter les messages non approuvés.
+CREATE INDEX IF NOT EXISTS idx_live_chat_event_status_created
+  ON live_chat_messages(live_event_id, status, created_at DESC);
+
+-- Divers chemins chauds.
+CREATE INDEX IF NOT EXISTS idx_petition_sig_signed_at
+  ON petition_signatures(signed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_users_membership_province
+  ON users(membership_type, province);
+CREATE INDEX IF NOT EXISTS idx_events_province ON events(province);
+CREATE INDEX IF NOT EXISTS idx_push_subscriptions_topics
+  ON push_subscriptions USING GIN(topics);
+
 -- ── Séquences d'ID par table (refactor persistance P1) ─────────────────────
 -- Remplace le compteur global en mémoire (nextId) : élimine les collisions
 -- multi-instances. Séquences volontairement NON-OWNED pendant la transition

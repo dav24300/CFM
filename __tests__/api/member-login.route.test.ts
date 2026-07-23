@@ -9,6 +9,7 @@ vi.mock("@/application/services/member.service", () => ({
 }));
 
 import { POST } from "@/app/api/member/login/route";
+import { domainError } from "@/domain/errors/domain-error";
 
 describe("POST /api/member/login", () => {
   it("returns 400 when required fields are missing", async () => {
@@ -46,5 +47,37 @@ describe("POST /api/member/login", () => {
     expect(res.status).toBe(200);
     expect(mocked.loginMember).toHaveBeenCalledWith("a@b.cd", "secret123");
     expect(body).toMatchObject({ success: true, user: { id: 9, email: "a@b.cd" } });
+  });
+
+  it("returns 403 with explicit message for a pending account", async () => {
+    mocked.loginMember.mockRejectedValueOnce(domainError("ACCOUNT_PENDING"));
+
+    const req = new Request("http://localhost/api/member/login", {
+      method: "POST",
+      body: JSON.stringify({ email: "p@b.cd", password: "secret123" }),
+      headers: { "Content-Type": "application/json" },
+    }) as any;
+
+    const res = await POST(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.error).toContain("attente de validation");
+  });
+
+  it("returns 403 for a suspended account", async () => {
+    mocked.loginMember.mockRejectedValueOnce(domainError("ACCOUNT_SUSPENDED"));
+
+    const req = new Request("http://localhost/api/member/login", {
+      method: "POST",
+      body: JSON.stringify({ email: "s@b.cd", password: "secret123" }),
+      headers: { "Content-Type": "application/json" },
+    }) as any;
+
+    const res = await POST(req);
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.error).toContain("suspendu");
   });
 });

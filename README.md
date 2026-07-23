@@ -19,7 +19,7 @@ Points cles :
 - `src/infrastructure/repositories/` : 6 repositories par domaine
 - `src/lib/validators/*` : schemas Zod pour validation API
 - `src/lib/i18n/messages/*.json` : dictionnaires FR/EN/LN/SW
-- `ResultatArchLog.md` : rapport detaille de la refactorisation
+- `docs/archive/ResultatArchLog.md` : rapport detaille de la refactorisation
 
 Persistance supportee:
 - mode JSON local (`data/store.json`) pour dev simple
@@ -89,19 +89,19 @@ Administration locale: `http://localhost:3000/admin`
 ## Documentation technique
 
 - Plan produit: `PLAN.md`
-- Analyse et stabilisation: `ANALYSE_ETAT_ACTUEL_LOGICIEL.md`
 - Release notes: `RELEASE-NOTES.md`
 - Tests admin↔site: `docs/TEST-ADMIN-SITE-E2E.md`
 - Scope stabilisation: `docs/STABILISATION-SCOPE.md`
-- Correctifs fonctionnels: `Corrective.md`
-- Strategie de refactor: `Strat_Refact.md`
 - Runbook ops/securite: `docs/runbook.md`
+- Recuperation acces admin: `docs/AdminRecovery.md`
+- Workflow CI a installer: `docs/ci/github-actions-ci.yml`
+- Documents historiques: `docs/archive/` (voir son README)
 - ADR:
   - `docs/adr/0001-postgresql-normalized-persistence.md`
   - `docs/adr/0002-session-auth-hmac-and-bcrypt.md`
   - `docs/adr/0003-sensitive-data-encryption.md`
   - `docs/adr/0004-clean-architecture-layers.md`
-- Rapport architecture: `ResultatArchLog.md`
+- Rapport architecture: `docs/archive/ResultatArchLog.md`
 
 ## Deploiement
 
@@ -114,4 +114,4 @@ Administration locale: `http://localhost:3000/admin`
 4. Deployer : `npx vercel --prod` (buildCommand `npm run build`, cf. `vercel.json`).
 5. Verifier : `GET /api/health` doit renvoyer `database: ok` (et `redis: ok` si Upstash configure).
 
-Option secondaire (self-hosting) : Docker/VPS via `output: standalone` (`Dockerfile`, `docker-compose.prod.yml`, `DEPLOY-VPS.md`). Non utilise pour la cible Vercel.
+Option secondaire (self-hosting) : Docker/VPS via `output: standalone` (`Dockerfile`, `docker-compose.prod.yml`, `docs/DEPLOY-VPS.md`). Non utilise pour la cible Vercel.

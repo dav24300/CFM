@@ -1,7 +1,7 @@
 # Exécution du plan de stabilisation — CFM ASBL
 
 Date d'exécution: 2026-07-07  
-Référence: `ANALYSE_ETAT_ACTUEL_LOGICIEL.md` section 9
+Référence: `archive/ANALYSE_ETAT_ACTUEL_LOGICIEL.md` section 9
 
 ## Actions réalisées
 

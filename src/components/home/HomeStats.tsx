@@ -18,6 +18,7 @@ function CountUp({ target }: { target: number }) {
     const el = ref.current;
     if (!el) return;
     let started = false;
+    let frame = 0;
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
@@ -28,10 +29,10 @@ function CountUp({ target }: { target: number }) {
             const step = (now: number) => {
               const p = Math.min(1, (now - start) / dur);
               setDisplay(Math.round(target * (1 - Math.pow(1 - p, 3))));
-              if (p < 1) requestAnimationFrame(step);
+              if (p < 1) frame = requestAnimationFrame(step);
               else setDisplay(target);
             };
-            requestAnimationFrame(step);
+            frame = requestAnimationFrame(step);
             io.unobserve(e.target);
           }
         });
@@ -39,7 +40,10 @@ function CountUp({ target }: { target: number }) {
       { threshold: 0.6 }
     );
     io.observe(el);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [target, reduced]);
 
   return <span ref={ref}>{display}</span>;

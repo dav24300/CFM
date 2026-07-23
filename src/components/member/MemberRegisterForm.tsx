@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PROVINCES_RDC } from "@/lib/constants";
@@ -15,6 +15,18 @@ import { useAsyncAction } from "@/lib/hooks/use-async-action";
 import { useTranslations } from "@/lib/i18n-client";
 
 const TYPE_IDS = ["famille", "soutien", "benevole"] as const;
+
+const PREFILL_KEY = "cfm-adhesion-prefill";
+const PREFILL_FIELDS = [
+  "first_name",
+  "last_name",
+  "email",
+  "phone",
+  "province",
+  "military_link",
+  "parent_military_name",
+  "skills",
+] as const;
 
 export function MemberRegisterForm() {
   const { t } = useTranslations();
@@ -40,6 +52,31 @@ export function MemberRegisterForm() {
 
   const isFamille = type === "famille";
   const isBenevole = type === "benevole";
+  const [prefilled, setPrefilled] = useState(false);
+
+  // Reprend la demande d'adhésion rapide (/s-engager) : mêmes champs,
+  // il ne reste qu'à choisir un mot de passe.
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(PREFILL_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as Record<string, unknown>;
+      if (TYPE_IDS.includes(saved.type as (typeof TYPE_IDS)[number])) {
+        setType(saved.type as string);
+      }
+      setForm((prev) => {
+        const next = { ...prev };
+        for (const field of PREFILL_FIELDS) {
+          const value = saved[field];
+          if (typeof value === "string" && value) next[field] = value;
+        }
+        return next;
+      });
+      setPrefilled(true);
+    } catch {
+      // préremplissage facultatif
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -68,6 +105,11 @@ export function MemberRegisterForm() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
+        try {
+          sessionStorage.removeItem(PREFILL_KEY);
+        } catch {
+          // stockage indisponible
+        }
         setSuccessMessage(m.registerSuccess);
         setTimeout(() => router.push("/membre/connexion"), 2500);
       });
@@ -82,6 +124,8 @@ export function MemberRegisterForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {prefilled && <Alert variant="info">{m.prefillNotice}</Alert>}
+
       <FormField label={f.accountType} htmlFor="register_type" required>
         <NativeSelect
           id="register_type"

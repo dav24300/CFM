@@ -164,18 +164,44 @@ async function patchLiveEvent<K extends keyof LiveEvent>(
   }
 }
 
+/**
+ * Messages d'un live, du plus ancien au plus récent.
+ *
+ * `limit` borne la fenêtre (les N DERNIERS messages) et `sinceId` ne renvoie
+ * que les messages postérieurs à un id connu : sans eux, chaque tick de
+ * polling rapatriait tout l'historique de l'événement.
+ */
 export async function getChatMessages(
   eventId: number,
-  publicOnly = true
+  publicOnly = true,
+  options: { limit?: number; sinceId?: number } = {}
 ): Promise<LiveChatMessage[]> {
+  const { limit, sinceId } = options;
   try {
+    const params: unknown[] = [eventId];
+    let where = `live_event_id = $1${publicOnly ? " AND status = 'approved'" : ""}`;
+    if (sinceId !== undefined) {
+      params.push(sinceId);
+      where += ` AND id > $${params.length}`;
+    }
+
+    if (limit === undefined) {
+      const res = await query<LiveChatMessage>(
+        `SELECT * FROM live_chat_messages WHERE ${where} ORDER BY created_at ASC, id ASC`,
+        params
+      );
+      return normalizePgRows(res.rows);
+    }
+
+    // Fenêtre glissante : on prend les N plus récents (DESC + LIMIT, servi par
+    // idx_live_chat_event_created) puis on rétablit l'ordre chronologique.
+    params.push(limit);
     const res = await query<LiveChatMessage>(
-      `SELECT * FROM live_chat_messages
-       WHERE live_event_id = $1${publicOnly ? " AND status = 'approved'" : ""}
-       ORDER BY created_at ASC, id ASC`,
-      [eventId]
+      `SELECT * FROM live_chat_messages WHERE ${where}
+       ORDER BY created_at DESC, id DESC LIMIT $${params.length}`,
+      params
     );
-    return normalizePgRows(res.rows);
+    return normalizePgRows(res.rows).reverse();
   } catch (err) {
     mapPgError(err);
   }

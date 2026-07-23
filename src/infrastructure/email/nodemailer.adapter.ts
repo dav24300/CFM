@@ -13,7 +13,7 @@ type SendOptions = {
   text?: string;
 };
 
-function isSmtpConfigured(): boolean {
+export function isSmtpConfigured(): boolean {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER);
 }
 
@@ -41,6 +41,30 @@ function logEmail(opts: SendOptions): void {
   }
 }
 
+/**
+ * Transport SMTP partagé et poolé. Un `createTransport` par email rouvrait une
+ * connexion + TLS + AUTH à chaque envoi : sous une rafale d'inscriptions, cela
+ * ouvre autant de connexions simultanées (rate-limit fournisseur, EMFILE).
+ */
+let transporter: nodemailer.Transporter | null = null;
+
+function getTransporter(): nodemailer.Transporter {
+  if (transporter) return transporter;
+  transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || "587", 10),
+    secure: process.env.SMTP_SECURE === "true",
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    pool: true,
+    maxConnections: 3,
+    maxMessages: 100,
+  });
+  return transporter;
+}
+
 export async function sendEmail(opts: SendOptions): Promise<boolean> {
   if (!opts.to) return false;
 
@@ -54,24 +78,29 @@ export async function sendEmail(opts: SendOptions): Promise<boolean> {
     return true;
   }
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || "587", 10),
-    secure: process.env.SMTP_SECURE === "true",
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM || `${SITE.sigle} <${SITE.email}>`,
-    to: opts.to,
-    subject: opts.subject,
-    html: opts.html,
-    text: opts.text,
-  });
-  return true;
+  // Un envoi qui échoue ne doit JAMAIS faire échouer l'action métier qui l'a
+  // déclenché. Sans cette garde, une panne SMTP (auth, TLS, quota, timeout)
+  // remontait jusqu'à la route : l'inscription renvoyait une erreur 400 avec le
+  // message brut de nodemailer ALORS QUE LE COMPTE ÉTAIT DÉJÀ CRÉÉ. Le membre
+  // resoumettait et se heurtait à EMAIL_EXISTS, définitivement bloqué.
+  // La valeur de retour indique si l'email est parti ; l'appelant décide.
+  try {
+    await getTransporter().sendMail({
+      from: process.env.SMTP_FROM || `${SITE.sigle} <${SITE.email}>`,
+      to: opts.to,
+      subject: opts.subject,
+      html: opts.html,
+      text: opts.text,
+    });
+    return true;
+  } catch (err) {
+    // Ni le corps ni l'adresse complète ne sont journalisés en clair côté erreur.
+    console.error(
+      `[CFM Email] échec d'envoi (${opts.subject}) :`,
+      err instanceof Error ? err.message : err
+    );
+    return false;
+  }
 }
 
 function baseTemplate(title: string, body: string): string {
