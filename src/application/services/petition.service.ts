@@ -20,7 +20,7 @@ export async function getPetition(slug: string): Promise<Petition | undefined> {
 export async function signPetitionBySlug(
   slug: string,
   body: { email?: string; name?: string }
-): Promise<void> {
+): Promise<{ signatures_count: number }> {
   const petition = await getPetitionBySlug(slug);
   if (!petition) throw new Error("NOT_FOUND");
 
@@ -31,7 +31,10 @@ export async function signPetitionBySlug(
 
   if (!email || !name) throw new Error("MISSING_SIGNER");
 
-  await signPetition({
+  // Le total à jour remonte jusqu'au client : la route ne renvoyait que
+  // `{success:true}`, si bien que le signataire continuait de voir l'ancien
+  // compteur jusqu'au prochain rendu serveur.
+  return signPetition({
     petition_id: petition.id,
     user_id: member?.id,
     email,

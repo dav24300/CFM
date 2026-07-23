@@ -49,9 +49,11 @@ export async function signPetition(data: {
   user_id?: number;
   email: string;
   name: string;
-}): Promise<void> {
+}): Promise<{ signatures_count: number }> {
+  let signaturesCount = 0;
+
   if (isPgMode()) {
-    await sqlPetitions.signPetition(data);
+    ({ signatures_count: signaturesCount } = await sqlPetitions.signPetition(data));
   } else {
     await updateStoreAsync((store) => {
       const petition = store.petitions.find((p) => p.id === data.petition_id);
@@ -73,9 +75,11 @@ export async function signPetition(data: {
         signed_at: new Date().toISOString(),
       });
       petition.signatures_count += 1;
+      signaturesCount = petition.signatures_count;
     });
   }
   invalidatePetitionsCache();
+  return { signatures_count: signaturesCount };
 }
 
 export async function createPetition(data: {

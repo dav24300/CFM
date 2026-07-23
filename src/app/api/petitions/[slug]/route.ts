@@ -63,9 +63,9 @@ export async function POST(
 
 
 
-    await signPetitionBySlug(slug, parsed.data);
+    const { signatures_count } = await signPetitionBySlug(slug, parsed.data);
 
-    return jsonSuccess();
+    return jsonSuccess({ signatures_count });
 
   } catch (err) {
 

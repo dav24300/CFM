@@ -54,38 +54,56 @@ export async function getPetitionById(id: number): Promise<Petition | undefined>
   }
 }
 
+/**
+ * Signe une pétition et renvoie le nouveau total.
+ *
+ * Une SEULE instruction, sans transaction explicite ni `SELECT ... FOR UPDATE`.
+ * L'ancienne version tenait un verrou sur la ligne `petitions` pendant trois
+ * allers-retours réseau (SELECT, INSERT, UPDATE) : toutes les signatures
+ * concurrentes d'une même pétition étaient sérialisées sur la latence
+ * applicative, plafonnant le débit à ~1/RTT. Le verrou était de surcroît
+ * inutile — aucun état lu ne servait à calculer l'écriture.
+ *
+ * Ici, `ins` échoue sur l'index unique en cas de doublon (→ ALREADY_SIGNED) et
+ * ne produit aucune ligne si la pétition est absente ou inactive ; l'UPDATE
+ * n'incrémente donc que sur insertion réelle, et ne verrouille la ligne que le
+ * temps de son propre exécution.
+ */
 export async function signPetition(data: {
   petition_id: number;
   user_id?: number;
   email: string;
   name: string;
-}): Promise<void> {
-  await withTransaction(async (client) => {
-    const petition = await client.query(
-      "SELECT id FROM petitions WHERE id = $1 AND active = 1 FOR UPDATE",
-      [data.petition_id]
+}): Promise<{ signatures_count: number }> {
+  try {
+    const res = await query<{ signatures_count: number }>(
+      `WITH cible AS (
+         SELECT id FROM petitions WHERE id = $1::int AND active = 1
+       ), ins AS (
+         INSERT INTO petition_signatures (petition_id, user_id, email, name, signed_at)
+         SELECT cible.id, $2::int, $3::text, $4::text, $5::timestamptz FROM cible
+         RETURNING petition_id
+       )
+       UPDATE petitions p
+       SET signatures_count = p.signatures_count + 1
+       FROM ins WHERE p.id = ins.petition_id
+       RETURNING p.signatures_count`,
+      [
+        data.petition_id,
+        data.user_id ?? null,
+        data.email.trim().toLowerCase(),
+        data.name,
+        new Date().toISOString(),
+      ]
     );
-    if (petition.rowCount === 0) throw domainError("NOT_FOUND");
-    try {
-      await client.query(
-        `INSERT INTO petition_signatures (petition_id, user_id, email, name, signed_at)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [
-          data.petition_id,
-          data.user_id || null,
-          data.email.trim().toLowerCase(),
-          data.name,
-          new Date().toISOString(),
-        ]
-      );
-    } catch (err) {
-      mapPgError(err); // 23505 idx_petition_sig_unique → ALREADY_SIGNED
-    }
-    await client.query(
-      "UPDATE petitions SET signatures_count = signatures_count + 1 WHERE id = $1",
-      [data.petition_id]
-    );
-  }).catch((err) => mapPgError(err));
+
+    // Aucune ligne : la pétition n'existe pas ou n'est plus active (un doublon
+    // aurait levé 23505 en amont).
+    if (res.rowCount === 0) throw domainError("NOT_FOUND");
+    return { signatures_count: res.rows[0].signatures_count };
+  } catch (err) {
+    mapPgError(err); // 23505 idx_petition_sig_unique → ALREADY_SIGNED
+  }
 }
 
 export async function createPetition(data: {
