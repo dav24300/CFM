@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getLiveEventBySlugCached } from "@/infrastructure/cache/live-cache";
 import { getPollsForEventCached } from "@/infrastructure/cache/public-page-cache";
 import { LiveRoom } from "@/components/live/LiveRoom";
-import { getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 import { PushSubscribeButton } from "@/components/PushSubscribeButton";
 import { NextActionBlock } from "@/components/ux/NextActionBlock";
 import { NewsletterForm } from "@/components/NewsletterForm";
@@ -15,7 +15,7 @@ export default async function LiveEventPage({ params }: Props) {
   const event = await getLiveEventBySlugCached(slug);
   if (!event) notFound();
 
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   const polls = (await getPollsForEventCached(event.id)).filter((p) => p.active === 1);
   const live = t.pages.live;
 

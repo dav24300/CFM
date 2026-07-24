@@ -1,6 +1,9 @@
-const CACHE = "cfm-v5";
+const CACHE = "cfm-v6";
 const PRECACHE = ["/", "/live", "/contact", "/s-engager", "/petitions", "/manifest.json", "/icon.svg"];
-const NETWORK_FIRST = ["/membre/", "/admin/", "/api/"];
+// Espaces à session : jamais mis en Cache API (leur HTML contient des données
+// membre/admin). "/portail" est le vrai espace membre (l'ancien "/membre/*"
+// n'est que le tunnel d'auth).
+const NETWORK_FIRST = ["/membre/", "/portail", "/admin/", "/api/"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -23,11 +26,36 @@ self.addEventListener("fetch", (event) => {
   if (url.pathname.startsWith("/api/")) return;
   if (NETWORK_FIRST.some((p) => url.pathname.startsWith(p))) return;
 
+  // Les pages HTML sont désormais statiques et peuvent changer côté serveur
+  // (édition admin → revalidation). En cache-first, un visiteur récurrent
+  // voyait toujours l'ancienne version, la neuve seulement à la visite
+  // SUIVANTE. → network-first pour les navigations : on tente le réseau, le
+  // cache ne sert que de repli hors ligne.
+  const isNavigation =
+    event.request.mode === "navigate" ||
+    (event.request.headers.get("accept") || "").includes("text/html");
+
+  if (isNavigation) {
+    event.respondWith(
+      fetch(event.request)
+        .then((res) => {
+          if (res.ok && url.origin === self.location.origin) {
+            const clone = res.clone();
+            caches.open(CACHE).then((c) => c.put(event.request, clone));
+          }
+          return res;
+        })
+        .catch(() => caches.match(event.request).then((cached) => cached || caches.match("/")))
+    );
+    return;
+  }
+
+  // Autres ressources same-origin (images, polices…) : stale-while-revalidate.
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const fetchPromise = fetch(event.request)
         .then((res) => {
-          if (res.ok && url.origin === self.location.origin && !url.pathname.startsWith("/_next/")) {
+          if (res.ok && url.origin === self.location.origin) {
             const clone = res.clone();
             caches.open(CACHE).then((c) => c.put(event.request, clone));
           }

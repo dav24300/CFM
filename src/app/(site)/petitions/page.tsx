@@ -3,13 +3,13 @@ import { ButtonLink } from "@/components/ui/patterns/button-link";
 import { getActivePetitionsCached } from "@/infrastructure/cache/petitions-cache";
 import { InteriorHero } from "@/components/ui/InteriorHero";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
-import { getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 
 export const metadata: Metadata = { title: "Pétitions" };
 
 export default async function PetitionsPage() {
   const petitions = await getActivePetitionsCached();
-  const { locale, t } = await getTranslations();
+  const { locale, t } = await getTranslationsFor("fr");
 
   return (
     <>

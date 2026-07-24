@@ -1,9 +1,9 @@
-import { getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 import { getSiteSetting } from "@/infrastructure/repositories/settings.repository";
 import { getDonationTotalsCached } from "@/infrastructure/cache/public-page-cache";
 
 export async function DonationTransparency() {
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   const showDonorList = (await getSiteSetting("donors_public")) === "1";
 
   // Totaux agrégés une fois puis mis en cache : la table entière était

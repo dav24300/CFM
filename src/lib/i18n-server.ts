@@ -13,7 +13,18 @@ export async function getLocale(): Promise<Locale> {
 }
 
 export async function getTranslations() {
-  const locale = await getLocale();
+  return getTranslationsFor(await getLocale());
+}
+
+/**
+ * Traductions d'une locale explicite, SANS lecture de cookie.
+ *
+ * C'est l'appel à `cookies()` (via getLocale) qui rend dynamique tout ce qui en
+ * dépend — à commencer par le layout racine, donc l'application entière. Le
+ * site public passe par cette variante figée sur "fr" pour redevenir statique ;
+ * le portail lui passe la locale réelle du membre (il est déjà dynamique).
+ */
+export async function getTranslationsFor(locale: Locale) {
   const base = getDictionary(locale);
   const overrides = await getI18nOverridesForLocale(locale);
   return { locale, t: applyI18nOverrides(base, overrides) };

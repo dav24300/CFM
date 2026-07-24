@@ -4,9 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { ButtonLink } from "@/components/ui/patterns/button-link";
 import { Menu, X, Shield, User, ChevronDown } from "lucide-react";
-import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { AXES } from "@/lib/constants";
-import type { Locale } from "@/lib/i18n";
 import type { SiteConfig } from "@/domain/site-config";
 
 type NavLabels = {
@@ -25,18 +23,50 @@ type NavLabels = {
 };
 
 type Props = {
-  locale: Locale;
   site: SiteConfig;
   nav: NavLabels;
   memberLogin: string;
-  isAuthenticated: boolean;
   memberArea: string;
 };
 
-export function Header({ locale, site, nav, memberLogin, isAuthenticated, memberArea }: Props) {
+export function Header({ site, nav, memberLogin, memberArea }: Props) {
   const [open, setOpen] = useState(false);
   const [axesOpen, setAxesOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  // Le layout du site public est statique et ne lit plus la session : l'état de
+  // connexion est déterminé ici, côté client.
+  //
+  // L'état initial est `false` — comme le HTML prérendu — pour ne PAS provoquer
+  // de divergence d'hydratation. La correction se fait dans l'effet (après
+  // hydratation) : un visiteur ANONYME (pas de cookie-indice) ne fait aucune
+  // requête et reste sur l'état déconnecté ; un membre bascule via l'indice
+  // (instantané), confirmé par /api/member/me.
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const hint = document.cookie.split("; ").some((c) => c === "cfm_member_hint=1");
+    // Aucun indice : visiteur anonyme (l'immense majorité du trafic public).
+    // On évite l'appel réseau et on reste déconnecté.
+    if (!hint) return;
+
+    // Affichage optimiste immédiat, puis confirmation faisant autorité —
+    // l'indice peut être périmé (session expirée, compte suspendu). Endpoint
+    // léger : un booléen, sans PII ni scan de table.
+    setIsAuthenticated(true);
+    let cancelled = false;
+    fetch("/api/member/status", { credentials: "same-origin" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled) setIsAuthenticated(Boolean(data?.authenticated));
+      })
+      .catch(() => {
+        /* hors ligne : on garde la valeur de l'indice */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     function onScroll() {
@@ -132,7 +162,6 @@ export function Header({ locale, site, nav, memberLogin, isAuthenticated, member
           </Link>
 
           <span className="mx-1 h-5 w-px bg-site-hairline" aria-hidden />
-          <LocaleSwitcher current={locale} />
           <Link
             href={isAuthenticated ? "/portail" : "/membre/connexion"}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-site-muted transition hover:text-site-primary"
@@ -210,9 +239,6 @@ export function Header({ locale, site, nav, memberLogin, isAuthenticated, member
             >
               {isAuthenticated ? memberArea : nav.member}
             </MobileLink>
-            <div className="mt-3 flex items-center justify-between">
-              <LocaleSwitcher current={locale} />
-            </div>
             <ButtonLink
               href="/contact#aide"
               className="mt-2 w-full py-3.5 text-[15px]"

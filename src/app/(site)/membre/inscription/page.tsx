@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { MemberRegisterForm } from "@/components/member/MemberRegisterForm";
-import { getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   return { title: t.pages.memberArea.registerTitle };
 }
 
 export default async function MemberRegisterPage() {
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   const m = t.pages.memberArea;
 
   return (

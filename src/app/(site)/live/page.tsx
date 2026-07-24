@@ -1,7 +1,7 @@
 import { NextActionBlock } from "@/components/ux/NextActionBlock";
 import { ButtonLink } from "@/components/ui/patterns/button-link";
 import { getLiveEventsCached, getActiveLiveEventCached } from "@/infrastructure/cache/live-cache";
-import { getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 import { PushSubscribeButton } from "@/components/PushSubscribeButton";
 import { InteriorHero } from "@/components/ui/InteriorHero";
 import { MediaCard } from "@/components/ui/MediaCard";
@@ -10,12 +10,12 @@ import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { getResolvedLiveThumbCached as getResolvedLiveThumb } from "@/infrastructure/cache/media-cache";
 
 export async function generateMetadata() {
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   return { title: t.nav.live };
 }
 
 export default async function LiveListPage() {
-  const { locale, t } = await getTranslations();
+  const { locale, t } = await getTranslationsFor("fr");
   const events = await getLiveEventsCached();
   const active = await getActiveLiveEventCached();
   const heroThumb = await getResolvedLiveThumb(active?.thumbnail);

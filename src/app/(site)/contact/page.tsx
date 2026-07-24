@@ -5,11 +5,11 @@ import { HelpRequestForm } from "@/components/HelpRequestForm";
 import { ContactForm } from "@/components/ContactForm";
 import { InteriorHero } from "@/components/ui/InteriorHero";
 import { Alert } from "@/components/ui/primitives/alert";
-import { getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 import { getSiteConfig } from "@/lib/site-config.server";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   return { title: t.pages.contact.title };
 }
 
@@ -17,7 +17,7 @@ type Props = { searchParams: Promise<{ type?: string }> };
 
 export default async function ContactPage({ searchParams }: Props) {
   const { type } = await searchParams;
-  const { locale, t } = await getTranslations();
+  const { locale, t } = await getTranslationsFor("fr");
   const site = await getSiteConfig();
   const c = t.pages.contact;
   const h = t.ux.helpInfo;
