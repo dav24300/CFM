@@ -168,7 +168,7 @@ export function Header({ site, nav, memberLogin, memberArea }: Props) {
 
           <span className="mx-1 h-5 w-px bg-site-hairline" aria-hidden />
           <Link
-            href={isAuthenticated ? "/portail" : "/membre/connexion"}
+            href={isAuthenticated ? "/membre" : "/membre/connexion"}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-site-muted transition hover:text-site-primary"
             aria-label={isAuthenticated ? memberArea : memberLogin}
           >
@@ -239,7 +239,7 @@ export function Header({ site, nav, memberLogin, memberArea }: Props) {
               {nav.about}
             </MobileLink>
             <MobileLink
-              href={isAuthenticated ? "/portail" : "/membre/connexion"}
+              href={isAuthenticated ? "/membre" : "/membre/connexion"}
               onClick={() => setOpen(false)}
             >
               {isAuthenticated ? memberArea : nav.member}

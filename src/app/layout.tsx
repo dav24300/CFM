@@ -11,6 +11,7 @@ import {
   getFaviconPathCached as getFaviconPath,
 } from "@/infrastructure/cache/media-cache";
 import { getSiteConfig } from "@/lib/site-config.server";
+import { getBaseUrl } from "@/lib/base-url";
 import { getTranslationsFor } from "@/lib/i18n-server";
 import { I18nProvider } from "@/components/i18n/I18nProvider";
 import { PWARegister } from "@/components/PWARegister";
@@ -53,11 +54,18 @@ export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteConfig();
   const ogImage = await getOgImagePath();
   const favicon = await getFaviconPath();
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  // getBaseUrl ne lit que des variables d'environnement — surtout AUCUNE API
+  // dynamique ici (cookies/headers/searchParams) : ce layout est le seul
+  // ancêtre commun des pages prérendues, une telle lecture dé-statifierait
+  // tout le site.
+  const baseUrl = getBaseUrl();
   const imageUrl = ogImage.startsWith("http") ? ogImage : `${baseUrl}${ogImage}`;
   const iconUrl = favicon.startsWith("http") ? favicon : `${baseUrl}${favicon}`;
 
   return {
+    // Rend absolues les URLs des métadonnées (openGraph, alternates).
+    // N'agit PAS sur `icons` — d'où l'URL déjà absolue construite ci-dessus.
+    metadataBase: new URL(baseUrl),
     title: {
       default: `${site.sigle} — ${site.name}`,
       template: `%s | ${site.sigle}`,

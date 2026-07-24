@@ -37,19 +37,19 @@ type NavItem = {
 };
 
 const NAV: NavItem[] = [
-  { key: "accueil", href: "/portail", label: "Fil d'annonces", icon: LayoutList },
-  { key: "aide", href: "/portail/aide", label: "Mes demandes d'aide", icon: LifeBuoy, roleOnly: "famille" },
-  { key: "messages", href: "/portail/messages", label: "Messagerie", icon: MessageCircle },
-  { key: "entraide", href: "/portail/entraide", label: "Entraide", icon: HandHeart },
-  { key: "medias", href: "/portail/medias", label: "Médias & galerie", icon: ImageIcon },
-  { key: "ressources", href: "/portail/ressources", label: "Ressources & démarches", icon: FileText },
-  { key: "evenements", href: "/portail/evenements", label: "Événements", icon: Calendar },
-  { key: "famille", href: "/portail/famille", label: "Ma famille", icon: Users, roleOnly: "famille" },
-  { key: "dons", href: "/portail/dons", label: "Dons & reçus", icon: HandCoins },
-  { key: "petitions", href: "/portail/petitions", label: "Pétitions", icon: FileSignature },
+  { key: "accueil", href: "/membre", label: "Fil d'annonces", icon: LayoutList },
+  { key: "aide", href: "/membre/aide", label: "Mes demandes d'aide", icon: LifeBuoy, roleOnly: "famille" },
+  { key: "messages", href: "/membre/messages", label: "Messagerie", icon: MessageCircle },
+  { key: "entraide", href: "/membre/entraide", label: "Entraide", icon: HandHeart },
+  { key: "medias", href: "/membre/medias", label: "Médias & galerie", icon: ImageIcon },
+  { key: "ressources", href: "/membre/ressources", label: "Ressources & démarches", icon: FileText },
+  { key: "evenements", href: "/membre/evenements", label: "Événements", icon: Calendar },
+  { key: "famille", href: "/membre/famille", label: "Ma famille", icon: Users, roleOnly: "famille" },
+  { key: "dons", href: "/membre/dons", label: "Dons & reçus", icon: HandCoins },
+  { key: "petitions", href: "/membre/petitions", label: "Pétitions", icon: FileSignature },
   {
     key: "coordination",
-    href: "/portail/coordination",
+    href: "/membre/coordination",
     label: "Coordination",
     icon: Activity,
     roleOnly: "coordinateur",
@@ -76,7 +76,7 @@ export function PortalShell({ name, initials, initialRole, locale, children }: P
   }, [pathname]);
 
   function isActive(href: string) {
-    if (href === "/portail") return pathname === "/portail";
+    if (href === "/membre") return pathname === "/membre";
     return pathname === href || pathname.startsWith(href + "/");
   }
 
@@ -116,7 +116,7 @@ export function PortalShell({ name, initials, initialRole, locale, children }: P
         </div>
 
         <Link
-          href="/portail/profil"
+          href="/membre/profil"
           className="flex items-center gap-3 border-b border-white/10 px-[22px] py-[18px] hover:bg-white/[0.04]"
         >
           <span className="flex h-[42px] w-[42px] flex-none items-center justify-center bg-site-navy font-serif text-[15px] font-semibold text-white">
