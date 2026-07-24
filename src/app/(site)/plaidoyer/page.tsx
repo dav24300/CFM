@@ -15,15 +15,15 @@ import {
   getResolvedGalleryCached as getResolvedGallery,
   getResolvedNewsCoverCached as getResolvedNewsCover,
 } from "@/infrastructure/cache/media-cache";
-import { getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   return { title: t.pages.advocacy.title };
 }
 
 export default async function PlaidoyerPage() {
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   const p = t.pages.advocacy;
   const studies = await getPublishedStudies();
   const campaigns = await getActiveCampaigns();

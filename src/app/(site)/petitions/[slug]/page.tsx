@@ -6,7 +6,7 @@ import {
   getPetitionBySlugCached,
 } from "@/infrastructure/cache/petitions-cache";
 import { PetitionSignForm } from "@/components/PetitionSignForm";
-import { getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -26,7 +26,7 @@ export default async function PetitionDetailPage({ params }: Props) {
   const petition = await getPetitionBySlugCached(slug);
   if (!petition) notFound();
 
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   const p = t.petitions;
   const progress = Math.min(100, Math.round((petition.signatures_count / petition.goal) * 100));
 

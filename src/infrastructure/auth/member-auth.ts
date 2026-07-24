@@ -8,14 +8,33 @@ const COOKIE_NAME = "cfm_member_session";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 jours
 const SESSION_NAMESPACE = "member";
 
+/**
+ * Indice de session NON sensible (pas de httpOnly) : un simple drapeau "1"
+ * lisible côté client. Le vrai jeton reste httpOnly et fait autorité côté
+ * serveur. Cet indice sert au header du site public — devenu statique, il ne
+ * peut plus lire la session serveur — à basculer le bon lien (« Mon espace »
+ * vs « Se connecter ») dès l'hydratation, sans attendre la requête réseau.
+ * Il ne donne AUCUN accès : falsifié, il ne fait que changer un libellé, et le
+ * portail vérifie de toute façon la vraie session.
+ */
+const HINT_COOKIE_NAME = "cfm_member_hint";
+
 export async function createMemberSession(userId: number): Promise<void> {
   const idStr = userId.toString();
   const issuedAt = Math.floor(Date.now() / 1000);
   const token = `${idStr}.${issuedAt}.${signSessionPayload(`${idStr}:${issuedAt}`, SESSION_NAMESPACE)}`;
   const cookieStore = await cookies();
+  const secure = process.env.NODE_ENV === "production";
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure,
+    sameSite: "lax",
+    maxAge: SESSION_MAX_AGE,
+    path: "/",
+  });
+  cookieStore.set(HINT_COOKIE_NAME, "1", {
+    httpOnly: false,
+    secure,
     sameSite: "lax",
     maxAge: SESSION_MAX_AGE,
     path: "/",
@@ -25,6 +44,7 @@ export async function createMemberSession(userId: number): Promise<void> {
 export async function destroyMemberSession(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAME);
+  cookieStore.delete(HINT_COOKIE_NAME);
 }
 
 export async function getMemberSessionUserId(): Promise<number | null> {

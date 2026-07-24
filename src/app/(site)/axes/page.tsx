@@ -5,10 +5,10 @@ import { AXES } from "@/lib/constants";
 import { getAxesHeroImageCached as getAxesHeroImage } from "@/infrastructure/cache/media-cache";
 import { InteriorHero } from "@/components/ui/InteriorHero";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
-import { getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   return { title: t.pages.axes.title };
 }
 
@@ -21,7 +21,7 @@ const iconMap = {
 };
 
 export default async function AxesPage() {
-  const { locale } = await getTranslations();
+  const { locale } = await getTranslationsFor("fr");
   const axesHero = await getAxesHeroImage();
   const isEn = locale === "en";
 

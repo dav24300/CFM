@@ -7,22 +7,27 @@ import {
   getActiveCampaignsCached as getActiveCampaigns,
 } from "@/infrastructure/cache/content-cache";
 import { getResolvedNewsCoverCached as getResolvedNewsCover } from "@/infrastructure/cache/media-cache";
-import { getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 import { dateLocale } from "@/lib/i18n";
 import { ButtonLink } from "@/components/ui/patterns/button-link";
 
 type Props = { params: Promise<{ slug: string }> };
 
+export async function generateStaticParams() {
+  const news = await getPublishedNews();
+  return news.map((n) => ({ slug: n.slug }));
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   const article = (await getPublishedNews()).find((n) => n.slug === slug);
   return { title: article?.title || t.pages.news.fallbackTitle };
 }
 
 export default async function NewsDetailPage({ params }: Props) {
   const { slug } = await params;
-  const { locale, t } = await getTranslations();
+  const { locale, t } = await getTranslationsFor("fr");
   const [news, campaigns] = await Promise.all([getPublishedNews(), getActiveCampaigns()]);
   const article = news.find((n) => n.slug === slug);
   if (!article) notFound();

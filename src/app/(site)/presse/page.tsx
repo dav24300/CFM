@@ -4,18 +4,18 @@ import { AnchorButton, ButtonLink } from "@/components/ui/patterns/button-link";
 import { getPublishedPressReleasesCached as getPublishedPressReleases } from "@/infrastructure/cache/content-cache";
 import { SITE } from "@/lib/constants";
 import { InteriorHero } from "@/components/ui/InteriorHero";
-import { getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 import { dateLocale } from "@/lib/i18n";
 import { getPressKitPathCached as getPressKitPath } from "@/infrastructure/cache/media-cache";
 import { getPressKitAvailableCached } from "@/infrastructure/cache/public-page-cache";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   return { title: t.pages.press.title };
 }
 
 export default async function PressePage() {
-  const { locale, t } = await getTranslations();
+  const { locale, t } = await getTranslationsFor("fr");
   const p = t.pages.press;
   const releases = await getPublishedPressReleases();
   const pressKitPath = await getPressKitPath();

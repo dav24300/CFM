@@ -187,35 +187,29 @@ async function testE4Identity() {
   }
 }
 
-/** E5 — override i18n nav FR + EN */
+/**
+ * E5 — override i18n appliqué sur une page publique STATIQUE.
+ * Le site public est désormais rendu en français uniquement (les préfixes de
+ * langue viendront plus tard) : on vérifie que l'override FR édité en admin
+ * s'applique bien sur la page statique après invalidation par tag — ce qui
+ * prouve que l'invalidation traverse le Full Route Cache.
+ */
 async function testE5I18n() {
   const frLabel = `À propos E2E ${TAG}`;
-  const enLabel = `About E2E ${TAG}`;
-  for (const [locale, key, value] of [
-    ["fr", "nav.about", frLabel],
-    ["en", "nav.about", enLabel],
-  ]) {
-    const patchRes = await api("/api/admin/i18n", {
-      method: "PATCH",
-      body: JSON.stringify({ locale, key, value }),
-    });
-    if (!patchRes.ok) {
-      fail("E5", `i18n ${locale}`, `status ${patchRes.status}`);
-      return;
-    }
+  const patchRes = await api("/api/admin/i18n", {
+    method: "PATCH",
+    body: JSON.stringify({ locale: "fr", key: "nav.about", value: frLabel }),
+  });
+  if (!patchRes.ok) {
+    fail("E5", "i18n fr", `status ${patchRes.status}`);
+    return;
   }
   await preview([TAGS.i18n]);
-  const frPage = await fetchPage("/", { Cookie: "cfm_locale=fr" });
-  const enPage = await fetchPage("/", { Cookie: "cfm_locale=en" });
+  const frPage = await fetchPage("/");
   if (frPage.html.includes(frLabel)) {
-    pass("E5", "i18n FR → Header", frLabel);
+    pass("E5", "i18n FR → page statique", frLabel);
   } else {
-    fail("E5", "i18n FR → Header", "label FR absent");
-  }
-  if (enPage.html.includes(enLabel)) {
-    pass("E5", "i18n EN → Header", enLabel);
-  } else {
-    fail("E5", "i18n EN → Header", "label EN absent");
+    fail("E5", "i18n FR → page statique", "label FR absent");
   }
 }
 

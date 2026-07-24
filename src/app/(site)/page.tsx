@@ -10,7 +10,7 @@ import {
   getResolvedLiveThumbCached as getResolvedLiveThumb,
   getResolvedTestimonialPhotoCached as getResolvedTestimonialPhoto,
 } from "@/infrastructure/cache/media-cache";
-import { getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { HomeHero } from "@/components/home/HomeHero";
@@ -37,7 +37,7 @@ const AXIS_TEASERS: Record<string, string> = {
 const MARQUEE_WORDS = ["Protéger", "Accompagner", "Éduquer", "Autonomiser", "Défendre", "Plaider"];
 
 export default async function HomePage() {
-  const { locale, t } = await getTranslations();
+  const { locale, t } = await getTranslationsFor("fr");
   const p = t.pages.home;
   const media = await getSiteMedia();
   const site = await getSiteConfig();

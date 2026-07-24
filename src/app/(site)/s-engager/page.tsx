@@ -6,10 +6,10 @@ import { MembershipForm } from "@/components/MembershipForm";
 import { DonationTransparency } from "@/components/DonationTransparency";
 import { MembershipComparisonTable } from "@/components/ux/MembershipComparisonTable";
 import { InteriorHero } from "@/components/ui/InteriorHero";
-import { getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   return { title: t.pages.engage.title };
 }
 
@@ -17,7 +17,7 @@ const typeIcons = { famille: Users, soutien: Heart, benevole: HandHeart };
 const typeIds = ["famille", "soutien", "benevole"] as const;
 
 export default async function EngagerPage() {
-  const { locale, t } = await getTranslations();
+  const { locale, t } = await getTranslationsFor("fr");
   const e = t.pages.engage;
   const x = t.pages.engageExtra;
 

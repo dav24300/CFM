@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ResetPasswordForm } from "@/components/member/ResetPasswordForm";
-import { getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 
 export const metadata: Metadata = { title: "Réinitialiser le mot de passe" };
 
@@ -8,7 +8,7 @@ type Props = { searchParams: Promise<{ token?: string }> };
 
 export default async function ResetPasswordPage({ searchParams }: Props) {
   const { token } = await searchParams;
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
 
   return (
     <div className="mx-auto max-w-md px-4 py-12">

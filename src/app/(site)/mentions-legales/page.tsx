@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { getTranslations, getLocale } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 import { getSiteConfig, getLegalContent } from "@/lib/site-config.server";
 import { SimpleMarkdown } from "@/components/ui/SimpleMarkdown";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   return { title: t.pages.legal.mentionsTitle };
 }
 
 export default async function MentionsLegalesPage() {
-  const locale = await getLocale();
-  const { t } = await getTranslations();
+  const locale = "fr";
+  const { t } = await getTranslationsFor("fr");
   const site = await getSiteConfig();
   const cms = await getLegalContent("legal_mentions", locale);
 

@@ -11,7 +11,7 @@ import {
   getFaviconPathCached as getFaviconPath,
 } from "@/infrastructure/cache/media-cache";
 import { getSiteConfig } from "@/lib/site-config.server";
-import { getLocale, getTranslations } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 import { I18nProvider } from "@/components/i18n/I18nProvider";
 import { PWARegister } from "@/components/PWARegister";
 
@@ -90,8 +90,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const locale = await getLocale();
-  const { t } = await getTranslations();
+  // Base FRANÇAISE, sans lecture de cookie : c'est cet appel qui rendait toute
+  // l'application dynamique. Le portail (dynamique par nature — il exige une
+  // session) réinjecte la locale du membre via un I18nProvider imbriqué.
+  const locale = "fr" as const;
+  const { t } = await getTranslationsFor(locale);
   return (
     <html lang={locale} className={fontVars}>
       <head>

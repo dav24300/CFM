@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/patterns/button-link";
 import Image from "next/image";
-import { getTranslations, getLocale } from "@/lib/i18n-server";
+import { getTranslationsFor } from "@/lib/i18n-server";
 import { getSiteConfig, getAboutTimeline } from "@/lib/site-config.server";
 import {
   getResolvedAboutMediaCached as getResolvedAboutMedia,
@@ -14,12 +14,12 @@ import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { ImageGallery } from "@/components/ui/ImageGallery";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getTranslations();
+  const { t } = await getTranslationsFor("fr");
   return { title: t.pages.about.title };
 }
 
 export default async function AboutPage() {
-  const locale = await getLocale();
+  const locale = "fr";
   const site = await getSiteConfig();
   const gallery = await getResolvedGallery();
   const defaultHero = await getResolvedNewsCover(null);
