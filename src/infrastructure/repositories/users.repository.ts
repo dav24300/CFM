@@ -58,7 +58,16 @@ export async function registerUser(data: {
     throw domainError("MILITARY_LINK_REQUIRED");
   }
 
-  const role: UserRole = data.membership_type === "benevole" ? "volunteer" : "member";
+  // SÉCURITÉ — le rôle n'est JAMAIS déduit d'une auto-déclaration.
+  // Cocher « Bénévole » dans le formulaire public donnait `role: "volunteer"`,
+  // et `getAdminAccess()` (src/lib/admin-access.ts:9) accorde à ce rôle l'accès
+  // au back-office : édition du contenu public, des médias, des partenaires, du
+  // live, et validation de dons — sans jamais avoir eu le mot de passe admin.
+  // Avec une activation en lot, toute la salle passait bénévole d'un clic.
+  // Le type d'adhésion déclaré reste enregistré dans `membership_type` ; la
+  // promotion effective se fait à la main via PATCH /api/admin/users/[id]/role,
+  // qui exige un vrai administrateur.
+  const role: UserRole = "member";
   const hash = await bcrypt.hash(data.password, SALT_ROUNDS);
 
   if (isPgMode()) {

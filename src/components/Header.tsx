@@ -56,9 +56,14 @@ export function Header({ site, nav, memberLogin, memberArea }: Props) {
     setIsAuthenticated(true);
     let cancelled = false;
     fetch("/api/member/status", { credentials: "same-origin" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!cancelled) setIsAuthenticated(Boolean(data?.authenticated));
+      .then(async (res) => {
+        if (cancelled) return;
+        // Une panne serveur (5xx) ne doit pas « déconnecter » visuellement un
+        // membre : seule une réponse exploitable fait autorité, sinon on
+        // conserve l'état donné par l'indice.
+        if (!res.ok) return;
+        const data = await res.json().catch(() => null);
+        if (!cancelled && data) setIsAuthenticated(Boolean(data.authenticated));
       })
       .catch(() => {
         /* hors ligne : on garde la valeur de l'indice */

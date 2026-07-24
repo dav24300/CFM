@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PROVINCES_RDC } from "@/lib/constants";
 import { Input } from "@/components/ui/primitives/input";
@@ -32,7 +31,6 @@ export function MemberRegisterForm() {
   const { t } = useTranslations();
   const m = t.pages.memberArea;
   const f = t.forms;
-  const router = useRouter();
   const [type, setType] = useState("famille");
   const [successMessage, setSuccessMessage] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
@@ -60,6 +58,10 @@ export function MemberRegisterForm() {
     try {
       const raw = sessionStorage.getItem(PREFILL_KEY);
       if (!raw) return;
+      // Consommé DÈS la lecture : sur un poste de saisie partagé, le brouillon
+      // ressortait sinon dans le formulaire de la personne suivante, avec un
+      // bandeau l'invitant à « choisir simplement un mot de passe ».
+      sessionStorage.removeItem(PREFILL_KEY);
       const saved = JSON.parse(raw) as Record<string, unknown>;
       if (TYPE_IDS.includes(saved.type as (typeof TYPE_IDS)[number])) {
         setType(saved.type as string);
@@ -103,15 +105,35 @@ export function MemberRegisterForm() {
             skills: isBenevole ? form.skills : undefined,
           }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        try {
-          sessionStorage.removeItem(PREFILL_KEY);
-        } catch {
-          // stockage indisponible
+        // Une passerelle en erreur (502/504) renvoie du HTML, pas du JSON :
+        // `res.json()` levait alors une SyntaxError anglaise. Et si le corps
+        // n'avait pas de champ `error`, le message était vide — la garde
+        // d'affichage était fausse et l'opérateur ne voyait AUCUN message,
+        // sans savoir si le compte avait été créé.
+        const data = await res.json().catch(() => ({}) as { error?: string });
+        if (!res.ok) {
+          throw new Error(
+            data.error || `Erreur ${res.status} — réessayez, ou prévenez l'administrateur.`
+          );
         }
+
+        // Saisie en série sur un poste partagé : on repart d'un formulaire
+        // vierge et on RESTE sur la page. La redirection vers la connexion
+        // envoyait vers un écran qui refuse le compte (il est en attente de
+        // validation), ce qui faisait croire à un échec.
+        setForm({
+          email: "",
+          password: "",
+          confirm: "",
+          first_name: "",
+          last_name: "",
+          phone: "",
+          province: "",
+          military_link: "",
+          parent_military_name: "",
+          skills: "",
+        });
         setSuccessMessage(m.registerSuccess);
-        setTimeout(() => router.push("/membre/connexion"), 2500);
       });
     } catch {
       // handled by hook
