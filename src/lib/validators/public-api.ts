@@ -24,12 +24,19 @@ export const petitionSignSchema = z.object({
 // En cas de doute un champ est toléré (nullish) plutôt que rejeté.
 
 export const memberRegisterSchema = z.object({
-  email: z.string().min(1),
+  // Format réellement validé (comme contactSchema et newsletterSchema ci-dessus,
+  // qui utilisaient déjà emailSchema). Auparavant `z.string().min(1)` acceptait
+  // « jean » : le compte était créé avec une adresse inutilisable, donc sans
+  // activation par email NI réinitialisation de mot de passe possible — un
+  // compte mort, qu'aucun écran d'administration ne permet de corriger.
+  email: emailSchema,
   // Longueur minimale vérifiée par le service (PASSWORD_TOO_SHORT) — pas ici,
   // pour conserver le message d'erreur historique sur mot de passe vide/court.
   password: z.string(),
-  first_name: z.string(),
-  last_name: z.string(),
+  // `.trim().min(1)` : un nom fait d'espaces produisait « Bonjour , » dans les
+  // emails et une ligne vide dans l'écran d'administration.
+  first_name: z.string().trim().min(1),
+  last_name: z.string().trim().min(1),
   // Colonnes nullables en base : tolérés absents/null (parité handler actuel).
   phone: z.string().nullish(),
   province: z.string().nullish(),
