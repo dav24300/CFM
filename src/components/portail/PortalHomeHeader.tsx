@@ -6,9 +6,9 @@ import { ButtonLink } from "@/components/ui/patterns/button-link";
 import { usePortalRole } from "@/components/portail/portal-role-context";
 
 const CTA: Record<string, { href: string; label: string }> = {
-  famille: { href: "/portail/aide", label: "Nouvelle demande d'aide" },
-  benevole: { href: "/portail/evenements", label: "Proposer mon aide" },
-  coordinateur: { href: "/portail/coordination", label: "Diffuser une annonce" },
+  famille: { href: "/membre/aide", label: "Nouvelle demande d'aide" },
+  benevole: { href: "/membre/evenements", label: "Proposer mon aide" },
+  coordinateur: { href: "/membre/coordination", label: "Diffuser une annonce" },
 };
 
 type CoordStats = {
@@ -68,7 +68,7 @@ export function PortalHomeHeader({
           <div className="mb-4 flex items-center gap-2.5 bg-site-navy px-4 py-3 text-[13px] font-medium leading-[1.5] text-white">
             <Activity className="h-4 w-4 shrink-0 text-site-light" aria-hidden />
             Vue coordinateur —{" "}
-            <Link href="/portail/coordination" className="text-site-light hover:underline">
+            <Link href="/membre/coordination" className="text-site-light hover:underline">
               accéder à la coordination provinciale →
             </Link>
           </div>

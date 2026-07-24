@@ -30,7 +30,7 @@ export default async function PortailCoordinationPage() {
   const member = await getCurrentMember();
   if (!member) redirect("/membre/connexion");
   // Écran réservé aux coordinateurs : ne jamais dériver le rôle du sélecteur démo côté client.
-  if (member.role !== "coordinator") redirect("/portail");
+  if (member.role !== "coordinator") redirect("/membre");
 
   // Un coordinateur sans province rattachée ne doit pas voir l'agrégat national.
   const province = member.province ?? undefined;

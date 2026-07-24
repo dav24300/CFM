@@ -1,9 +1,13 @@
-const CACHE = "cfm-v6";
+const CACHE = "cfm-v7";
 const PRECACHE = ["/", "/live", "/contact", "/s-engager", "/petitions", "/manifest.json", "/icon.svg"];
 // Espaces à session : jamais mis en Cache API (leur HTML contient des données
-// membre/admin). "/portail" est le vrai espace membre (l'ancien "/membre/*"
-// n'est que le tunnel d'auth).
-const NETWORK_FIRST = ["/membre/", "/portail", "/admin/", "/api/"];
+// membre/admin).
+// ATTENTION à l'absence de barre finale sur "/membre" : la comparaison est un
+// startsWith, et l'URL EXACTE /membre (accueil de l'espace membre, qui affiche
+// le nom du membre et son fil d'annonces) ne serait PAS couverte par
+// "/membre/". Son HTML finirait en Cache API, lisible par la personne suivante
+// sur un poste partagé.
+const NETWORK_FIRST = ["/membre", "/admin/", "/api/"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

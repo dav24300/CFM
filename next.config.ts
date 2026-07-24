@@ -67,5 +67,19 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
+  async redirects() {
+    // L'espace membre a migré de /portail vers /membre, pour n'avoir qu'un
+    // seul préfixe (l'authentification vivait déjà sous /membre).
+    // 308 = déplacement permanent, méthode préservée. Les liens déjà diffusés
+    // (emails d'activation, favoris des membres) continuent de fonctionner.
+    // Note : `redirects()` applique la PREMIÈRE règle qui correspond — d'où la
+    // règle des sous-chemins avant celle de la racine.
+    return [
+      { source: "/portail/:path*", destination: "/membre/:path*", permanent: true },
+      { source: "/portail", destination: "/membre", permanent: true },
+      // Ancien tableau de bord : sa page-relais est supprimée.
+      { source: "/membre/tableau-de-bord", destination: "/membre", permanent: true },
+    ];
+  },
 };
 export default nextConfig;

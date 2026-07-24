@@ -97,7 +97,7 @@ export default async function PortailAccueilPage() {
                   {events.map((e) => {
                     const b = railDateBadge(e.date);
                     return (
-                      <Link key={e.id} href="/portail/evenements" className="flex gap-3.5">
+                      <Link key={e.id} href="/membre/evenements" className="flex gap-3.5">
                         <div className="w-12 flex-none border border-site-hairline text-center">
                           <div className="bg-site-deep py-1 text-[10px] font-semibold text-white">{b.month}</div>
                           <div className="py-0.5 font-serif text-lg font-semibold text-site-ink">{b.day}</div>

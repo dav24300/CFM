@@ -24,7 +24,16 @@ const routes = [
   { path: "/membre/inscription", expect: 200 },
   { path: "/membre/mot-de-passe-oublie", expect: 200 },
   { path: "/membre/reinitialiser-mot-de-passe", expect: 200 },
-  { path: "/membre/tableau-de-bord", expect: 307 },
+  // Migration /portail → /membre : la DESTINATION est vérifiée, pas seulement
+  // le code. Ces redirections protègent les liens déjà envoyés aux membres.
+  { path: "/membre/tableau-de-bord", expect: 308, location: "/membre" },
+  { path: "/portail", expect: 308, location: "/membre" },
+  { path: "/portail/profil", expect: 308, location: "/membre/profil" },
+  { path: "/portail/dons", expect: 308, location: "/membre/dons" },
+  // L'espace membre lui-même redirige vers la connexion s'il n'y a pas de session.
+  { path: "/membre", expect: 307, location: "/membre/connexion" },
+  { path: "/sitemap.xml", expect: 200 },
+  { path: "/robots.txt", expect: 200 },
   { path: "/admin", expect: 200 },
   { path: "/admin/dashboard", expect: 307 },
 ];

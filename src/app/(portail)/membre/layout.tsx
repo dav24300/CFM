@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentMember } from "@/infrastructure/auth/member-auth";
 import { getLocale, getTranslationsFor } from "@/lib/i18n-server";
 import { portalRole } from "@/lib/portal-role";
 import { PortalShell } from "@/components/portail/PortalShell";
 import { I18nProvider } from "@/components/i18n/I18nProvider";
+
+/** Espace membre : jamais indexé (contenu personnel, accès sur session). */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function PortailLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentMember();

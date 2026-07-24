@@ -87,7 +87,7 @@ function ResourceCard({ resource }: { resource: MemberResource }) {
           </a>
         ) : (
           <Link
-            href="/portail/messages"
+            href="/membre/messages"
             className="text-[13px] font-semibold text-site-primary transition hover:text-site-deep"
           >
             Nous contacter →
