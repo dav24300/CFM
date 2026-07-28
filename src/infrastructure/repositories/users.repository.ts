@@ -33,11 +33,17 @@ export async function getUserById(id: number): Promise<User | undefined> {
 }
 
 export async function getUserByEmail(email: string): Promise<User | undefined> {
+  // Garde d'entrée : `email` arrive parfois d'un champ nullish (liens familiaux,
+  // child_email/parent_email), et `email.trim()` sur `undefined` lève une
+  // TypeError avalée par mapPgError → 500 « pg_error » opaque.
+  if (!email?.trim()) return undefined;
   if (isPgMode()) return sqlUsers.getUserByEmail(email);
   const store = await getStoreAsync();
-  return store.users.find(
-    (u) => u.email.toLowerCase() === email.trim().toLowerCase()
-  );
+  const needle = email.trim().toLowerCase();
+  // Garde sur la ligne : dès que des comptes ont un email NULL (connexion par
+  // téléphone), `u.email.toLowerCase()` ferait exploser TOUTE lecture par email
+  // en mode JSON — connexion, mot de passe oublié, inscription suivante.
+  return store.users.find((u) => u.email?.toLowerCase() === needle);
 }
 
 export async function registerUser(data: {

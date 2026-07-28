@@ -36,6 +36,9 @@ export async function getUserById(id: number): Promise<User | undefined> {
 }
 
 export async function getUserByEmail(email: string): Promise<User | undefined> {
+  // Parité avec la branche Store : un identifiant vide/nullish ne cherche rien
+  // plutôt que de lever `email.trim()` dans le try (TypeError → mapPgError → 500).
+  if (!email?.trim()) return undefined;
   try {
     const res = await query<User>(
       "SELECT * FROM users WHERE lower(email) = lower($1) LIMIT 1",
