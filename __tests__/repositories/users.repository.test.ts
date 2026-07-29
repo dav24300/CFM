@@ -89,10 +89,11 @@ describe("users.repository", () => {
       password: "longsecret",
       first_name: "New",
       last_name: "User",
-      phone: "0999",
+      phone: "0812345670",
       membership_type: "soutien",
     });
     expect(created.email).toBe("new@cfm.org");
+    expect(created.phone_e164).toBe("+243812345670");
     expect((await getUserByEmail("NEW@CFM.ORG"))?.id).toBe(created.id);
     const ok = await verifyUserCredentials("new@cfm.org", "longsecret");
     expect(ok?.id).toBe(created.id);

@@ -38,7 +38,10 @@ export function CommunityPanel({ data, onReload }: Props) {
   const userCols: Column<Row>[] = [
     { key: "first_name", header: "Prénom", sortable: true },
     { key: "last_name", header: "Nom" },
-    { key: "email", header: "Email" },
+    // Le téléphone est l'identifiant de connexion — souvent le SEUL, un membre
+    // pouvant n'avoir aucun email. On affiche la forme normalisée si elle existe.
+    { key: "phone_e164", header: "Téléphone", render: (r) => String(r.phone_e164 ?? r.phone ?? "—") },
+    { key: "email", header: "Email", render: (r) => String(r.email ?? "—") },
     { key: "membership_type", header: "Type" },
     { key: "status", header: "Statut", render: (r) => <StatusBadge status={String(r.status)} /> },
   ];
@@ -165,7 +168,7 @@ export function CommunityPanel({ data, onReload }: Props) {
         <DataTable
           data={users}
           columns={userCols}
-          searchKeys={["first_name", "last_name", "email"]}
+          searchKeys={["first_name", "last_name", "email", "phone", "phone_e164"]}
           rowKey={(r) => Number(r.id)}
           selectable
           bulkActions={(selected, clearSelection) => {

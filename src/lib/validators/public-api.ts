@@ -1,4 +1,4 @@
-import { z, emailSchema } from "@/lib/validators";
+import { z, emailSchema, optionalEmailSchema, rdcPhoneSchema } from "@/lib/validators";
 
 export const contactSchema = z.object({
   name: z.string().trim().min(1),
@@ -24,12 +24,10 @@ export const petitionSignSchema = z.object({
 // En cas de doute un champ est toléré (nullish) plutôt que rejeté.
 
 export const memberRegisterSchema = z.object({
-  // Format réellement validé (comme contactSchema et newsletterSchema ci-dessus,
-  // qui utilisaient déjà emailSchema). Auparavant `z.string().min(1)` acceptait
-  // « jean » : le compte était créé avec une adresse inutilisable, donc sans
-  // activation par email NI réinitialisation de mot de passe possible — un
-  // compte mort, qu'aucun écran d'administration ne permet de corriger.
-  email: emailSchema,
+  // FACULTATIF depuis la connexion par téléphone : un membre peut n'avoir aucun
+  // email (la majorité des 300 fiches). S'il est fourni, il est réellement
+  // validé — « jean » sans « @ » créait un compte à l'adresse inutilisable.
+  email: optionalEmailSchema,
   // Longueur minimale vérifiée par le service (PASSWORD_TOO_SHORT) — pas ici,
   // pour conserver le message d'erreur historique sur mot de passe vide/court.
   password: z.string(),
@@ -37,8 +35,10 @@ export const memberRegisterSchema = z.object({
   // emails et une ligne vide dans l'écran d'administration.
   first_name: z.string().trim().min(1),
   last_name: z.string().trim().min(1),
-  // Colonnes nullables en base : tolérés absents/null (parité handler actuel).
-  phone: z.string().nullish(),
+  // OBLIGATOIRE et normalisable : c'est désormais l'identifiant de connexion.
+  // La garantie « au moins un identifiant » est donc structurelle (pas de refine
+  // « email OU téléphone » : le téléphone suffit toujours).
+  phone: rdcPhoneSchema,
   province: z.string().nullish(),
   membership_type: z.enum(["famille", "soutien", "benevole"]),
   military_link: z.string().nullish(),

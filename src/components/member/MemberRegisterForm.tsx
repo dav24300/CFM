@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PROVINCES_RDC } from "@/lib/constants";
+import { normalizePhoneRdc } from "@/domain/phone";
 import { Input } from "@/components/ui/primitives/input";
 import { Textarea } from "@/components/ui/primitives/textarea";
 import { NativeSelect } from "@/components/ui/primitives/native-select";
@@ -171,8 +172,11 @@ export function MemberRegisterForm() {
         </FormField>
       </div>
 
-      <FormField label={m.email} htmlFor="register_email" required>
-        <Input type="email" required value={form.email} onChange={(e) => u("email", e.target.value)} />
+      {/* Email FACULTATIF : la majorité des fiches n'en ont pas. On garde
+          type="email" (clavier « @ », validation HTML5 d'un champ non vide) et
+          on retire `required` du FormField pour que l'astérisque ne mente pas. */}
+      <FormField label={m.emailOptional} htmlFor="register_email">
+        <Input type="email" value={form.email} onChange={(e) => u("email", e.target.value)} />
       </FormField>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -196,8 +200,30 @@ export function MemberRegisterForm() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <FormField label={f.phone} htmlFor="register_phone" required>
-          <Input type="tel" required value={form.phone} onChange={(e) => u("phone", e.target.value)} />
+        {/* Écho de normalisation sous le champ : l'opérateur voit
+            « → +243812345678 » apparaître pendant la frappe. Sur 300 fiches,
+            c'est ce qui empêche de découvrir trois semaines plus tard que
+            40 numéros ont été saisis à 8 chiffres. Même module pur que le
+            serveur : aucune divergence possible. */}
+        <FormField
+          label={f.phone}
+          htmlFor="register_phone"
+          required
+          hint={
+            form.phone
+              ? normalizePhoneRdc(form.phone)
+                ? `→ ${normalizePhoneRdc(form.phone)}`
+                : m.phoneInvalid
+              : m.phoneHint
+          }
+        >
+          <Input
+            type="tel"
+            inputMode="tel"
+            required
+            value={form.phone}
+            onChange={(e) => u("phone", e.target.value)}
+          />
         </FormField>
         <FormField label={f.province} htmlFor="register_province">
           <FormSelect

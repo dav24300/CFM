@@ -70,11 +70,12 @@ export async function getUserByPhoneE164(e164: string): Promise<User | undefined
 }
 
 export async function createUser(data: {
-  email: string;
+  email?: string | null;
   password_hash: string;
   first_name: string;
   last_name: string;
   phone: string;
+  phone_e164?: string | null;
   province?: string;
   role: UserRole;
   membership_type: MembershipType;
@@ -85,16 +86,18 @@ export async function createUser(data: {
   try {
     const res = await query<User>(
       `INSERT INTO users (email, password_hash, first_name, last_name, phone,
-                          province, role, membership_type, military_link,
+                          phone_e164, province, role, membership_type, military_link,
                           parent_military_name, skills, status, verified_at, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending', NULL, $12)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'pending', NULL, $13)
        RETURNING *`,
       [
-        data.email.trim().toLowerCase(),
+        // NULL, jamais '' : '' violerait users_email_key au 2e compte sans email.
+        data.email ? data.email.trim().toLowerCase() : null,
         data.password_hash,
         data.first_name,
         data.last_name,
         data.phone,
+        data.phone_e164 ?? null,
         data.province || null,
         data.role,
         data.membership_type,

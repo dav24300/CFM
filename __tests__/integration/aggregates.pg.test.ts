@@ -246,7 +246,7 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
         password: "motdepasse1",
         first_name: "Papa",
         last_name: "K",
-        phone: "0991",
+        phone: "0991000001",
         province: "Kinshasa",
         membership_type: "famille",
         military_link: "epoux",
@@ -357,7 +357,7 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
         password: "motdepasse1",
         first_name: "Fille",
         last_name: "K",
-        phone: "0993",
+        phone: "0991000003",
         membership_type: "soutien",
       });
       childId = child.id;
@@ -432,7 +432,7 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
         password: "motdepasse1",
         first_name: "Maman",
         last_name: "M",
-        phone: "0994",
+        phone: "0991000004",
         province: "Goma",
         membership_type: "famille",
         military_link: "epouse",
@@ -577,7 +577,7 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
         password: "motdepasse1",
         first_name: "Don",
         last_name: "K",
-        phone: "0995",
+        phone: "0991000005",
         membership_type: "soutien",
       });
       donorUserId = donor.id;
