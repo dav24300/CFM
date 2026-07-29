@@ -126,6 +126,7 @@ export async function registerUser(data: {
       skills: data.skills || null,
       status: "pending",
       verified_at: null,
+      password_changed_at: null,
       created_at: new Date().toISOString(),
     };
     store.users.push(created);
@@ -177,6 +178,25 @@ export async function verifyUserCredentials(
   }
   const ok = await bcrypt.compare(password, user.password_hash);
   return ok ? user : null;
+}
+
+/**
+ * Remplace le mot de passe (hash calculé par l'appelant) et HORODATE le
+ * changement : `password_changed_at` sert à révoquer les sessions émises avant.
+ * Dual-mode.
+ */
+export async function setUserPassword(
+  userId: number,
+  passwordHash: string
+): Promise<void> {
+  if (isPgMode()) return sqlUsers.setUserPassword(userId, passwordHash);
+  await updateStoreAsync((store) => {
+    const u = store.users?.find((x) => x.id === userId);
+    if (u) {
+      u.password_hash = passwordHash;
+      u.password_changed_at = new Date().toISOString();
+    }
+  });
 }
 
 export async function activateUser(userId: number): Promise<User | undefined> {
@@ -235,17 +255,60 @@ export async function setUserRole(
 
 export async function updateMemberProfile(
   userId: number,
-  data: { first_name?: string; last_name?: string; phone?: string; province?: string }
+  data: {
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    province?: string;
+    email?: string | null;
+  }
 ): Promise<User | undefined> {
-  if (isPgMode()) return sqlUsers.updateMemberProfile(userId, data);
+  // Formes canoniques + contrôles d'unicité AVANT l'aiguillage de mode (parité,
+  // et le getUserBy* est asynchrone donc hors du mutateur JSON synchrone).
+  let email: string | null | undefined;
+  if (data.email !== undefined) {
+    email = data.email?.trim().toLowerCase() || null; // '' → null, jamais ''
+    if (email) {
+      const existing = await getUserByEmail(email);
+      if (existing && existing.id !== userId) throw domainError("EMAIL_EXISTS");
+    }
+  }
+  let phone: string | undefined;
+  let phoneE164: string | null | undefined;
+  if (data.phone !== undefined) {
+    phone = data.phone.trim();
+    phoneE164 = phone ? normalizePhoneRdc(phone) : null;
+    if (phoneE164) {
+      const existing = await getUserByPhoneE164(phoneE164);
+      if (existing && existing.id !== userId) throw domainError("PHONE_EXISTS");
+    }
+  }
+
+  if (isPgMode()) {
+    return sqlUsers.updateMemberProfile(userId, {
+      first_name: data.first_name,
+      last_name: data.last_name,
+      province: data.province,
+      email,
+      phone,
+      phone_e164: phoneE164,
+    });
+  }
+
   let updated: User | undefined;
   await updateStoreAsync((store) => {
     const u = store.users?.find((x) => x.id === userId);
     if (!u) return;
     if (data.first_name) u.first_name = data.first_name.trim();
     if (data.last_name) u.last_name = data.last_name.trim();
-    if (data.phone !== undefined) u.phone = data.phone.trim();
+    // phone et phone_e164 bougent ensemble : sinon la connexion par téléphone
+    // pointerait vers l'ancien numéro après un changement.
+    if (phone !== undefined) {
+      u.phone = phone;
+      u.phone_e164 = phoneE164 ?? null;
+    }
     if (data.province !== undefined) u.province = data.province;
+    if (email !== undefined) u.email = email;
     updated = u;
   });
   return updated;

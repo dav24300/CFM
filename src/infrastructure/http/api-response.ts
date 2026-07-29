@@ -21,6 +21,7 @@ const DOMAIN_ERRORS: Record<string, ErrorSpec> = {
   PHONE_INVALID: { message: "Numéro de téléphone invalide. Exemple : 0812345678", status: 400 },
   LINK_EXISTS: { message: "Un lien existe déjà", status: 400 },
   PASSWORD_TOO_SHORT: { message: "Mot de passe minimum 8 caractères", status: 400 },
+  INVALID_CURRENT_PASSWORD: { message: "Mot de passe actuel incorrect", status: 400 },
   MILITARY_LINK_REQUIRED: { message: "Lien militaire requis pour les familles", status: 400 },
   INVALID_TOKEN: { message: "Lien invalide ou expiré", status: 400 },
   NOT_FOUND: { message: "Non trouvé", status: 404 },

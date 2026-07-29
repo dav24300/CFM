@@ -142,6 +142,7 @@ CREATE TABLE IF NOT EXISTS users (
   skills TEXT,
   status VARCHAR(50) DEFAULT 'pending',
   verified_at TIMESTAMPTZ,
+  password_changed_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL
 );
 
@@ -157,6 +158,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- CREATE UNIQUE INDEX en conflit annulerait tout le schéma à chaque requête.
 ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_e164 VARCHAR(20);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS password_changed_at TIMESTAMPTZ;
 
 CREATE TABLE IF NOT EXISTS family_links (
   id INTEGER PRIMARY KEY,

@@ -24,6 +24,10 @@ export type User = {
   skills: string | null;
   status: UserStatus;
   verified_at: string | null;
+  // Horodatage du dernier changement de mot de passe. Une session émise AVANT
+  // cette date est révoquée (réinitialisation admin = expulsion immédiate d'un
+  // éventuel intrus, sans attendre l'expiration à 7 jours du cookie).
+  password_changed_at: string | null;
   created_at: string;
 };
 

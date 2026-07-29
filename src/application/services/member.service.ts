@@ -1,7 +1,9 @@
+import bcrypt from "bcryptjs";
 import {
   registerUser,
   verifyUserCredentials,
   updateMemberProfile,
+  setUserPassword,
   getUserByEmail,
   getUserById,
   getHelpRequestsForUser,
@@ -94,10 +96,34 @@ export async function getMemberDashboard() {
 
 export async function updateProfile(
   userId: number,
-  data: { first_name?: string; last_name?: string; phone?: string; province?: string }
+  data: {
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    province?: string;
+    email?: string | null;
+  }
 ): Promise<PublicUser | undefined> {
   const updated = await updateMemberProfile(userId, data);
   return updated ? toPublicUser(updated) : undefined;
+}
+
+/**
+ * Changement de mot de passe par le membre lui-même (mot de passe actuel exigé).
+ * Rend réellement provisoire le mot de passe délivré par un responsable : sans
+ * cette voie, 300 secrets choisis au bureau resteraient permanents.
+ */
+export async function changePassword(
+  userId: number,
+  currentPassword: string,
+  newPassword: string
+): Promise<void> {
+  if (newPassword.length < 8) throw domainError("PASSWORD_TOO_SHORT");
+  const user = await getUserById(userId);
+  if (!user) throw domainError("USER_NOT_FOUND");
+  const ok = await bcrypt.compare(currentPassword, user.password_hash);
+  if (!ok) throw domainError("INVALID_CURRENT_PASSWORD");
+  await setUserPassword(userId, await bcrypt.hash(newPassword, 10));
 }
 
 export async function requestPasswordReset(email: string): Promise<void> {

@@ -16,6 +16,11 @@ const LIMITED_PREFIXES = [
   // P2.5 — endpoints publics jusqu'ici sans aucune limite :
   "/api/push",
   "/api/member/reset-password",
+  // Connexion par téléphone : changement de mot de passe (brute-force du mot de
+  // passe actuel) et mise à jour de profil (énumération email/numéro via les
+  // conflits d'unicité) — tous deux authentifiés mais à borner.
+  "/api/member/password",
+  "/api/member/me",
 ];
 
 // Endpoints d'authentification à fort enjeu : plafond bien plus strict

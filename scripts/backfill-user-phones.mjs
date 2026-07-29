@@ -43,6 +43,7 @@ const pool = new pg.Pool({ connectionString: databaseUrl });
 async function ensureColumns() {
   await pool.query("ALTER TABLE users ALTER COLUMN email DROP NOT NULL");
   await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_e164 VARCHAR(20)");
+  await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS password_changed_at TIMESTAMPTZ");
   await pool.query(
     "CREATE INDEX IF NOT EXISTS idx_users_phone_e164 ON users(phone_e164) WHERE phone_e164 IS NOT NULL"
   );

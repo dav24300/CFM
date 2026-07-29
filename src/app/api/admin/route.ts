@@ -8,6 +8,7 @@ import {
   getHelpRequestById,
 } from "@/infrastructure/repositories/content.repository";
 import { adminUpdateContent, updateContactStatus } from "@/infrastructure/repositories/content.repository";
+import { adminResetPassword } from "@/application/services/admin.service";
 import { patchSiteSettings } from "@/infrastructure/repositories/settings.repository";
 import {
   activateUser,
@@ -60,6 +61,7 @@ const ACTION_ACCESS: Record<AdminActionName, "admin" | "volunteer"> = {
   activate_user: "admin",
   activate_users: "admin",
   suspend_user: "admin",
+  reset_user_password: "admin",
   approve_family_link: "admin",
   reject_family_link: "admin",
   delete: "admin",
@@ -173,6 +175,23 @@ export async function POST(request: NextRequest) {
       case "suspend_user":
         await suspendUser(payload.id);
         break;
+      case "reset_user_password": {
+        // Récupération sans email ni SMS : un responsable délivre un mot de passe
+        // provisoire en main propre ou au téléphone. Prise de contrôle de compte
+        // par construction — d'où access "admin" (jamais bénévole) et l'audit.
+        const result = await adminResetPassword(payload.id);
+        if (!result) return jsonError("Utilisateur introuvable", 404);
+        await logAdminAction({
+          actorType: access,
+          endpoint: "/api/admin",
+          action: "reset_user_password",
+          target: String(payload.id),
+          status: "success",
+          ip: getClientIp(request),
+        });
+        // Mot de passe en clair renvoyé UNE fois, jamais stocké ni journalisé.
+        return jsonSuccess({ password: result.password, user_id: result.userId });
+      }
       case "approve_family_link":
         await adminApproveFamilyLink(payload.id);
         break;

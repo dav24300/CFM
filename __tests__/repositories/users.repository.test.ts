@@ -30,6 +30,7 @@ import {
   getUserByPhoneE164,
   findUserByIdentifier,
   registerUser,
+  setUserPassword,
   suspendUser,
   updateMemberProfile,
   verifyUserCredentials,
@@ -144,5 +145,14 @@ describe("users.repository", () => {
   it("returns help requests resolved for user identities", async () => {
     const list = await getHelpRequestsForUser(1);
     expect(list).toHaveLength(1);
+  });
+
+  it("setUserPassword remplace le hash ET horodate le changement (révocation)", async () => {
+    expect(mockStore.users[0].password_changed_at ?? null).toBeNull();
+    await setUserPassword(1, "nouveau-hash");
+    expect(mockStore.users[0].password_hash).toBe("nouveau-hash");
+    // password_changed_at doit être posé : c'est ce que getLoggedInMember
+    // compare à l'émission de la session pour révoquer un accès antérieur.
+    expect(mockStore.users[0].password_changed_at).toBeTruthy();
   });
 });

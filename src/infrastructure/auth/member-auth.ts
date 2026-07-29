@@ -47,7 +47,11 @@ export async function destroyMemberSession(): Promise<void> {
   cookieStore.delete(HINT_COOKIE_NAME);
 }
 
-export async function getMemberSessionUserId(): Promise<number | null> {
+/**
+ * Session vérifiée (signature + expiration), avec l'instant d'émission — utile
+ * pour révoquer une session antérieure à un changement de mot de passe.
+ */
+export async function getMemberSession(): Promise<{ userId: number; issuedAt: number } | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
@@ -62,7 +66,11 @@ export async function getMemberSessionUserId(): Promise<number | null> {
   if (Math.floor(Date.now() / 1000) - issuedAt > SESSION_MAX_AGE) return null;
 
   const id = parseInt(idStr, 10);
-  return Number.isNaN(id) ? null : id;
+  return Number.isNaN(id) ? null : { userId: id, issuedAt };
+}
+
+export async function getMemberSessionUserId(): Promise<number | null> {
+  return (await getMemberSession())?.userId ?? null;
 }
 
 /**
@@ -73,10 +81,18 @@ export async function getMemberSessionUserId(): Promise<number | null> {
  * deux requêtes : aucun risque de fuite de session d'un utilisateur à l'autre.
  */
 export const getLoggedInMember = cache(async function getLoggedInMember(): Promise<PublicUser | null> {
-  const userId = await getMemberSessionUserId();
-  if (!userId) return null;
-  const user = await getUserById(userId);
+  const session = await getMemberSession();
+  if (!session) return null;
+  const user = await getUserById(session.userId);
   if (!user || user.status === "suspended") return null;
+  // Révocation : une session émise AVANT le dernier changement de mot de passe
+  // est rejetée. C'est ce qui rend la réinitialisation admin d'un compte
+  // compromis réellement efficace — sans cela, l'intrus garde l'accès jusqu'à
+  // l'expiration à 7 jours du cookie (HMAC + issuedAt seulement).
+  if (user.password_changed_at) {
+    const changedAtSec = Math.floor(new Date(user.password_changed_at).getTime() / 1000);
+    if (Number.isFinite(changedAtSec) && session.issuedAt < changedAtSec) return null;
+  }
   return toPublicUser(user);
 });
 
