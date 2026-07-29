@@ -291,9 +291,9 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
     it("lookup par email insensible à la casse + login", async () => {
       const found = await users.getUserByEmail("  PARENT.ONE@ex.cd ");
       expect(found?.id).toBe(parentId);
-      const ok = await users.verifyUserPassword("Parent.One@EX.CD", "motdepasse1");
+      const ok = await users.verifyUserCredentials("Parent.One@EX.CD", "motdepasse1");
       expect(ok?.id).toBe(parentId);
-      expect(await users.verifyUserPassword("parent.one@ex.cd", "mauvais-mdp")).toBeNull();
+      expect(await users.verifyUserCredentials("parent.one@ex.cd", "mauvais-mdp")).toBeNull();
       expect(await users.getUserByEmail("inconnu@ex.cd")).toBeUndefined();
     });
 
@@ -342,8 +342,8 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
       expect(await passwordReset.getValidResetToken(token2)).toBeNull();
 
       // Login : nouveau hash actif, ancien mot de passe refusé.
-      expect(await users.verifyUserPassword("parent.one@ex.cd", "motdepasse1")).toBeNull();
-      const ok = await users.verifyUserPassword("parent.one@ex.cd", "nouveaumdp1");
+      expect(await users.verifyUserCredentials("parent.one@ex.cd", "motdepasse1")).toBeNull();
+      const ok = await users.verifyUserCredentials("parent.one@ex.cd", "nouveaumdp1");
       expect(ok?.id).toBe(parentId);
 
       await expect(

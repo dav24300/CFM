@@ -55,6 +55,20 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
  * INSERT sans id : DEFAULT nextval('users_id_seq') fournit l'id, récupéré
  * via RETURNING *. Doublon d'email → users_email_key → EMAIL_EXISTS.
  */
+/** Compte par numéro E.164 (identifiant unique via idx_users_phone_e164_unique). */
+export async function getUserByPhoneE164(e164: string): Promise<User | undefined> {
+  if (!e164) return undefined;
+  try {
+    const res = await query<User>(
+      "SELECT * FROM users WHERE phone_e164 = $1 LIMIT 1",
+      [e164]
+    );
+    return res.rows[0] ? normalizePgRow(res.rows[0]) : undefined;
+  } catch (err) {
+    mapPgError(err);
+  }
+}
+
 export async function createUser(data: {
   email: string;
   password_hash: string;

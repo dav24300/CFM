@@ -113,12 +113,47 @@ export async function registerUser(data: {
   return created!;
 }
 
-export async function verifyUserPassword(
-  email: string,
+/**
+ * Résolution d'un compte par son numéro normalisé E.164. Le téléphone est un
+ * identifiant UNIQUE (index partiel idx_users_phone_e164_unique) : 0 ou 1 compte.
+ */
+export async function getUserByPhoneE164(e164: string): Promise<User | undefined> {
+  if (!e164) return undefined;
+  if (isPgMode()) return sqlUsers.getUserByPhoneE164(e164);
+  const store = await getStoreAsync();
+  return store.users.find((u) => u.phone_e164 === e164);
+}
+
+/**
+ * Résout un identifiant de connexion : email OU téléphone. La présence d'un « @ »
+ * désambiguïse trivialement. Un numéro est normalisé avant la recherche, si bien
+ * que `0812345678` et `+243812345678` retrouvent le même compte.
+ */
+export async function findUserByIdentifier(identifier: string): Promise<User | undefined> {
+  const raw = (identifier ?? "").trim();
+  if (!raw) return undefined;
+  if (raw.includes("@")) return getUserByEmail(raw);
+  const e164 = normalizePhoneRdc(raw);
+  if (!e164) return undefined;
+  return getUserByPhoneE164(e164);
+}
+
+// Hash bcrypt syntaxiquement valide, jamais égalé (60 caractères, coût 10, il
+// déclenche un vrai calcul). Il garantit un coût de comparaison CONSTANT même
+// quand l'identifiant est inconnu : sans lui, « identifiant inconnu » répond en
+// ~1 ms et « mot de passe faux » en ~80 ms — un oracle d'existence de compte,
+// d'autant plus exploitable qu'un numéro est bien plus énumérable qu'un email.
+const DUMMY_HASH = "$2a$10$" + "x".repeat(53);
+
+export async function verifyUserCredentials(
+  identifier: string,
   password: string
 ): Promise<User | null> {
-  const user = await getUserByEmail(email);
-  if (!user) return null;
+  const user = await findUserByIdentifier(identifier);
+  if (!user) {
+    await bcrypt.compare(password, DUMMY_HASH);
+    return null;
+  }
   const ok = await bcrypt.compare(password, user.password_hash);
   return ok ? user : null;
 }

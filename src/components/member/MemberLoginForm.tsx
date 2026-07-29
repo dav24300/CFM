@@ -15,7 +15,7 @@ export function MemberLoginForm() {
   const m = t.pages.memberArea;
   const router = useRouter();
   const { isLoading, isError, error, run } = useAsyncAction();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
@@ -25,7 +25,7 @@ export function MemberLoginForm() {
         const res = await fetch("/api/member/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ identifier, password }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
@@ -39,8 +39,21 @@ export function MemberLoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <FormField label={m.email} htmlFor="login_email" required>
-        <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+      <FormField label={m.identifier} htmlFor="login_identifier" hint={m.identifierHint} required>
+        {/* type="text" et non "email" : le navigateur refuse « 0812345678 »
+            dans un champ email avant même toute requête. autoCapitalize/off
+            évite qu'Android transforme « jean@x.cd » en « Jean@x.cd ». */}
+        <Input
+          type="text"
+          inputMode="text"
+          autoComplete="username"
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
+          required
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
+        />
       </FormField>
 
       <FormField label={m.password} htmlFor="login_password" required>

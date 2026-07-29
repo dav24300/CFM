@@ -194,6 +194,8 @@
       "profileTitle": "Wasifu wangu",
       "profileBack": "← My account",
       "email": "Email",
+      "identifier": "Simu au barua pepe",
+      "identifierHint": "Mf. 0812345678, au barua pepe yako",
       "password": "Password",
       "confirmPassword": "Confirm password",
       "loginBtn": "Ingia",

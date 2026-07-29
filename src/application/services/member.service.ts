@@ -1,6 +1,6 @@
 import {
   registerUser,
-  verifyUserPassword,
+  verifyUserCredentials,
   updateMemberProfile,
   getUserByEmail,
   getUserById,
@@ -49,10 +49,10 @@ export async function registerMember(
 }
 
 export async function loginMember(
-  email: string,
+  identifier: string,
   password: string
 ): Promise<PublicUser | null> {
-  const user = await verifyUserPassword(email, password);
+  const user = await verifyUserCredentials(identifier, password);
   if (!user) return null;
   // Statut vérifié AVANT la pose du cookie : un compte non actif ne doit
   // recevoir aucune session, même invalidée en aval par getCurrentMember.

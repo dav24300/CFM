@@ -194,6 +194,8 @@
       "profileTitle": "Mon profil",
       "profileBack": "← Mon espace",
       "email": "Email",
+      "identifier": "Téléphone ou email",
+      "identifierHint": "Ex. 0812345678, ou votre adresse email",
       "password": "Mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
       "loginBtn": "Se connecter",

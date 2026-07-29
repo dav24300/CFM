@@ -194,6 +194,8 @@
       "profileTitle": "Profil na ngai",
       "profileBack": "← Esika na ngai",
       "email": "Email",
+      "identifier": "Telefone to email",
+      "identifierHint": "Ndakisa 0812345678, to email na yo",
       "password": "Mot de passe",
       "confirmPassword": "Zongisa mot de passe",
       "loginBtn": "Kokota",
