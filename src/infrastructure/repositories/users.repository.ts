@@ -5,6 +5,7 @@ import {
   nextId,
 } from "@/infrastructure/persistence/store-access";
 import { domainError } from "@/domain/errors/domain-error";
+import { normalizePhoneRdc } from "@/domain/phone";
 import { decryptHelpRequest } from "@/infrastructure/encryption/aes.adapter";
 import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
 import * as sqlForms from "@/infrastructure/repositories/sql/forms.sql";
@@ -95,6 +96,7 @@ export async function registerUser(data: {
       first_name: data.first_name,
       last_name: data.last_name,
       phone: data.phone,
+      phone_e164: normalizePhoneRdc(data.phone),
       province: data.province || null,
       role,
       membership_type: data.membership_type,

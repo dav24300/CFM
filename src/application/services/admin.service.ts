@@ -55,7 +55,7 @@ export {
 
 export async function activateUserWithEmail(userId: number) {
   const user = await activateUser(userId);
-  if (user) {
+  if (user?.email) {
     await sendAccountActivatedEmail(user.email, user.first_name);
   }
   return user;

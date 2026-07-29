@@ -1,4 +1,5 @@
 import seedData from "../../../data/store.seed.json";
+import { normalizePhoneRdc } from "@/domain/phone";
 import type { Store } from "@/domain/entities/store";
 import type {
   User,
@@ -219,6 +220,15 @@ export function defaultStore(): Store {
 export function normalizeCollections(store: Store): boolean {
   let changed = false;
   if (!store.users) { store.users = []; changed = true; }
+  // Équivalent JSON du backfill PG : dériver phone_e164 pour toute ligne qui ne
+  // l'a pas encore (undefined), sans jamais toucher `phone` brut. Rejoué à
+  // chaque chargement, idempotent (les valeurs déjà posées ne changent pas).
+  for (const u of store.users) {
+    if (u.phone_e164 === undefined) {
+      u.phone_e164 = normalizePhoneRdc(u.phone);
+      changed = true;
+    }
+  }
   if (!store.family_links) { store.family_links = []; changed = true; }
   if (!store.donations) { store.donations = []; changed = true; }
   if (!store.petitions) { store.petitions = []; changed = true; }

@@ -138,15 +138,20 @@ export async function POST(request: NextRequest) {
         break;
       case "activate_user": {
         const user = await activateUser(payload.id);
-        if (user) {
-          runAfterResponse(() => sendAccountActivatedEmail(user.email, user.first_name));
+        if (user?.email) {
+          const { email, first_name } = user;
+          runAfterResponse(() => sendAccountActivatedEmail(email, first_name));
         }
         break;
       }
       case "activate_users": {
         const users = await activateUsers(payload.ids);
         for (const user of users) {
-          runAfterResponse(() => sendAccountActivatedEmail(user.email, user.first_name));
+          // Les comptes activés en lot sans email (inscrits par téléphone) sont
+          // simplement sautés : leur activation leur est annoncée autrement.
+          if (!user.email) continue;
+          const { email, first_name } = user;
+          runAfterResponse(() => sendAccountActivatedEmail(email, first_name));
         }
         await logAdminAction({
           actorType: access,

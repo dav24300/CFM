@@ -149,7 +149,7 @@ const TABLE_SPECS: TableSpec[] = [
     table: "users",
     pk: "id",
     pkType: "int",
-    cols: ["id", "email", "password_hash", "first_name", "last_name", "phone", "province", "role", "membership_type", "military_link", "parent_military_name", "skills", "status", "verified_at", "created_at"],
+    cols: ["id", "email", "password_hash", "first_name", "last_name", "phone", "phone_e164", "province", "role", "membership_type", "military_link", "parent_military_name", "skills", "status", "verified_at", "created_at"],
     rows: (s) => (s.users || []) as unknown as Row[],
   },
   {

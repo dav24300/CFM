@@ -38,8 +38,13 @@ export async function registerMember(
 ): Promise<{ userId: number; status: string }> {
   const user = await registerUser(data);
   // Hors du chemin de requête : le compte est créé, l'inscrit ne doit pas
-  // attendre l'aller-retour SMTP pour voir sa confirmation.
-  runAfterResponse(() => sendRegistrationPendingEmail(user.email, user.first_name));
+  // attendre l'aller-retour SMTP pour voir sa confirmation. Un inscrit par
+  // téléphone n'a pas d'email — le canal de confirmation est alors la fiche
+  // papier / l'écran, jamais un envoi vers `null`.
+  if (user.email) {
+    const email = user.email;
+    runAfterResponse(() => sendRegistrationPendingEmail(email, user.first_name));
+  }
   return { userId: user.id, status: user.status };
 }
 
@@ -97,7 +102,10 @@ export async function updateProfile(
 
 export async function requestPasswordReset(email: string): Promise<void> {
   const user = await getUserByEmail(email);
-  if (!user) return;
+  // Sans email enregistré, aucun lien ne peut partir : la récupération passe
+  // alors par un responsable (réinitialisation admin). Réponse HTTP identique
+  // dans tous les cas (anti-énumération), gérée par la route.
+  if (!user?.email) return;
   const token = await createPasswordResetToken(user.id);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const resetUrl = `${baseUrl}/membre/reinitialiser-mot-de-passe?token=${token}`;

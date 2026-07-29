@@ -4,11 +4,18 @@ export type UserStatus = "pending" | "active" | "suspended";
 
 export type User = {
   id: number;
-  email: string;
+  // Nullable depuis la connexion par téléphone : un membre peut n'avoir aucun
+  // email. Toute lecture doit garder ce null (cf. gardes `if (user.email)` aux
+  // points d'envoi d'email, et `u.email?.toLowerCase()` dans le repository).
+  email: string | null;
   password_hash: string;
   first_name: string;
   last_name: string;
-  phone: string;
+  // `phone` = saisie brute conservée (jamais perdue). `phone_e164` = forme
+  // canonique servant d'identifiant de connexion (unique, partiel), ou null si
+  // le numéro est absent/inexploitable.
+  phone: string | null;
+  phone_e164: string | null;
   province: string | null;
   role: UserRole;
   membership_type: MembershipType;

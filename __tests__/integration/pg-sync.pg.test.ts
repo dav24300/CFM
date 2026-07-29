@@ -31,7 +31,7 @@ function fixtureStore(): Store {
     users: [
       {
         id: 20, email: "u@ex.com", password_hash: "h", first_name: "U", last_name: "V",
-        phone: null, province: null, role: "member", membership_type: "membre",
+        phone: null, phone_e164: null, province: null, role: "member", membership_type: "membre",
         military_link: null, parent_military_name: null, skills: null,
         status: "active", verified_at: null, created_at: t,
       } as unknown as Store["users"][0],
