@@ -25,9 +25,12 @@ if (!ADMIN_PASSWORD) {
   process.exit(1);
 }
 
+// Le téléphone est désormais un identifiant UNIQUE : chaque compte a un numéro
+// distinct (l'ancien +243900000001 partagé cassait l'inscription dès le 2e).
 const ACCOUNTS = [
   {
     email: "qa-famille@cfm-qa.test",
+    phone: "0810000001",
     membership_type: "famille",
     first_name: "QA",
     last_name: "Famille",
@@ -36,6 +39,7 @@ const ACCOUNTS = [
   },
   {
     email: "qa-benevole@cfm-qa.test",
+    phone: "0810000002",
     membership_type: "benevole",
     first_name: "QA",
     last_name: "Bénévole",
@@ -44,6 +48,7 @@ const ACCOUNTS = [
   },
   {
     email: "qa-coordinateur@cfm-qa.test",
+    phone: "0810000003",
     membership_type: "soutien",
     first_name: "QA",
     last_name: "Coordinateur",
@@ -52,11 +57,23 @@ const ACCOUNTS = [
   },
   {
     email: "qa-pending@cfm-qa.test",
+    phone: "0810000004",
     membership_type: "famille",
     first_name: "QA",
     last_name: "EnAttente",
     military_link: "enfant",
     activate: false,
+  },
+  // Compte TÉLÉPHONE SEUL (aucun email) : couvre le nouveau chemin de bout en
+  // bout — inscription sans email, connexion par numéro.
+  {
+    email: undefined,
+    phone: "0810000005",
+    membership_type: "famille",
+    first_name: "QA",
+    last_name: "TelSeul",
+    military_link: "veuve",
+    activate: true,
   },
 ];
 
@@ -88,18 +105,18 @@ async function main() {
         password: QA_PASSWORD,
         first_name: acc.first_name,
         last_name: acc.last_name,
-        phone: "+243900000001",
+        phone: acc.phone,
         province: "Kinshasa",
         membership_type: acc.membership_type,
         military_link: acc.military_link,
         skills: acc.skills,
       }),
     });
-    if (status === 200) console.log(`✔ inscrit    ${acc.email}`);
+    if (status === 200) console.log(`✔ inscrit    ${acc.email || acc.phone}`);
     else if (status === 400 && /utilisé|inscrit/i.test(body?.error || ""))
-      console.log(`= existe     ${acc.email}`);
+      console.log(`= existe     ${acc.email || acc.phone}`);
     else {
-      console.error(`✖ register ${acc.email} → ${status} ${body?.error || ""}`);
+      console.error(`✖ register ${acc.email || acc.phone} → ${status} ${body?.error || ""}`);
       process.exit(1);
     }
   }
@@ -121,9 +138,11 @@ async function main() {
   const usersRes = await api("/api/admin/users", {}, cookie);
   const users = usersRes.body?.users || [];
   for (const acc of ACCOUNTS) {
-    const user = users.find((u) => u.email === acc.email);
+    // Un compte téléphone-seul n'a pas d'email : le retrouver par le numéro brut.
+    const user = users.find((u) => (acc.email ? u.email === acc.email : u.phone === acc.phone));
+    const label = acc.email || acc.phone;
     if (!user) {
-      console.error(`✖ introuvable côté admin : ${acc.email}`);
+      console.error(`✖ introuvable côté admin : ${label}`);
       process.exit(1);
     }
     if (acc.activate && user.status !== "active") {
@@ -133,10 +152,10 @@ async function main() {
         cookie
       );
       if (r.status !== 200) {
-        console.error(`✖ activation ${acc.email} → ${r.status}`);
+        console.error(`✖ activation ${label} → ${r.status}`);
         process.exit(1);
       }
-      console.log(`✔ activé     ${acc.email}`);
+      console.log(`✔ activé     ${label}`);
     }
     if (acc.role && user.role !== acc.role) {
       const r = await api(
@@ -145,10 +164,10 @@ async function main() {
         cookie
       );
       if (r.status !== 200) {
-        console.error(`✖ rôle ${acc.role} ${acc.email} → ${r.status}`);
+        console.error(`✖ rôle ${acc.role} ${label} → ${r.status}`);
         process.exit(1);
       }
-      console.log(`✔ rôle       ${acc.email} → ${acc.role}`);
+      console.log(`✔ rôle       ${label} → ${acc.role}`);
     }
   }
 
