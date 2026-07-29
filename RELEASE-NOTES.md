@@ -1,3 +1,27 @@
+# Release Notes — CFM ASBL
+
+## Connexion par téléphone (en cours — branche feat/connexion-telephone)
+
+Les membres peuvent se connecter et s'inscrire avec leur **numéro de téléphone**
+(email devenu facultatif). Un compte par numéro ; les autres membres du foyer se
+rattachent via les liens familiaux.
+
+**Étape de migration obligatoire** avant le déploiement — voir `docs/runbook.md`,
+section « Connexion par téléphone » : `npm run backfill:phones -- --verify` puis
+`npm run backfill:phones`, dans cet ordre.
+
+⚠️ **Point de non-retour** : la première inscription **sans email** ferme le
+retour arrière du schéma. Avant elle, `git revert` du code suffit ; après,
+l'ancien code casse (il suppose un email non nul). À trancher avant d'ouvrir la
+saisie des fiches.
+
+⚠️ **Prérequis production** : `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`
+doivent être posés — l'application refuse désormais de démarrer sans, car le
+compteur d'échecs de connexion par identifiant est inopérant sans Redis en
+serverless.
+
+---
+
 # Release Notes — CFM ASBL v1.0.0-stabilisee
 
 Date : 2026-07-07
