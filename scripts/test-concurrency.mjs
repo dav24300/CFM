@@ -50,11 +50,18 @@ if (!password) {
   console.error("❌ ADMIN_PASSWORD manquant (env ou .env.local)");
   process.exit(1);
 }
+// DATABASE_URL est OBLIGATOIRE : la détection des pertes (scénarios A et B) repose
+// sur un COUNT en base. Sans elle, l'ancien repli « API uniquement » ne prouvait
+// rien (scénario B invérifiable, scénario A dépendant du cache API) et rapportait
+// vert — un gate en trompe-l'œil. On échoue net au lieu de dégrader en silence.
+if (!databaseUrl) {
+  console.error(
+    "❌ DATABASE_URL manquant (env ou .env.local) — vérification en base impossible, gate inopérant"
+  );
+  process.exit(1);
+}
 
-const pool = databaseUrl
-  ? new pg.Pool({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 })
-  : null;
-if (!pool) console.log("⚠ DATABASE_URL absent — vérification via API uniquement");
+const pool = new pg.Pool({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
 
 async function adminLogin() {
   const res = await fetch(`${base}/api/admin/login`, {
@@ -107,16 +114,8 @@ async function subscribeNewsletter(email) {
 }
 
 async function dbCount(sql, params) {
-  if (!pool) return null;
   const res = await pool.query(sql, params);
   return res.rows[0] ? Number(res.rows[0].n) : 0;
-}
-
-async function apiSignatureCount(slug) {
-  const res = await fetch(`${base}/api/petitions/${slug}`);
-  if (res.status !== 200) return null;
-  const body = await res.json();
-  return body.signatures_count ?? body.petition?.signatures_count ?? null;
 }
 
 let totalLossA = 0;
@@ -133,13 +132,14 @@ for (let run = 1; run <= runs; run++) {
   const accepted = statuses.filter((s) => s === 200).length;
   // laisse le serveur retomber avant lecture
   await new Promise((r) => setTimeout(r, 500));
-  const inDb = pool
-    ? await dbCount(`SELECT COUNT(*)::int AS n FROM petition_signatures WHERE petition_id = $1`, [petition.id])
-    : await apiSignatureCount(petition.slug);
-  const lossA = accepted - (inDb ?? 0);
+  const inDb = await dbCount(
+    `SELECT COUNT(*)::int AS n FROM petition_signatures WHERE petition_id = $1`,
+    [petition.id]
+  );
+  const lossA = accepted - inDb;
   if (lossA > 0) totalLossA += lossA;
   console.log(
-    `Run ${run} — A: ${accepted}/${PARALLEL_SIGNATURES} acceptées (HTTP), ${inDb ?? "?"} persistées ${lossA > 0 ? `→ PERTE ${lossA}` : "✓"}`
+    `Run ${run} — A: ${accepted}/${PARALLEL_SIGNATURES} acceptées (HTTP), ${inDb} persistées ${lossA > 0 ? `→ PERTE ${lossA}` : "✓"}`
   );
 
   // Scénario B : signature ‖ newsletter
@@ -150,28 +150,24 @@ for (let run = 1; run <= runs; run++) {
     subscribeNewsletter(nlEmail),
   ]);
   await new Promise((r) => setTimeout(r, 500));
-  const sigPersisted = pool
-    ? (await dbCount(`SELECT COUNT(*)::int AS n FROM petition_signatures WHERE email = $1`, [sigEmail])) > 0
-    : null;
-  const nlPersisted = pool
-    ? (await dbCount(`SELECT COUNT(*)::int AS n FROM newsletter WHERE email = $1`, [nlEmail])) > 0
-    : null;
+  const sigPersisted =
+    (await dbCount(`SELECT COUNT(*)::int AS n FROM petition_signatures WHERE email = $1`, [sigEmail])) > 0;
+  const nlPersisted =
+    (await dbCount(`SELECT COUNT(*)::int AS n FROM newsletter WHERE email = $1`, [nlEmail])) > 0;
   const lossB =
-    (sigStatus === 200 && sigPersisted === false ? 1 : 0) +
-    (nlStatus === 200 && nlPersisted === false ? 1 : 0);
+    (sigStatus === 200 && !sigPersisted ? 1 : 0) +
+    (nlStatus === 200 && !nlPersisted ? 1 : 0);
   if (lossB > 0) totalLossB += lossB;
   console.log(
-    `Run ${run} — B: signature ${sigStatus}/${sigPersisted === null ? "?" : sigPersisted ? "persistée" : "PERDUE"}, newsletter ${nlStatus}/${nlPersisted === null ? "?" : nlPersisted ? "persistée" : "PERDUE"}`
+    `Run ${run} — B: signature ${sigStatus}/${sigPersisted ? "persistée" : "PERDUE"}, newsletter ${nlStatus}/${nlPersisted ? "persistée" : "PERDUE"}`
   );
 
   await deletePetition(cookie, petition.id);
-  if (pool) {
-    await pool.query(`DELETE FROM newsletter WHERE email LIKE '%@test-concurrence.local'`).catch(() => {});
-    await pool.query(`DELETE FROM petition_signatures WHERE email LIKE '%@test-concurrence.local'`).catch(() => {});
-  }
+  await pool.query(`DELETE FROM newsletter WHERE email LIKE '%@test-concurrence.local'`).catch(() => {});
+  await pool.query(`DELETE FROM petition_signatures WHERE email LIKE '%@test-concurrence.local'`).catch(() => {});
 }
 
-if (pool) await pool.end();
+await pool.end();
 
 const totalLoss = totalLossA + totalLossB;
 console.log(`\nRésultat : ${totalLoss} écriture(s) perdue(s) sur ${runs} run(s) (A: ${totalLossA}, B: ${totalLossB})`);
