@@ -339,19 +339,24 @@ export async function createLivePoll(
  * même sondage étaient sérialisés sur trois allers-retours réseau, ce qui
  * plafonnait un live à quelques dizaines de votes par seconde.
  *
- * Deux instructions désormais, sans verrou explicite :
+ * Deux instructions, réunies dans UNE transaction :
  *  1. l'INSERT du vote sert lui-même de garde (contrainte unique → ALREADY_VOTED),
  *     et son `SELECT ... WHERE active = 1` filtre les sondages fermés ;
  *  2. l'incrément se fait DANS le JSONB côté serveur (jsonb_set sur l'élément
  *     ciblé), donc atomiquement, sans lecture préalable.
+ *
+ * Le BEGIN/COMMIT est indispensable : sans lui, un crash ENTRE l'INSERT et
+ * l'UPDATE laissait une ligne live_poll_votes non comptée dans le tally
+ * (sum(options.votes) < count(*)). Les deux écritures committent désormais
+ * ensemble, ou pas du tout.
  */
 export async function voteLivePoll(
   pollId: number,
   optionId: string,
   voterKey: string
 ): Promise<LivePoll> {
-  try {
-    const inserted = await query<{ id: number }>(
+  return withTransaction(async (client) => {
+    const inserted = await client.query<{ id: number }>(
       `INSERT INTO live_poll_votes (poll_id, option_id, voter_key, created_at)
        SELECT p.id, $2::text, $3::text, $4::timestamptz
        FROM live_polls p
@@ -368,22 +373,26 @@ export async function voteLivePoll(
       // Aucune insertion : sondage absent/fermé, ou option inconnue. On
       // rétablit la MÊME priorité de gardes que la branche Store — doublon
       // d'abord — sinon un votant déjà inscrit sur un sondage entre-temps
-      // fermé recevrait POLL_CLOSED au lieu d'ALREADY_VOTED.
-      // Requêtes payées uniquement sur le chemin d'erreur.
-      const dejaVote = await query(
+      // fermé recevrait POLL_CLOSED au lieu d'ALREADY_VOTED. Lectures faites
+      // sur le MÊME client (le rollback qui suit le throw est sans effet).
+      const dejaVote = await client.query(
         "SELECT 1 FROM live_poll_votes WHERE poll_id = $1::int AND voter_key = $2::text",
         [pollId, voterKey]
       );
       if ((dejaVote.rowCount ?? 0) > 0) throw domainError("ALREADY_VOTED");
 
-      const poll = await getPollById(pollId);
+      const pollRes = await client.query<LivePoll>(
+        "SELECT * FROM live_polls WHERE id = $1::int",
+        [pollId]
+      );
+      const poll = pollRes.rows[0] ? normalizePgRow(pollRes.rows[0]) : null;
       if (!poll || poll.active !== 1) throw domainError("POLL_CLOSED");
       throw domainError("INVALID_OPTION");
     }
 
     // Incrément atomique de l'option ciblée, sans relecture ni réécriture du
-    // tableau complet côté application.
-    const updated = await query<LivePoll>(
+    // tableau complet côté application. Committé conjointement avec l'INSERT.
+    const updated = await client.query<LivePoll>(
       `UPDATE live_polls SET options = (
          SELECT jsonb_agg(
            CASE WHEN o->>'id' = $2::text
@@ -399,9 +408,8 @@ export async function voteLivePoll(
     );
 
     return normalizePgRow(updated.rows[0]);
-  } catch (err) {
-    mapPgError(err); // 23505 live_poll_votes_poll_id_voter_key_key → ALREADY_VOTED
-  }
+    // 23505 live_poll_votes_poll_id_voter_key_key → ALREADY_VOTED (via mapPgError).
+  }).catch((err) => mapPgError(err));
 }
 
 export async function incrementViewerCount(eventId: number): Promise<void> {
