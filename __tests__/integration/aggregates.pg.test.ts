@@ -261,13 +261,17 @@ describe.skipIf(!TEST_URL)("agrégats SQL (intégration PG)", () => {
     });
 
     it("doublon d'email (casse différente) → EMAIL_EXISTS", async () => {
+      // Téléphone VALIDE et distinct : depuis la connexion par téléphone (PR #35),
+      // registerUser valide le format (PHONE_INVALID) AVANT le contrôle d'unicité
+      // d'email. Un numéro factice ("0000") masquerait EMAIL_EXISTS derrière
+      // PHONE_INVALID. L'unicité d'email (ligne 71) précède celle du numéro.
       await expect(
         users.registerUser({
           email: "PARENT.ONE@EX.CD",
           password: "motdepasse1",
           first_name: "Dup",
           last_name: "K",
-          phone: "0000",
+          phone: "0991000002",
           membership_type: "soutien",
         })
       ).rejects.toMatchObject({ code: "EMAIL_EXISTS" });

@@ -1,11 +1,4 @@
-# À installer dans .github/workflows/ci.yml
-#
-# Le jeton git utilisé par cette machine n'a pas le scope OAuth `workflow` :
-# GitHub refuse tout push touchant .github/workflows/. Deux options :
-#   a) régénérer le jeton avec le scope `workflow`, puis
-#      `git mv docs/ci/github-actions-ci.yml .github/workflows/ci.yml` et pousser ;
-#   b) via l'interface GitHub : Add file → Create new file →
-#      `.github/workflows/ci.yml` → coller le contenu ci-dessous (sans cet en-tête).
+
 name: CI
 
 on:
@@ -14,21 +7,114 @@ on:
   pull_request:
     branches: [master, main]
 
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
+    name: typecheck · lint · tests (PG) · build
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: cfm
+          POSTGRES_PASSWORD: cfm_dev_password
+          POSTGRES_DB: cfm_test
+        ports:
+          - 5432:5432
+        
+        options: >-
+          --health-cmd "pg_isready -U cfm -d cfm_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+    
+      TEST_DATABASE_URL: postgresql://cfm:cfm_dev_password@localhost:5432/cfm_test
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: npm
+
       - run: npm ci
-      - run: npm run lint
       - run: npm run typecheck
-      - run: npm test
-      - run: npm run build
+      - run: npm run lint
+
+      
+      - name: Tests (unitaires + intégration PostgreSQL)
+        run: npm test
+
+      
+      - name: Build
+        run: npm run build
         env:
-          SESSION_SECRET: ci-test-secret-min-32-chars-long
-          ADMIN_PASSWORD: ci-admin
-          DATA_ENCRYPTION_KEY: ci-encryption-key-32chars-min
+          SESSION_SECRET: ci-build-secret-min-32-caracteres-000
+          ADMIN_PASSWORD: ci-admin-password
+          DATA_ENCRYPTION_KEY: ci-encryption-key-32chars-minimum
+
+  
+  concurrence:
+    name: lost update (e2e)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: cfm
+          POSTGRES_PASSWORD: cfm_dev_password
+          POSTGRES_DB: cfm_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cfm -d cfm_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      
+      DATABASE_URL: postgresql://cfm:cfm_dev_password@localhost:5432/cfm_test
+      CFM_PG_NORMALIZED: "true"
+      ADMIN_PASSWORD: ci-admin-password
+      SESSION_SECRET: ci-build-secret-min-32-caracteres-000
+      DATA_ENCRYPTION_KEY: ci-encryption-key-32chars-minimum
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Serveur dev + test de concurrence
+        run: |
+          npm run dev > server.log 2>&1 &
+          SERVER_PID=$!
+          echo "Attente du serveur (compilation dev en cours)…"
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3000 > /dev/null; then
+              echo "✓ Serveur prêt"
+              break
+            fi
+            sleep 3
+          done
+          # Échoue (exit 1) sur toute écriture perdue OU si DATABASE_URL absent.
+          node scripts/test-concurrency.mjs --runs 5
+          STATUS=$?
+          kill "$SERVER_PID" 2>/dev/null || true
+          exit $STATUS
+
+      - name: Journaux serveur (si échec)
+        if: failure()
+        run: cat server.log || true
