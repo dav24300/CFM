@@ -4,7 +4,7 @@ import { domainError } from "@/domain/errors/domain-error";
 import { normalizePgRow, normalizePgRows } from "@/infrastructure/persistence/normalize-pg-row";
 import { demoPetitionSeeds, slugify } from "@/infrastructure/persistence/store-seed";
 import { mapPgError } from "@/infrastructure/persistence/sql/pg-errors";
-import { query, withTransaction } from "@/infrastructure/persistence/sql/sql-client";
+import { query } from "@/infrastructure/persistence/sql/sql-client";
 
 /**
  * Agrégat pétitions en SQL ciblé (mode PG).

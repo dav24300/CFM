@@ -27,12 +27,20 @@ const ORDER_BY_DATE_ASC =
  * d'inscription du seul membre qui consulte. La liste des inscrits ne quitte
  * plus la base.
  */
+// Colonnes de `events` SAUF rsvp_user_ids. Cette colonne legacy est CONSERVÉE en
+// base par le backfill (réversibilité) et peut donc contenir en production les
+// identifiants des inscrits : un `SELECT *` / `e.*` la renverrait au navigateur.
+// On projette donc explicitement, et on ré-expose toujours un tableau VIDE.
+const EVENT_COLS = `id, title, description, province, "date", "time", type, location, capacity, created_at`;
+const EVENT_COLS_E = `e.id, e.title, e.description, e.province, e."date", e."time", e.type, e.location, e.capacity, e.created_at`;
+const EMPTY_RSVP = `'[]'::jsonb AS rsvp_user_ids`;
+
 const RSVP_COLUMNS = `
   (SELECT count(*)::int FROM event_rsvps r WHERE r.event_id = e.id) AS rsvp_count,
   ($2::int IS NOT NULL
    AND EXISTS (SELECT 1 FROM event_rsvps r WHERE r.event_id = e.id AND r.user_id = $2::int)
   ) AS viewer_going,
-  '[]'::jsonb AS rsvp_user_ids`;
+  ${EMPTY_RSVP}`;
 
 const ORDER_BY_DATE_ASC_E =
   `ORDER BY e."date" ASC, COALESCE(NULLIF(e."time", ''), '00:00') ASC, e.id ASC`;
@@ -41,7 +49,7 @@ export async function getUpcomingEvents(viewerId?: number): Promise<PortalEvent[
   try {
     const today = new Date().toISOString().slice(0, 10);
     const res = await query<PortalEvent>(
-      `SELECT e.*, ${RSVP_COLUMNS}
+      `SELECT ${EVENT_COLS_E}, ${RSVP_COLUMNS}
        FROM events e WHERE e."date" >= $1 ${ORDER_BY_DATE_ASC_E}`,
       [today, viewerId ?? null]
     );
@@ -53,8 +61,11 @@ export async function getUpcomingEvents(viewerId?: number): Promise<PortalEvent[
 
 export async function listPortalEvents(): Promise<PortalEvent[]> {
   try {
-    // Ordre d'insertion (id ASC) — équivalent de l'ordre du store.
-    const res = await query<PortalEvent>("SELECT * FROM events ORDER BY id");
+    // Ordre d'insertion (id ASC) — équivalent de l'ordre du store. Projection
+    // explicite (jamais SELECT *) : atteint une surface membre via la coordination.
+    const res = await query<PortalEvent>(
+      `SELECT ${EVENT_COLS}, ${EMPTY_RSVP} FROM events ORDER BY id`
+    );
     return normalizePgRows(res.rows);
   } catch (err) {
     mapPgError(err);
@@ -63,7 +74,9 @@ export async function listPortalEvents(): Promise<PortalEvent[]> {
 
 export async function getAllEvents(): Promise<PortalEvent[]> {
   try {
-    const res = await query<PortalEvent>(`SELECT * FROM events ${ORDER_BY_DATE_ASC}`);
+    const res = await query<PortalEvent>(
+      `SELECT ${EVENT_COLS}, ${EMPTY_RSVP} FROM events ${ORDER_BY_DATE_ASC}`
+    );
     return normalizePgRows(res.rows);
   } catch (err) {
     mapPgError(err);
@@ -73,7 +86,7 @@ export async function getAllEvents(): Promise<PortalEvent[]> {
 export async function getEventsForProvince(province: string): Promise<PortalEvent[]> {
   try {
     const res = await query<PortalEvent>(
-      `SELECT * FROM events WHERE province = $1 ${ORDER_BY_DATE_ASC}`,
+      `SELECT ${EVENT_COLS}, ${EMPTY_RSVP} FROM events WHERE province = $1 ${ORDER_BY_DATE_ASC}`,
       [province]
     );
     return normalizePgRows(res.rows);
@@ -160,9 +173,20 @@ export async function rsvpEvent(
       );
       const count = total.rows[0]?.n ?? 0;
 
-      return (inserted.rowCount ?? 0) > 0
-        ? { going: true, count }
-        : { going: false, count, full: true };
+      if ((inserted.rowCount ?? 0) > 0) return { going: true, count };
+
+      // rowCount 0 est AMBIGU : soit la capacité est atteinte, soit le
+      // `ON CONFLICT DO NOTHING` a absorbé une double-soumission concurrente du
+      // MÊME membre (déjà inscrit). Départager par un test d'existence, sinon un
+      // double-clic sur un événement complet-mais-déjà-réservé renvoie un faux
+      // 409 « Complet » au lieu d'un 200 idempotent.
+      const already = await client.query(
+        "SELECT 1 FROM event_rsvps WHERE event_id = $1::int AND user_id = $2::int",
+        [eventId, userId]
+      );
+      return (already.rowCount ?? 0) > 0
+        ? { going: true, count } // déjà inscrit → 200 idempotent
+        : { going: false, count, full: true }; // capacité atteinte → 409
     });
   } catch (err) {
     mapPgError(err);
