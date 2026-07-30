@@ -18,6 +18,7 @@
     "test:repos": "node scripts/test-repositories.mjs",
     "seed:qa": "node scripts/seed-qa-accounts.mjs",
     "backfill:rsvps": "node scripts/backfill-event-rsvps.mjs",
+  "backfill:phones": "npx tsx scripts/backfill-user-phones.mjs",
     "migrate:pg": "npx tsx scripts/migrate-json-to-pg.mjs",
     "bootstrap:pg": "npx tsx scripts/bootstrap-pg.mjs",
     "hydrate:pg": "npx tsx scripts/hydrate-from-postgres.mjs",

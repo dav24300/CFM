@@ -14,8 +14,14 @@ const DOMAIN_ERRORS: Record<string, ErrorSpec> = {
   ALREADY_SIGNED: { message: "Déjà signé", status: 409 },
   ALREADY_VOTED: { message: "Vous avez déjà voté", status: 400 },
   EMAIL_EXISTS: { message: "Cet email est déjà utilisé", status: 400 },
+  // Le message est neutralisé au niveau de la route publique d'inscription
+  // (réponse indiscernable d'un succès, anti-énumération) : il ne sert que si
+  // PHONE_EXISTS remonte d'un chemin authentifié (back-office).
+  PHONE_EXISTS: { message: "Ce numéro est déjà associé à un compte", status: 400 },
+  PHONE_INVALID: { message: "Numéro de téléphone invalide. Exemple : 0812345678", status: 400 },
   LINK_EXISTS: { message: "Un lien existe déjà", status: 400 },
   PASSWORD_TOO_SHORT: { message: "Mot de passe minimum 8 caractères", status: 400 },
+  INVALID_CURRENT_PASSWORD: { message: "Mot de passe actuel incorrect", status: 400 },
   MILITARY_LINK_REQUIRED: { message: "Lien militaire requis pour les familles", status: 400 },
   INVALID_TOKEN: { message: "Lien invalide ou expiré", status: 400 },
   NOT_FOUND: { message: "Non trouvé", status: 404 },

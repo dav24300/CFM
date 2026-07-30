@@ -5,6 +5,7 @@ import {
   nextId,
 } from "@/infrastructure/persistence/store-access";
 import { domainError } from "@/domain/errors/domain-error";
+import { normalizePhoneRdc } from "@/domain/phone";
 import { decryptHelpRequest } from "@/infrastructure/encryption/aes.adapter";
 import { isPgMode } from "@/infrastructure/persistence/sql/sql-client";
 import * as sqlForms from "@/infrastructure/repositories/sql/forms.sql";
@@ -33,15 +34,21 @@ export async function getUserById(id: number): Promise<User | undefined> {
 }
 
 export async function getUserByEmail(email: string): Promise<User | undefined> {
+  // Garde d'entrée : `email` arrive parfois d'un champ nullish (liens familiaux,
+  // child_email/parent_email), et `email.trim()` sur `undefined` lève une
+  // TypeError avalée par mapPgError → 500 « pg_error » opaque.
+  if (!email?.trim()) return undefined;
   if (isPgMode()) return sqlUsers.getUserByEmail(email);
   const store = await getStoreAsync();
-  return store.users.find(
-    (u) => u.email.toLowerCase() === email.trim().toLowerCase()
-  );
+  const needle = email.trim().toLowerCase();
+  // Garde sur la ligne : dès que des comptes ont un email NULL (connexion par
+  // téléphone), `u.email.toLowerCase()` ferait exploser TOUTE lecture par email
+  // en mode JSON — connexion, mot de passe oublié, inscription suivante.
+  return store.users.find((u) => u.email?.toLowerCase() === needle);
 }
 
 export async function registerUser(data: {
-  email: string;
+  email?: string | null;
   password: string;
   first_name: string;
   last_name: string;
@@ -53,7 +60,21 @@ export async function registerUser(data: {
   skills?: string;
 }): Promise<User> {
   if (data.password.length < 8) throw domainError("PASSWORD_TOO_SHORT");
-  if (await getUserByEmail(data.email)) throw domainError("EMAIL_EXISTS");
+
+  // Formes canoniques calculées UNE fois, AVANT tout aiguillage de mode : les
+  // deux branches (PG, JSON) reçoivent ainsi rigoureusement la même valeur —
+  // la divergence de parité devient structurellement impossible.
+  const email = data.email?.trim().toLowerCase() || null; // '' → null, jamais ''
+  const phoneE164 = normalizePhoneRdc(data.phone);
+  if (!phoneE164) throw domainError("PHONE_INVALID");
+
+  if (email && (await getUserByEmail(email))) throw domainError("EMAIL_EXISTS");
+  // Unicité du numéro (1 compte par numéro). Pré-check non concurrent-safe : le
+  // garde-fou réel est l'index UNIQUE partiel idx_users_phone_e164_unique
+  // (23505 → PHONE_EXISTS via mapPgError). La route publique NEUTRALISE
+  // PHONE_EXISTS en réponse de succès (anti-énumération).
+  if (await getUserByPhoneE164(phoneE164)) throw domainError("PHONE_EXISTS");
+
   if (data.membership_type === "famille" && !data.military_link) {
     throw domainError("MILITARY_LINK_REQUIRED");
   }
@@ -71,11 +92,18 @@ export async function registerUser(data: {
   const hash = await bcrypt.hash(data.password, SALT_ROUNDS);
 
   if (isPgMode()) {
-    // Le pré-check getUserByEmail ci-dessus préserve l'ordre des erreurs ;
-    // la contrainte users_email_key reste le garde-fou concurrent-safe
-    // (23505 → EMAIL_EXISTS) — plus de scan mémoire.
-    const { password: _password, ...fields } = data;
-    return sqlUsers.createUser({ ...fields, password_hash: hash, role });
+    // Les pré-checks ci-dessus préservent l'ordre des erreurs ; les contraintes
+    // base restent les garde-fous concurrent-safe (users_email_key → EMAIL_EXISTS,
+    // idx_users_phone_e164_unique → PHONE_EXISTS). On passe les formes canoniques
+    // déjà calculées (email nullable, phone_e164) — plus jamais data.email brut.
+    const { password: _password, email: _rawEmail, ...fields } = data;
+    return sqlUsers.createUser({
+      ...fields,
+      email,
+      phone_e164: phoneE164,
+      password_hash: hash,
+      role,
+    });
   }
 
   let created!: User;
@@ -84,11 +112,12 @@ export async function registerUser(data: {
     if (!store.users) store.users = [];
     created = {
       id: nextId(store),
-      email: data.email.trim().toLowerCase(),
+      email,
       password_hash: hash,
       first_name: data.first_name,
       last_name: data.last_name,
       phone: data.phone,
+      phone_e164: phoneE164,
       province: data.province || null,
       role,
       membership_type: data.membership_type,
@@ -97,6 +126,7 @@ export async function registerUser(data: {
       skills: data.skills || null,
       status: "pending",
       verified_at: null,
+      password_changed_at: null,
       created_at: new Date().toISOString(),
     };
     store.users.push(created);
@@ -105,14 +135,68 @@ export async function registerUser(data: {
   return created!;
 }
 
-export async function verifyUserPassword(
-  email: string,
+/**
+ * Résolution d'un compte par son numéro normalisé E.164. Le téléphone est un
+ * identifiant UNIQUE (index partiel idx_users_phone_e164_unique) : 0 ou 1 compte.
+ */
+export async function getUserByPhoneE164(e164: string): Promise<User | undefined> {
+  if (!e164) return undefined;
+  if (isPgMode()) return sqlUsers.getUserByPhoneE164(e164);
+  const store = await getStoreAsync();
+  return store.users.find((u) => u.phone_e164 === e164);
+}
+
+/**
+ * Résout un identifiant de connexion : email OU téléphone. La présence d'un « @ »
+ * désambiguïse trivialement. Un numéro est normalisé avant la recherche, si bien
+ * que `0812345678` et `+243812345678` retrouvent le même compte.
+ */
+export async function findUserByIdentifier(identifier: string): Promise<User | undefined> {
+  const raw = (identifier ?? "").trim();
+  if (!raw) return undefined;
+  if (raw.includes("@")) return getUserByEmail(raw);
+  const e164 = normalizePhoneRdc(raw);
+  if (!e164) return undefined;
+  return getUserByPhoneE164(e164);
+}
+
+// Hash bcrypt syntaxiquement valide, jamais égalé (60 caractères, coût 10, il
+// déclenche un vrai calcul). Il garantit un coût de comparaison CONSTANT même
+// quand l'identifiant est inconnu : sans lui, « identifiant inconnu » répond en
+// ~1 ms et « mot de passe faux » en ~80 ms — un oracle d'existence de compte,
+// d'autant plus exploitable qu'un numéro est bien plus énumérable qu'un email.
+const DUMMY_HASH = "$2a$10$" + "x".repeat(53);
+
+export async function verifyUserCredentials(
+  identifier: string,
   password: string
 ): Promise<User | null> {
-  const user = await getUserByEmail(email);
-  if (!user) return null;
+  const user = await findUserByIdentifier(identifier);
+  if (!user) {
+    await bcrypt.compare(password, DUMMY_HASH);
+    return null;
+  }
   const ok = await bcrypt.compare(password, user.password_hash);
   return ok ? user : null;
+}
+
+/**
+ * Remplace le mot de passe (hash calculé par l'appelant) et HORODATE le
+ * changement : `password_changed_at` sert à révoquer les sessions émises avant.
+ * Dual-mode.
+ */
+export async function setUserPassword(
+  userId: number,
+  passwordHash: string
+): Promise<void> {
+  if (isPgMode()) return sqlUsers.setUserPassword(userId, passwordHash);
+  await updateStoreAsync((store) => {
+    const u = store.users?.find((x) => x.id === userId);
+    if (u) {
+      u.password_hash = passwordHash;
+      u.password_changed_at = new Date().toISOString();
+    }
+  });
 }
 
 export async function activateUser(userId: number): Promise<User | undefined> {
@@ -171,17 +255,60 @@ export async function setUserRole(
 
 export async function updateMemberProfile(
   userId: number,
-  data: { first_name?: string; last_name?: string; phone?: string; province?: string }
+  data: {
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    province?: string;
+    email?: string | null;
+  }
 ): Promise<User | undefined> {
-  if (isPgMode()) return sqlUsers.updateMemberProfile(userId, data);
+  // Formes canoniques + contrôles d'unicité AVANT l'aiguillage de mode (parité,
+  // et le getUserBy* est asynchrone donc hors du mutateur JSON synchrone).
+  let email: string | null | undefined;
+  if (data.email !== undefined) {
+    email = data.email?.trim().toLowerCase() || null; // '' → null, jamais ''
+    if (email) {
+      const existing = await getUserByEmail(email);
+      if (existing && existing.id !== userId) throw domainError("EMAIL_EXISTS");
+    }
+  }
+  let phone: string | undefined;
+  let phoneE164: string | null | undefined;
+  if (data.phone !== undefined) {
+    phone = data.phone.trim();
+    phoneE164 = phone ? normalizePhoneRdc(phone) : null;
+    if (phoneE164) {
+      const existing = await getUserByPhoneE164(phoneE164);
+      if (existing && existing.id !== userId) throw domainError("PHONE_EXISTS");
+    }
+  }
+
+  if (isPgMode()) {
+    return sqlUsers.updateMemberProfile(userId, {
+      first_name: data.first_name,
+      last_name: data.last_name,
+      province: data.province,
+      email,
+      phone,
+      phone_e164: phoneE164,
+    });
+  }
+
   let updated: User | undefined;
   await updateStoreAsync((store) => {
     const u = store.users?.find((x) => x.id === userId);
     if (!u) return;
     if (data.first_name) u.first_name = data.first_name.trim();
     if (data.last_name) u.last_name = data.last_name.trim();
-    if (data.phone !== undefined) u.phone = data.phone.trim();
+    // phone et phone_e164 bougent ensemble : sinon la connexion par téléphone
+    // pointerait vers l'ancien numéro après un changement.
+    if (phone !== undefined) {
+      u.phone = phone;
+      u.phone_e164 = phoneE164 ?? null;
+    }
     if (data.province !== undefined) u.province = data.province;
+    if (email !== undefined) u.email = email;
     updated = u;
   });
   return updated;

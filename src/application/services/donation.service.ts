@@ -37,7 +37,9 @@ export async function processDonation(body: {
     provider: body.provider,
     phone: body.phone,
     donor_name: body.donor_name,
-    donor_email: body.donor_email || member?.email,
+    // member.email est désormais nullable : ramener null à undefined pour la
+    // colonne donor_email optionnelle (un membre sans email donne anonymement).
+    donor_email: body.donor_email || member?.email || undefined,
   });
 
   const mode = getMobileMoneyMode();

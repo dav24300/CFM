@@ -4,6 +4,14 @@ const REQUIRED_IN_PRODUCTION = [
   "SESSION_SECRET",
   "ADMIN_PASSWORD",
   "DATA_ENCRYPTION_KEY",
+  // Connexion par téléphone : le compteur d'échecs PAR IDENTIFIANT s'appuie sur
+  // checkRateLimitDistributed. Sans Redis, le repli est une Map par instance
+  // lambda — en serverless, chaque instance a son propre compteur, donc le
+  // plafond par compte est pratiquement inopérant face à une attaque distribuée.
+  // Un numéro étant bien plus énumérable qu'un email, ce contrôle n'est pas
+  // optionnel : on refuse de démarrer sans lui.
+  "UPSTASH_REDIS_REST_URL",
+  "UPSTASH_REDIS_REST_TOKEN",
 ] as const;
 
 export function assertProductionConfig(): void {

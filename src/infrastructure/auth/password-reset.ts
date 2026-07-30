@@ -86,6 +86,7 @@ export async function resetPasswordWithToken(
     const user = store.users.find((u) => u.id === entry.user_id);
     if (!user) throw domainError("USER_NOT_FOUND");
     user.password_hash = hash;
+    user.password_changed_at = new Date().toISOString();
 
     const t = store.password_reset_tokens.find((x) => x.id === entry.id);
     if (t) t.used = 1;

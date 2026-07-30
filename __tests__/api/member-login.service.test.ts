@@ -1,13 +1,13 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 const mocked = vi.hoisted(() => ({
-  verifyUserPassword: vi.fn(),
+  verifyUserCredentials: vi.fn(),
   createMemberSession: vi.fn(),
 }));
 
 vi.mock("@/infrastructure/repositories/users.repository", () => ({
   registerUser: vi.fn(),
-  verifyUserPassword: mocked.verifyUserPassword,
+  verifyUserCredentials: mocked.verifyUserCredentials,
   updateMemberProfile: vi.fn(),
   getUserByEmail: vi.fn(),
   getUserById: vi.fn(),
@@ -38,19 +38,19 @@ const baseUser = {
 
 describe("loginMember — statut du compte", () => {
   beforeEach(() => {
-    mocked.verifyUserPassword.mockReset();
+    mocked.verifyUserCredentials.mockReset();
     mocked.createMemberSession.mockReset();
   });
 
   it("creates a session for an active account", async () => {
-    mocked.verifyUserPassword.mockResolvedValueOnce({ ...baseUser });
+    mocked.verifyUserCredentials.mockResolvedValueOnce({ ...baseUser });
     const user = await loginMember("m@cfm.cd", "pass");
     expect(user).toMatchObject({ id: 7, status: "active" });
     expect(mocked.createMemberSession).toHaveBeenCalledWith(7);
   });
 
   it("rejects a pending account WITHOUT creating a session", async () => {
-    mocked.verifyUserPassword.mockResolvedValueOnce({ ...baseUser, status: "pending" });
+    mocked.verifyUserCredentials.mockResolvedValueOnce({ ...baseUser, status: "pending" });
     await expect(loginMember("m@cfm.cd", "pass")).rejects.toMatchObject({
       code: "ACCOUNT_PENDING",
     });
@@ -58,7 +58,7 @@ describe("loginMember — statut du compte", () => {
   });
 
   it("rejects a suspended account WITHOUT creating a session", async () => {
-    mocked.verifyUserPassword.mockResolvedValueOnce({ ...baseUser, status: "suspended" });
+    mocked.verifyUserCredentials.mockResolvedValueOnce({ ...baseUser, status: "suspended" });
     await expect(loginMember("m@cfm.cd", "pass")).rejects.toMatchObject({
       code: "ACCOUNT_SUSPENDED",
     });
@@ -66,7 +66,7 @@ describe("loginMember — statut du compte", () => {
   });
 
   it("returns null on invalid credentials (pas d'énumération de statut)", async () => {
-    mocked.verifyUserPassword.mockResolvedValueOnce(null);
+    mocked.verifyUserCredentials.mockResolvedValueOnce(null);
     expect(await loginMember("m@cfm.cd", "wrong")).toBeNull();
     expect(mocked.createMemberSession).not.toHaveBeenCalled();
   });

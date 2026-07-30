@@ -36,6 +36,9 @@ export async function getUserById(id: number): Promise<User | undefined> {
 }
 
 export async function getUserByEmail(email: string): Promise<User | undefined> {
+  // Parité avec la branche Store : un identifiant vide/nullish ne cherche rien
+  // plutôt que de lever `email.trim()` dans le try (TypeError → mapPgError → 500).
+  if (!email?.trim()) return undefined;
   try {
     const res = await query<User>(
       "SELECT * FROM users WHERE lower(email) = lower($1) LIMIT 1",
@@ -52,12 +55,27 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
  * INSERT sans id : DEFAULT nextval('users_id_seq') fournit l'id, récupéré
  * via RETURNING *. Doublon d'email → users_email_key → EMAIL_EXISTS.
  */
+/** Compte par numéro E.164 (identifiant unique via idx_users_phone_e164_unique). */
+export async function getUserByPhoneE164(e164: string): Promise<User | undefined> {
+  if (!e164) return undefined;
+  try {
+    const res = await query<User>(
+      "SELECT * FROM users WHERE phone_e164 = $1 LIMIT 1",
+      [e164]
+    );
+    return res.rows[0] ? normalizePgRow(res.rows[0]) : undefined;
+  } catch (err) {
+    mapPgError(err);
+  }
+}
+
 export async function createUser(data: {
-  email: string;
+  email?: string | null;
   password_hash: string;
   first_name: string;
   last_name: string;
   phone: string;
+  phone_e164?: string | null;
   province?: string;
   role: UserRole;
   membership_type: MembershipType;
@@ -68,16 +86,18 @@ export async function createUser(data: {
   try {
     const res = await query<User>(
       `INSERT INTO users (email, password_hash, first_name, last_name, phone,
-                          province, role, membership_type, military_link,
+                          phone_e164, province, role, membership_type, military_link,
                           parent_military_name, skills, status, verified_at, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending', NULL, $12)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'pending', NULL, $13)
        RETURNING *`,
       [
-        data.email.trim().toLowerCase(),
+        // NULL, jamais '' : '' violerait users_email_key au 2e compte sans email.
+        data.email ? data.email.trim().toLowerCase() : null,
         data.password_hash,
         data.first_name,
         data.last_name,
         data.phone,
+        data.phone_e164 ?? null,
         data.province || null,
         data.role,
         data.membership_type,
@@ -151,7 +171,14 @@ export async function setUserRole(
  */
 export async function updateMemberProfile(
   userId: number,
-  data: { first_name?: string; last_name?: string; phone?: string; province?: string }
+  data: {
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    phone_e164?: string | null;
+    province?: string;
+    email?: string | null;
+  }
 ): Promise<User | undefined> {
   const sets: string[] = [];
   const params: unknown[] = [userId];
@@ -161,7 +188,13 @@ export async function updateMemberProfile(
   };
   if (data.first_name) add("first_name", data.first_name.trim());
   if (data.last_name) add("last_name", data.last_name.trim());
-  if (data.phone !== undefined) add("phone", data.phone.trim());
+  // email / phone / phone_e164 sont déjà canoniques (calculés dans le
+  // repository, avant l'aiguillage de mode) : on les écrit tels quels.
+  if (data.email !== undefined) add("email", data.email);
+  if (data.phone !== undefined) {
+    add("phone", data.phone);
+    add("phone_e164", data.phone_e164 ?? null);
+  }
   if (data.province !== undefined) add("province", data.province);
 
   try {
@@ -172,6 +205,20 @@ export async function updateMemberProfile(
         )
       : await query<User>("SELECT * FROM users WHERE id = $1", [userId]);
     return res.rows[0] ? normalizePgRow(res.rows[0]) : undefined;
+  } catch (err) {
+    mapPgError(err);
+  }
+}
+
+export async function setUserPassword(
+  userId: number,
+  passwordHash: string
+): Promise<void> {
+  try {
+    await query(
+      "UPDATE users SET password_hash = $2, password_changed_at = $3 WHERE id = $1",
+      [userId, passwordHash, new Date().toISOString()]
+    );
   } catch (err) {
     mapPgError(err);
   }
@@ -307,8 +354,8 @@ export async function resetPasswordWithTokenHash(
     if (new Date(entry.expires_at) < new Date()) throw domainError("INVALID_TOKEN");
 
     const updated = await client.query(
-      "UPDATE users SET password_hash = $2 WHERE id = $1",
-      [entry.user_id, passwordHash]
+      "UPDATE users SET password_hash = $2, password_changed_at = $3 WHERE id = $1",
+      [entry.user_id, passwordHash, new Date().toISOString()]
     );
     if ((updated.rowCount ?? 0) === 0) throw domainError("USER_NOT_FOUND");
 

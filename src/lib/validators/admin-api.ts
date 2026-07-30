@@ -267,6 +267,7 @@ export const adminActionSchema = z.discriminatedUnion("action", [
     ids: z.array(adminActionId).min(1).max(1000),
   }),
   z.object({ action: z.literal("suspend_user"), id: adminActionId }),
+  z.object({ action: z.literal("reset_user_password"), id: adminActionId }),
   z.object({ action: z.literal("approve_family_link"), id: adminActionId }),
   z.object({ action: z.literal("reject_family_link"), id: adminActionId }),
   z.object({

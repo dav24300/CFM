@@ -12,6 +12,10 @@ const UNIQUE_CONSTRAINT_TO_CODE: Record<string, string> = {
   idx_petition_sig_unique: "ALREADY_SIGNED",
   idx_newsletter_email: "ALREADY_EXISTS",
   users_email_key: "EMAIL_EXISTS",
+  // Index UNIQUE partiel posé par scripts/backfill-user-phones.mjs. Sa présence
+  // ici est sans effet tant que le script n'a pas tourné (pas d'index = pas de
+  // 23505) : le mapper d'avance évite un 500 opaque le jour où il existe.
+  idx_users_phone_e164_unique: "PHONE_EXISTS",
   live_poll_votes_poll_id_voter_key_key: "ALREADY_VOTED",
 };
 
@@ -59,6 +63,16 @@ export function mapPgError(err: unknown): never {
   const e = err as PgLikeError;
   if (e?.code === "23505" && e.constraint && UNIQUE_CONSTRAINT_TO_CODE[e.constraint]) {
     throw domainError(UNIQUE_CONSTRAINT_TO_CODE[e.constraint]);
+  }
+
+  // Colonne absente (42703) ou NOT NULL violé (23502) : le symptôme quasi certain
+  // d'une migration de schéma non jouée (phone_e164 manquant, email encore NOT
+  // NULL). Sans ce mapping, chaque inscription renverrait un 500 « Erreur
+  // serveur » indiscernable d'une panne — le pire mode d'échec le jour de la
+  // saisie des fiches. On le rend diagnosticable dans les logs.
+  if (e?.code === "42703" || e?.code === "23502") {
+    logStructured("pg_schema_migration_missing", err);
+    throw domainError("PERSISTENCE_ERROR", "Erreur serveur");
   }
 
   if (isConnectionError(err)) {

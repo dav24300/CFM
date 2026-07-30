@@ -1,7 +1,9 @@
+import bcrypt from "bcryptjs";
 import {
   registerUser,
-  verifyUserPassword,
+  verifyUserCredentials,
   updateMemberProfile,
+  setUserPassword,
   getUserByEmail,
   getUserById,
   getHelpRequestsForUser,
@@ -38,16 +40,21 @@ export async function registerMember(
 ): Promise<{ userId: number; status: string }> {
   const user = await registerUser(data);
   // Hors du chemin de requête : le compte est créé, l'inscrit ne doit pas
-  // attendre l'aller-retour SMTP pour voir sa confirmation.
-  runAfterResponse(() => sendRegistrationPendingEmail(user.email, user.first_name));
+  // attendre l'aller-retour SMTP pour voir sa confirmation. Un inscrit par
+  // téléphone n'a pas d'email — le canal de confirmation est alors la fiche
+  // papier / l'écran, jamais un envoi vers `null`.
+  if (user.email) {
+    const email = user.email;
+    runAfterResponse(() => sendRegistrationPendingEmail(email, user.first_name));
+  }
   return { userId: user.id, status: user.status };
 }
 
 export async function loginMember(
-  email: string,
+  identifier: string,
   password: string
 ): Promise<PublicUser | null> {
-  const user = await verifyUserPassword(email, password);
+  const user = await verifyUserCredentials(identifier, password);
   if (!user) return null;
   // Statut vérifié AVANT la pose du cookie : un compte non actif ne doit
   // recevoir aucune session, même invalidée en aval par getCurrentMember.
@@ -89,15 +96,42 @@ export async function getMemberDashboard() {
 
 export async function updateProfile(
   userId: number,
-  data: { first_name?: string; last_name?: string; phone?: string; province?: string }
+  data: {
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    province?: string;
+    email?: string | null;
+  }
 ): Promise<PublicUser | undefined> {
   const updated = await updateMemberProfile(userId, data);
   return updated ? toPublicUser(updated) : undefined;
 }
 
+/**
+ * Changement de mot de passe par le membre lui-même (mot de passe actuel exigé).
+ * Rend réellement provisoire le mot de passe délivré par un responsable : sans
+ * cette voie, 300 secrets choisis au bureau resteraient permanents.
+ */
+export async function changePassword(
+  userId: number,
+  currentPassword: string,
+  newPassword: string
+): Promise<void> {
+  if (newPassword.length < 8) throw domainError("PASSWORD_TOO_SHORT");
+  const user = await getUserById(userId);
+  if (!user) throw domainError("USER_NOT_FOUND");
+  const ok = await bcrypt.compare(currentPassword, user.password_hash);
+  if (!ok) throw domainError("INVALID_CURRENT_PASSWORD");
+  await setUserPassword(userId, await bcrypt.hash(newPassword, 10));
+}
+
 export async function requestPasswordReset(email: string): Promise<void> {
   const user = await getUserByEmail(email);
-  if (!user) return;
+  // Sans email enregistré, aucun lien ne peut partir : la récupération passe
+  // alors par un responsable (réinitialisation admin). Réponse HTTP identique
+  // dans tous les cas (anti-énumération), gérée par la route.
+  if (!user?.email) return;
   const token = await createPasswordResetToken(user.id);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const resetUrl = `${baseUrl}/membre/reinitialiser-mot-de-passe?token=${token}`;

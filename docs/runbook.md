@@ -15,6 +15,34 @@
 2. Executer `npm run bootstrap:pg`.
 3. Verifier les logs : schema applique, migration ok, hydration ok.
 
+## Connexion par telephone — migration `phone_e164` (obligatoire avant le go-live)
+
+Additive et rejouable. `bootstrap:pg` n'appelle AUCUN backfill : ces etapes se
+jouent a la main, dans l'ordre. Le point de non-retour n'est PAS la migration,
+c'est la premiere inscription sans email (ensuite l'ancien code casse).
+
+1. `DATABASE_URL=... npm run backfill:phones -- --verify`
+   Rapport a blanc : combien de numeros normalisables, lesquels sont illisibles
+   ou partages (fail-closed : laisses NULL). CORRIGER a la main les numeros
+   illisibles listes AVANT de continuer.
+2. `DATABASE_URL=... npm run backfill:phones`
+   Normalise `phone_e164` (numeros a compte unique uniquement) et pose l'index
+   UNIQUE partiel `idx_users_phone_e164_unique`. Sortie en exit code 2 s'il
+   reste des comptes injoignables par telephone (collisions/illisibles) : ce
+   n'est pas un echec, c'est un rappel de les resoudre.
+3. Deployer le code (connexion + inscription par telephone).
+4. `DATABASE_URL=... npm run backfill:phones -- --verify`
+   Controle post-deploiement : recalcule et compare colonne vs fonction, doit
+   conclure « colonne coherente ».
+
+Prerequis production : `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`
+poses (le compteur d'echecs par identifiant est inoperant sans Redis en
+serverless — l'app refuse de demarrer sans, cf. config.ts).
+
+Rollback : tant qu'aucun compte sans email n'existe, `git revert` du code suffit
+(phone_e164 devient inerte, email nullable ne gene pas). Pour retirer l'unicite :
+`DROP INDEX IF EXISTS idx_users_phone_e164_unique;`.
+
 ## Rate Limit Distribue (Upstash)
 
 1. Definir :

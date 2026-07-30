@@ -22,9 +22,16 @@ export function MemberProfileForm({ user }: Props) {
     last_name: user.last_name,
     phone: user.phone || "",
     province: user.province || "",
+    email: user.email || "",
   });
   const [successMessage, setSuccessMessage] = useState("");
   const { isLoading, isSuccess, isError, error, run } = useAsyncAction();
+
+  // Second formulaire indépendant : changement de mot de passe.
+  const [pwd, setPwd] = useState({ current_password: "", new_password: "", confirm: "" });
+  const [pwdSuccess, setPwdSuccess] = useState("");
+  const [pwdError, setPwdError] = useState<string | null>(null);
+  const pwdAction = useAsyncAction();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,6 +45,34 @@ export function MemberProfileForm({ user }: Props) {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
         setSuccessMessage(t.common.profileUpdated);
+      });
+    } catch {
+      // handled by hook
+    }
+  }
+
+  async function handlePasswordSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setPwdError(null);
+    setPwdSuccess("");
+    if (pwd.new_password !== pwd.confirm) {
+      setPwdError(t.common.passwordMismatch);
+      return;
+    }
+    try {
+      await pwdAction.run(async () => {
+        const res = await fetch("/api/member/password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            current_password: pwd.current_password,
+            new_password: pwd.new_password,
+          }),
+        });
+        const data = await res.json().catch(() => ({}) as { error?: string });
+        if (!res.ok) throw new Error(data.error || `Erreur ${res.status}`);
+        setPwd({ current_password: "", new_password: "", confirm: "" });
+        setPwdSuccess(m.passwordChanged);
       });
     } catch {
       // handled by hook
@@ -80,9 +115,16 @@ export function MemberProfileForm({ user }: Props) {
         />
       </FormField>
 
-      <p className="text-sm text-site-muted">
-        {m.email} : {user.email}
-      </p>
+      {/* Email ÉDITABLE : facultatif, mais seule voie de récupération autonome
+          pour un membre inscrit sans email. */}
+      <FormField label={m.emailOptional} htmlFor="profile_email">
+        <Input
+          type="email"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+        />
+      </FormField>
+      {!user.email && <Alert variant="info">{m.emailAddNotice}</Alert>}
 
       <Button type="submit" loading={isLoading}>
         {t.common.save}
@@ -90,6 +132,44 @@ export function MemberProfileForm({ user }: Props) {
 
       {isSuccess && successMessage && <Alert variant="success">{successMessage}</Alert>}
       {isError && error && <Alert variant="error">{error}</Alert>}
+
+      <div className="mt-6 space-y-4 border-t border-site-line pt-6">
+        <h3 className="font-semibold text-site-ink">{m.changePassword}</h3>
+        <FormField label={m.currentPassword} htmlFor="profile_current_password" required>
+          <Input
+            type="password"
+            autoComplete="current-password"
+            value={pwd.current_password}
+            onChange={(e) => setPwd({ ...pwd, current_password: e.target.value })}
+          />
+        </FormField>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField label={`${m.newPassword} (min. 8)`} htmlFor="profile_new_password" required>
+            <Input
+              type="password"
+              autoComplete="new-password"
+              minLength={8}
+              value={pwd.new_password}
+              onChange={(e) => setPwd({ ...pwd, new_password: e.target.value })}
+            />
+          </FormField>
+          <FormField label={m.confirmPassword} htmlFor="profile_confirm_password" required>
+            <Input
+              type="password"
+              autoComplete="new-password"
+              value={pwd.confirm}
+              onChange={(e) => setPwd({ ...pwd, confirm: e.target.value })}
+            />
+          </FormField>
+        </div>
+        <Button type="button" onClick={handlePasswordSubmit} loading={pwdAction.isLoading}>
+          {m.changePassword}
+        </Button>
+        {pwdSuccess && <Alert variant="success">{pwdSuccess}</Alert>}
+        {(pwdError || (pwdAction.isError && pwdAction.error)) && (
+          <Alert variant="error">{pwdError || pwdAction.error}</Alert>
+        )}
+      </div>
     </form>
   );
 }

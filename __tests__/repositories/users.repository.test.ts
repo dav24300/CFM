@@ -27,10 +27,13 @@ import {
   getAllUsers,
   getHelpRequestsForUser,
   getUserByEmail,
+  getUserByPhoneE164,
+  findUserByIdentifier,
   registerUser,
+  setUserPassword,
   suspendUser,
   updateMemberProfile,
-  verifyUserPassword,
+  verifyUserCredentials,
 } from "@/infrastructure/repositories/users.repository";
 
 describe("users.repository", () => {
@@ -87,13 +90,43 @@ describe("users.repository", () => {
       password: "longsecret",
       first_name: "New",
       last_name: "User",
-      phone: "0999",
+      phone: "0812345670",
       membership_type: "soutien",
     });
     expect(created.email).toBe("new@cfm.org");
+    expect(created.phone_e164).toBe("+243812345670");
     expect((await getUserByEmail("NEW@CFM.ORG"))?.id).toBe(created.id);
-    const ok = await verifyUserPassword("new@cfm.org", "longsecret");
+    const ok = await verifyUserCredentials("new@cfm.org", "longsecret");
     expect(ok?.id).toBe(created.id);
+  });
+
+  it("résout un compte par son numéro, toutes variantes confondues", async () => {
+    mockStore.users.push({
+      id: 5,
+      email: null,
+      password_hash: "hash",
+      first_name: "Tel",
+      last_name: "Seul",
+      phone: "0812345678",
+      phone_e164: "+243812345678",
+      membership_type: "famille",
+      status: "active",
+      verified_at: null,
+    });
+    // Le numéro brut, la forme internationale et la forme espacée pointent tous
+    // vers le même compte : la résolution normalise avant de chercher.
+    for (const form of ["0812345678", "+243812345678", "243 81 234 56 78"]) {
+      expect((await findUserByIdentifier(form))?.id, form).toBe(5);
+    }
+    expect((await getUserByPhoneE164("+243812345678"))?.id).toBe(5);
+  });
+
+  it("ne résout aucun compte pour un identifiant inconnu ou illisible", async () => {
+    expect(await findUserByIdentifier("+243999999999")).toBeUndefined();
+    expect(await findUserByIdentifier("pas-un-numero")).toBeUndefined();
+    // Identifiant inconnu → null (le coût bcrypt constant est assuré par le
+    // DUMMY_HASH ; le mock renvoie true, mais sans candidat on renvoie bien null).
+    expect(await verifyUserCredentials("+243999999999", "x")).toBeNull();
   });
 
   it("updates profile, suspends user and exposes user collections", async () => {
@@ -112,5 +145,14 @@ describe("users.repository", () => {
   it("returns help requests resolved for user identities", async () => {
     const list = await getHelpRequestsForUser(1);
     expect(list).toHaveLength(1);
+  });
+
+  it("setUserPassword remplace le hash ET horodate le changement (révocation)", async () => {
+    expect(mockStore.users[0].password_changed_at ?? null).toBeNull();
+    await setUserPassword(1, "nouveau-hash");
+    expect(mockStore.users[0].password_hash).toBe("nouveau-hash");
+    // password_changed_at doit être posé : c'est ce que getLoggedInMember
+    // compare à l'émission de la session pour révoquer un accès antérieur.
+    expect(mockStore.users[0].password_changed_at).toBeTruthy();
   });
 });

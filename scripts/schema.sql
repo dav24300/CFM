@@ -125,11 +125,15 @@ CREATE TABLE IF NOT EXISTS contact_messages (
 
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY,
-  email VARCHAR(255) UNIQUE NOT NULL,
+  -- UNIQUE (→ contrainte users_email_key) conservée ; NOT NULL retiré : la
+  -- connexion par téléphone autorise des comptes sans email. PostgreSQL traite
+  -- les NULL comme distincts, l'unicité reste donc valide.
+  email VARCHAR(255) UNIQUE,
   password_hash TEXT NOT NULL,
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
   phone VARCHAR(50),
+  phone_e164 VARCHAR(20),
   province VARCHAR(100),
   role VARCHAR(50) DEFAULT 'member',
   membership_type VARCHAR(50) NOT NULL,
@@ -138,8 +142,23 @@ CREATE TABLE IF NOT EXISTS users (
   skills TEXT,
   status VARCHAR(50) DEFAULT 'pending',
   verified_at TIMESTAMPTZ,
+  password_changed_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL
 );
+
+-- Connexion par téléphone — rattrapage sur base EXISTANTE (le corps du
+-- CREATE TABLE IF NOT EXISTS ci-dessus n'est pas rejoué si la table existe).
+-- Ces deux instructions sont idempotentes ET incapables d'échouer sur les
+-- données : DROP NOT NULL est un no-op silencieux si la colonne est déjà
+-- nullable, ADD COLUMN IF NOT EXISTS suit le motif déjà présent plus bas.
+-- Elles peuvent donc rester dans ce fichier rejoué en UNE transaction implicite
+-- à chaque cold start (applyFullSchema, pg-sync.ts). L'index UNIQUE partiel sur
+-- phone_e164, lui, dépend des données (des doublons de numéro existent) : il
+-- vit EXCLUSIVEMENT dans scripts/backfill-user-phones.mjs, jamais ici — un
+-- CREATE UNIQUE INDEX en conflit annulerait tout le schéma à chaque requête.
+ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_e164 VARCHAR(20);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS password_changed_at TIMESTAMPTZ;
 
 CREATE TABLE IF NOT EXISTS family_links (
   id INTEGER PRIMARY KEY,
@@ -292,6 +311,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_studies_slug ON studies(slug);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_newsletter_email ON newsletter(lower(email));
 CREATE UNIQUE INDEX IF NOT EXISTS idx_petition_sig_unique ON petition_signatures(petition_id, lower(email));
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(lower(email));
+-- Index de LOOKUP (NON unique) : sert la résolution d'identifiant à la connexion
+-- par téléphone. L'unicité de phone_e164 est posée par le script de backfill,
+-- après un contrôle fail-closed des doublons — jamais ici (cf. bloc ALTER users).
+CREATE INDEX IF NOT EXISTS idx_users_phone_e164 ON users(phone_e164) WHERE phone_e164 IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_donations_status ON donations(status);
 CREATE INDEX IF NOT EXISTS idx_petitions_slug ON petitions(slug);
 CREATE INDEX IF NOT EXISTS idx_live_events_slug ON live_events(slug);

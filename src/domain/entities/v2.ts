@@ -4,11 +4,18 @@ export type UserStatus = "pending" | "active" | "suspended";
 
 export type User = {
   id: number;
-  email: string;
+  // Nullable depuis la connexion par téléphone : un membre peut n'avoir aucun
+  // email. Toute lecture doit garder ce null (cf. gardes `if (user.email)` aux
+  // points d'envoi d'email, et `u.email?.toLowerCase()` dans le repository).
+  email: string | null;
   password_hash: string;
   first_name: string;
   last_name: string;
-  phone: string;
+  // `phone` = saisie brute conservée (jamais perdue). `phone_e164` = forme
+  // canonique servant d'identifiant de connexion (unique, partiel), ou null si
+  // le numéro est absent/inexploitable.
+  phone: string | null;
+  phone_e164: string | null;
   province: string | null;
   role: UserRole;
   membership_type: MembershipType;
@@ -17,6 +24,10 @@ export type User = {
   skills: string | null;
   status: UserStatus;
   verified_at: string | null;
+  // Horodatage du dernier changement de mot de passe. Une session émise AVANT
+  // cette date est révoquée (réinitialisation admin = expulsion immédiate d'un
+  // éventuel intrus, sans attendre l'expiration à 7 jours du cookie).
+  password_changed_at: string | null;
   created_at: string;
 };
 
