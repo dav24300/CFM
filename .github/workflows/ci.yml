@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+# Annule les exécutions redondantes sur une même branche/PR.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Gate principal : le service postgres:16 + TEST_DATABASE_URL font ENFIN
+  # exécuter les blocs describe.skipIf(!TEST_DATABASE_URL) des tests PG.
+  test:
+    name: typecheck · lint · tests (PG) · build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: cfm
+          POSTGRES_PASSWORD: cfm_dev_password
+          POSTGRES_DB: cfm_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cfm -d cfm_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Sa présence retire le skipIf : les tests d'intégration PG s'exécutent.
+      TEST_DATABASE_URL: postgresql://cfm:cfm_dev_password@localhost:5432/cfm_test
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+
+      - name: Tests (unitaires + intégration PostgreSQL)
+        run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          SESSION_SECRET: ci-build-secret-min-32-caracteres-000
+          ADMIN_PASSWORD: ci-admin-password
+          DATA_ENCRYPTION_KEY: ci-encryption-key-32chars-minimum
+
+  # Optionnel — preuve end-to-end (HTTP → services → repositories → PG) de
+  # l'absence de lost update. Serveur dev (NODE_ENV != production) pour éviter
+  # l'exigence Redis d'assertProductionConfig ; schéma appliqué au 1er accès.
+  # Supprimer ce job pour ne garder que le gate principal.
+  concurrence:
+    name: lost update (e2e)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: cfm
+          POSTGRES_PASSWORD: cfm_dev_password
+          POSTGRES_DB: cfm_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cfm -d cfm_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://cfm:cfm_dev_password@localhost:5432/cfm_test
+      CFM_PG_NORMALIZED: "true"
+      ADMIN_PASSWORD: ci-admin-password
+      SESSION_SECRET: ci-build-secret-min-32-caracteres-000
+      DATA_ENCRYPTION_KEY: ci-encryption-key-32chars-minimum
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Serveur dev + test de concurrence
+        run: |
+          npm run dev > server.log 2>&1 &
+          SERVER_PID=$!
+          echo "Attente du serveur (compilation dev en cours)…"
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3000 > /dev/null; then
+              echo "✓ Serveur prêt"
+              break
+            fi
+            sleep 3
+          done
+          # Échoue (exit 1) sur toute écriture perdue OU si DATABASE_URL absent.
+          node scripts/test-concurrency.mjs --runs 5
+          STATUS=$?
+          kill "$SERVER_PID" 2>/dev/null || true
+          exit $STATUS
+
+      - name: Journaux serveur (si échec)
+        if: failure()
+        run: cat server.log || true
