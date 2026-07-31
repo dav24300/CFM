@@ -3,6 +3,7 @@ export type AdminAccess = "admin" | "volunteer";
 export const ADMIN_SECTIONS = [
   "overview",
   "inbox",
+  "conversions",
   "content",
   "territory",
   "community",

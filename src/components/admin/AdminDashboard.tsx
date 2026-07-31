@@ -23,6 +23,7 @@ const panelLoading = () => (
   </div>
 );
 const InboxPanel = dynamic(() => import("@/components/admin/inbox/InboxPanel").then((m) => m.InboxPanel), { loading: panelLoading, ssr: false });
+const ConversionsPanel = dynamic(() => import("@/components/admin/analytics/ConversionsPanel").then((m) => m.ConversionsPanel), { loading: panelLoading, ssr: false });
 const ContentPanel = dynamic(() => import("@/components/admin/content/ContentPanel").then((m) => m.ContentPanel), { loading: panelLoading, ssr: false });
 const TerritoryPanel = dynamic(() => import("@/components/admin/territory/TerritoryPanel").then((m) => m.TerritoryPanel), { loading: panelLoading, ssr: false });
 const CommunityPanel = dynamic(() => import("@/components/admin/community/CommunityPanel").then((m) => m.CommunityPanel), { loading: panelLoading, ssr: false });
@@ -55,6 +56,8 @@ function DashboardBody({
       return <AdminOverview stats={stats} />;
     case "inbox":
       return <InboxPanel data={data} onReload={onReload} />;
+    case "conversions":
+      return <ConversionsPanel />;
     case "content":
       return <ContentPanel data={data} onReload={onReload} />;
     case "territory":
