@@ -16,6 +16,7 @@ import { jsonData, jsonError } from "@/infrastructure/http/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
 import { parseOrBadRequest } from "@/lib/validators";
 import { adminLiveActionSchema } from "@/lib/validators/admin-api";
+import { getBaseUrl } from "@/lib/base-url";
 
 export async function GET() {
   const auth = await requireAdminAccess();
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
         body.replay_url ?? undefined
       );
       if (body.status === "live" && event) {
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+        const baseUrl = getBaseUrl();
         await sendPushToTopic("lives", {
           title: `🔴 Live CFM : ${event.title}`,
           body: "Rejoignez-nous en direct maintenant !",

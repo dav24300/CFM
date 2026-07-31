@@ -2,6 +2,7 @@ import { SITE } from "@/lib/constants";
 import { createHmac, timingSafeEqual } from "crypto";
 import { domainError } from "@/domain/errors/domain-error";
 import { getMobileMoneyMode } from "@/infrastructure/payment/payment-mode";
+import { getBaseUrl } from "@/lib/base-url";
 
 const PAYDUNYA_LIVE_API = "https://app.paydunya.com/api/v1";
 const PAYDUNYA_SANDBOX_API = "https://app.paydunya.com/sandbox-api/v1";
@@ -48,7 +49,7 @@ function getHeaders() {
 export async function createPayDunyaInvoice(
   params: CreateInvoiceParams
 ): Promise<PayDunyaResult> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const baseUrl = getBaseUrl();
 
   const body = {
     invoice: {

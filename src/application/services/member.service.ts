@@ -32,6 +32,7 @@ import {
 } from "@/infrastructure/auth/password-reset";
 import { domainError } from "@/domain/errors/domain-error";
 import { runAfterResponse } from "@/lib/after-response";
+import { getBaseUrl } from "@/lib/base-url";
 import type { MembershipType, PublicUser, User } from "@/domain/entities/v2";
 import type { FamilyLink } from "@/domain/entities/v2";
 
@@ -133,7 +134,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
   // dans tous les cas (anti-énumération), gérée par la route.
   if (!user?.email) return;
   const token = await createPasswordResetToken(user.id);
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const baseUrl = getBaseUrl();
   const resetUrl = `${baseUrl}/membre/reinitialiser-mot-de-passe?token=${token}`;
   await sendPasswordResetEmail(user.email, user.first_name, resetUrl);
 }
