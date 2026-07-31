@@ -462,3 +462,15 @@ BEGIN
     EXECUTE format('ALTER SEQUENCE %I OWNED BY %I.id', seq, t);
   END LOOP;
 END $$;
+
+-- ── Télémétrie CTA ───────────────────────────────────────────────────────────
+-- Append-only, découplé du Store (aucune synchro, aucun compteur applicatif) :
+-- identité PG native. Mesure des conversions (clics sur les CTA publics).
+-- Volontairement SANS IP ni identifiant utilisateur (agrégat non nominatif).
+CREATE TABLE IF NOT EXISTS cta_events (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  event VARCHAR(50) NOT NULL,
+  href TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_cta_events_event_created ON cta_events (event, created_at DESC);

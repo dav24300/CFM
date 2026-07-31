@@ -15,6 +15,8 @@ const LIMITED_PREFIXES = [
   "/api/member/forgot-password",
   // P2.5 — endpoints publics jusqu'ici sans aucune limite :
   "/api/push",
+  // Télémétrie CTA : public et best-effort → borné pour éviter le flood d'inserts.
+  "/api/analytics",
   "/api/member/reset-password",
   // Connexion par téléphone : changement de mot de passe (brute-force du mot de
   // passe actuel) et mise à jour de profil (énumération email/numéro via les
