@@ -1,15 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { trackCta, type CtaEvent } from "@/lib/analytics";
+import { CTA_EVENTS, trackCta, type CtaEvent } from "@/lib/analytics";
 
-const VALID_EVENTS = new Set<CtaEvent>([
-  "cta_live",
-  "cta_aide",
-  "cta_don",
-  "cta_petition",
-  "cta_adhesion",
-]);
+const VALID_EVENTS = new Set<CtaEvent>(CTA_EVENTS);
 
 export function CtaTracker() {
   useEffect(() => {
