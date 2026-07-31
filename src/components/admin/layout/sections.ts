@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Inbox,
+  BarChart3,
   FileText,
   MapPin,
   Users,
@@ -39,6 +40,7 @@ export const ADMIN_NAV: SectionGroup[] = [
     items: [
       { id: "overview", label: "Vue d'ensemble", subtitle: "Activité, contenu et éléments à traiter", icon: LayoutDashboard },
       { id: "inbox", label: "Boîte de réception", subtitle: "Demandes d'aide, adhésions, contacts et pétitions", icon: Inbox },
+      { id: "conversions", label: "Conversions", subtitle: "Clics sur les appels à l'action publics (adhésion, don, aide…)", icon: BarChart3 },
     ],
   },
   {
