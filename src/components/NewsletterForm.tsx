@@ -13,6 +13,7 @@ type Props = {
 
 export function NewsletterForm({ variant = "inline" }: Props) {
   const [email, setEmail] = useState("");
+  const [website, setWebsite] = useState(""); // honeypot anti-bot (jamais rempli par un humain)
   const [successMessage, setSuccessMessage] = useState("");
   const { isLoading, isSuccess, isError, error, run } = useAsyncAction();
 
@@ -23,7 +24,7 @@ export function NewsletterForm({ variant = "inline" }: Props) {
         const res = await fetch("/api/newsletter", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
+          body: JSON.stringify({ email, website }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Erreur");
@@ -39,6 +40,17 @@ export function NewsletterForm({ variant = "inline" }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className={isFooter ? "mt-3" : "mt-4"}>
+      {/* Honeypot anti-bot : invisible pour un humain, souvent rempli par les robots → rejet silencieux côté serveur. */}
+      <input
+        type="text"
+        name="website"
+        value={website}
+        onChange={(e) => setWebsite(e.target.value)}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+      />
       <div className={`flex gap-2 ${isFooter ? "flex-col sm:flex-row" : ""}`}>
         {isFooter ? (
           <Input
@@ -72,6 +84,13 @@ export function NewsletterForm({ variant = "inline" }: Props) {
           S&apos;inscrire
         </Button>
       </div>
+      <p className={`mt-2 text-[11px] leading-snug ${isFooter ? "text-white/50" : "text-site-muted"}`}>
+        En vous inscrivant, vous acceptez notre{" "}
+        <a href="/confidentialite" className="underline hover:no-underline">
+          politique de confidentialité
+        </a>
+        .
+      </p>
       {isSuccess && successMessage && (
         <Alert variant="success" className="mt-2">
           {successMessage}

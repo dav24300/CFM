@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { adminUpdateDonation } from "@/infrastructure/repositories/donations.repository";
 import { sendDonationReceiptEmail } from "@/infrastructure/email/nodemailer.adapter";
-import { requireAdminAccess } from "@/lib/admin-rest";
+import { requireAdminRole } from "@/lib/admin-rest";
 import { getClientIp } from "@/infrastructure/rate-limit/memory";
 import { jsonError, jsonNotFound, jsonSuccess } from "@/infrastructure/http/api-response";
 import { logAdminAction } from "@/lib/admin-audit";
@@ -18,7 +18,10 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireAdminAccess();
+  // Mutation financière (statut/transaction d'un don, envoi de reçu) : réservée
+  // à l'admin fondateur — un bénévole quasi-admin ne doit pas pouvoir marquer un
+  // don « completed » ni déclencher un reçu.
+  const auth = await requireAdminRole();
   if (!auth.ok) return auth.response;
 
   const body = await request.json();

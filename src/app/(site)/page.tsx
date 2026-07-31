@@ -231,8 +231,9 @@ export default async function HomePage() {
         </ScrollReveal>
       </section>
 
-      {/* Section 6 — Témoignages */}
-      <section className="bg-site-deep py-section-lg text-white">
+      {/* Section 6 — Témoignages (bloc entier masqué si aucun témoignage publié) */}
+      {testimonials.length > 0 && (
+        <section className="bg-site-deep py-section-lg text-white">
         <div className="mx-auto max-w-site px-6">
           <ScrollReveal>
             <div className="max-w-[640px]">
@@ -290,7 +291,8 @@ export default async function HomePage() {
             </ScrollReveal>
           )}
         </div>
-      </section>
+        </section>
+      )}
 
       {/* Section 7 — CTA + Newsletter */}
       <section className="py-section-lg">
