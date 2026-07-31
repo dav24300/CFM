@@ -16,6 +16,7 @@ type Labels = {
   email: string;
   submit: string;
   success: string;
+  signatures: string;
 };
 
 type Props = {
@@ -29,6 +30,10 @@ export function PetitionSignForm({ slug, petitionTitle, labels }: Props) {
   const fs = t.ux.formSuccess;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  // Total renvoyé par l'API après signature : donne au signataire le retour
+  // visuel « votre signature est comptée » que le compteur serveur (caché) ne
+  // reflète pas immédiatement.
+  const [signedCount, setSignedCount] = useState<number | null>(null);
   const { isLoading, isSuccess, isError, error, run } = useAsyncAction();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -42,6 +47,7 @@ export function PetitionSignForm({ slug, petitionTitle, labels }: Props) {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
+        if (typeof data.signatures_count === "number") setSignedCount(data.signatures_count);
         setName("");
         setEmail("");
       });
@@ -74,6 +80,11 @@ export function PetitionSignForm({ slug, petitionTitle, labels }: Props) {
 
       {isSuccess && (
         <>
+          {signedCount !== null && (
+            <p className="mt-6 text-center text-sm font-semibold text-site-primary">
+              {signedCount.toLocaleString("fr-FR")} {labels.signatures}
+            </p>
+          )}
           <FormSuccessPanel
             acknowledgment={fs.petitionAck}
             delay={fs.petitionDelay}

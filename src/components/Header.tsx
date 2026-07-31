@@ -151,6 +151,9 @@ export function Header({ site, nav, memberLogin, memberArea }: Props) {
           <Link href="/plaidoyer" className={navLink}>
             {nav.advocacy}
           </Link>
+          <Link href="/petitions" className={navLink}>
+            {nav.petitions}
+          </Link>
           <Link
             href="/live"
             className={`inline-flex items-center gap-2 ${navLink}`}
@@ -161,6 +164,9 @@ export function Header({ site, nav, memberLogin, memberArea }: Props) {
           </Link>
           <Link href="/s-engager" className={navLink}>
             {nav.engage}
+          </Link>
+          <Link href="/presse" className={navLink}>
+            {nav.press}
           </Link>
           <Link href="/a-propos" className={navLink}>
             {nav.about}

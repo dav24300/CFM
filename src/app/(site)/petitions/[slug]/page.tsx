@@ -62,6 +62,7 @@ export default async function PetitionDetailPage({ params }: Props) {
           email: p.email,
           submit: p.submit,
           success: p.success,
+          signatures: p.signatures,
         }}
       />
     </div>
