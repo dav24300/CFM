@@ -30,6 +30,7 @@ import { logAdminAction } from "@/lib/admin-audit";
 import { runAfterResponse } from "@/lib/after-response";
 import { getClientIp } from "@/infrastructure/rate-limit/memory";
 import { parseOrBadRequest } from "@/lib/validators";
+import { getBaseUrl } from "@/lib/base-url";
 import {
   adminActionSchema,
   type AdminActionName,
@@ -222,7 +223,7 @@ export async function POST(request: NextRequest) {
         await sendPushToTopic("help", {
           title: "Mise à jour dossier CFM",
           body: `Statut : ${payload.data.status}`,
-          url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/membre`,
+          url: `${getBaseUrl()}/membre`,
         });
         break;
       }

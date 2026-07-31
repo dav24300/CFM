@@ -3,6 +3,7 @@ import path from "path";
 import nodemailer from "nodemailer";
 import { SITE } from "@/lib/constants";
 import { isServerlessRuntime } from "@/lib/runtime";
+import { getBaseUrl } from "@/lib/base-url";
 
 const logPath = path.join(process.cwd(), "data", "emails.log");
 
@@ -129,7 +130,7 @@ export async function sendRegistrationPendingEmail(to: string, firstName: string
 }
 
 export async function sendAccountActivatedEmail(to: string, firstName: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const baseUrl = getBaseUrl();
   return sendEmail({
     to,
     subject: `${SITE.sigle} — Compte activé`,
